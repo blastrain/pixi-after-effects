@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+    <script src="node_modules/pixi-tween.js/build/pixi-tween.js"></script>
+    <script src="dist/pixi-ae.min.js"></script>
+  </head>
+  <body>
+    <script>
+      var app = new PIXI.Application(2000, 600, {backgroundColor : 0x1099bb});
+      document.body.appendChild(app.view);
+      var ae = new PIXI.AfterEffects('./data.json');
+      app.stage.addChild(ae);
+    </script>
+  </body>
+</html>
