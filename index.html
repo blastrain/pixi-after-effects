@@ -6,10 +6,16 @@
   </head>
   <body>
     <script>
-      var app = new PIXI.Application(2000, 600, {backgroundColor : 0x1099bb});
-      document.body.appendChild(app.view);
+      var renderer = new PIXI.WebGLRenderer(1000, 800, { antialias: true, backgroundColor: 0x10c9bb });
+      document.body.appendChild(renderer.view);
       var ae = new PIXI.AfterEffects('./data.json');
-      app.stage.addChild(ae);
+      var stage = new PIXI.Container();
+      stage.addChild(ae);
+      animate();
+      function animate() {
+          renderer.render(stage);
+          requestAnimationFrame(animate);
+      }
     </script>
   </body>
 </html>
