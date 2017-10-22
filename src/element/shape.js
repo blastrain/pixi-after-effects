@@ -34,8 +34,38 @@ class Shape extends PIXI.Graphics {
         let shapePath = {};
         shapePath.isClosed = data.closed;
         shapePath.name     = data.nm;
-        shapePath.paths    = data.ks.k.v;
+        shapePath.path     = this.createPath(data.ks.k);
         this.shapePath     = shapePath;
+    }
+
+    createPath(data) {
+        if (!data.v) return null;
+        let path = {};
+        data.v.forEach((_v, index) => {
+            data.i[index][0] += data.v[index][0];
+            data.i[index][1] += data.v[index][1];
+            data.o[index][0] += data.v[index][0];
+            data.o[index][1] += data.v[index][1];
+            if (index == 0) return;
+            const cp  = data.o[index - 1];
+            const cp2 = data.i[index];
+            const to  = data.v[index];
+            if (index == 1) {
+                path.moveTo = new PIXI.Point(data.v[0][0], data.v[0][1]);
+            }
+            if (!path.bezierCurveToPaths) path.bezierCurveToPaths = [];
+            path.bezierCurveToPaths.push({
+                cp:  new PIXI.Point(cp[0], cp[1]),
+                cp2: new PIXI.Point(cp2[0], cp2[1]),
+                to:  new PIXI.Point(to[0], to[1])
+            });
+        });
+        path.bezierCurveToPaths.push({
+            cp:  new PIXI.Point(data.o[data.v.length - 1][0], data.o[data.v.length - 1][1]),
+            cp2: new PIXI.Point(data.i[0][0], data.i[0][1]),
+            to:  new PIXI.Point(data.v[0][0], data.v[0][1])
+        });
+        return path;
     }
 
     setupFill(data) {
@@ -84,22 +114,18 @@ class Shape extends PIXI.Graphics {
     drawThis() {
         if (!this.fill) return;
         if (!this.shapePath) return;
+        if (!this.shapePath.path) return;
 
         if (this.fill.enabled) {
             this.beginFill(this.fill.color);
         } else {
             this.lineStyle(1, this.fill.color);
         }
-        if (this.shapePath.paths) {
-            for (let i = 0; i < this.shapePath.paths.length; ++i) {
-                if (i == 0) {
-                    const moveToPath = this.shapePath.paths[i];
-                    this.moveTo(moveToPath[0], moveToPath[1]);
-                } else {
-                    this.lineTo(this.shapePath.paths[i][0], this.shapePath.paths[i][1]);
-                }
-            }
-        }
+        const moveTo = this.shapePath.path.moveTo;
+        this.moveTo(moveTo.x, moveTo.y);
+        this.shapePath.path.bezierCurveToPaths.forEach((path) => {
+            this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
+        });
         if (this.fill.enabled) {
             this.endFill();
         } else {
