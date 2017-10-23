@@ -68,4 +68,6 @@ export default class Element extends PIXI.Container {
             this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
         }
     }
+
+    update(frame) {}
 }

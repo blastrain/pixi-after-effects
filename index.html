@@ -11,8 +11,9 @@
       var ae = new PIXI.AfterEffects('./data.json');
       var stage = new PIXI.Container();
       stage.addChild(ae);
-      animate();
-      function animate() {
+      requestAnimationFrame(animate);
+      function animate(nowTime) {
+          ae.update(nowTime);
           renderer.render(stage);
           requestAnimationFrame(animate);
       }
