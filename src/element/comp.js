@@ -89,4 +89,12 @@ export default class CompElement extends Element {
             this.addChild(layer);
         });
     }
+
+    update(frame) {
+        this.layers.forEach((layer) => {
+            if (!layer) return;
+            layer.update(frame);
+        });
+    }
+
 }
