@@ -38,8 +38,23 @@ class Shape extends PIXI.Graphics {
         this.shapePath     = shapePath;
     }
 
+    createPathByAnimation(data) {
+        const lastIndex = data.length - 1;
+        return data.map((animData, index) => {
+            return {
+                name:            animData.n,
+                startFrame:      animData.t,
+                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
+                easingFromRatio: animData.i,
+                easingToRatio:   animData.o,
+                fromPath:        animData.e ? this.createPath(animData.e[0]) : null,
+                toPath:          animData.s ? this.createPath(animData.s[0]) : null,
+            };
+        });
+    }
+
     createPath(data) {
-        if (!data.v) return null;
+        if (!data.v) return this.createPathByAnimation(data);
         let path = {};
         data.v.forEach((_v, index) => {
             data.i[index][0] += data.v[index][0];
@@ -111,19 +126,15 @@ class Shape extends PIXI.Graphics {
         return "0x" + this.toHex(r) + this.toHex(g) + this.toHex(b);
     }
 
-    drawThis() {
-        if (!this.fill) return;
-        if (!this.shapePath) return;
-        if (!this.shapePath.path) return;
-
+    drawPath(shapePath) {
         if (this.fill.enabled) {
             this.beginFill(this.fill.color);
         } else {
             this.lineStyle(1, this.fill.color);
         }
-        const moveTo = this.shapePath.path.moveTo;
+        const moveTo = shapePath.moveTo;
         this.moveTo(moveTo.x, moveTo.y);
-        this.shapePath.path.bezierCurveToPaths.forEach((path) => {
+        shapePath.bezierCurveToPaths.forEach((path) => {
             this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
         });
         if (this.fill.enabled) {
@@ -131,6 +142,18 @@ class Shape extends PIXI.Graphics {
         } else {
             this.closePath();
         }
+    }
+
+    drawThis() {
+        if (!this.fill) return;
+        if (!this.shapePath) return;
+        if (!this.shapePath.path) return;
+        if (this.shapePath.path[0]) {
+            const animPath = this.shapePath.path[0];
+            this.drawPath(animPath.fromPath);
+            return;
+        }
+        this.drawPath(this.shapePath.path);
     }
 }
 
