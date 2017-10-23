@@ -1,13 +1,34 @@
 import * as PIXI from 'pixi.js';
 import Element from './element';
+import MaskElement from './mask';
 
 export default class CompElement extends Element {
     constructor(data) {
         super(data);
+        this.hasMask      = data.hasMask;
         this.width        = data.w;
         this.height       = data.h;
         this.blendMode    = this.blendMode(data.bm);
         this.autoOriented = data.ao;
+        if (this.hasMask && data.masksProperties) {
+            this.addMask(data);
+        }
+    }
+
+    addMask(data) {
+        this.masks = data.masksProperties.map((maskData) => {
+            return new MaskElement(maskData);
+        });
+        if (!this.masks[0]) return;
+        
+        console.log(this.masks[0]);
+        const renderer = PIXI.autoDetectRenderer();
+        if (!renderer.maskManager) {
+            renderer.maskManager = new PIXI.MaskManager(renderer);
+        }
+        const maskManager = renderer.maskManager;
+        maskManager.pushMask(this, this.masks[0].shape);
+        this.mask = this.masks[0].shape;
     }
 
     blendMode(mode) {

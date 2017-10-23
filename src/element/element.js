@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 export default class Element extends PIXI.Container {
     constructor(data) {
         super();
+        if (!data) return;
         this.name         = data.nm;
         this.referenceId  = data.refId;
         this.type         = data.ty;
@@ -17,6 +18,8 @@ export default class Element extends PIXI.Container {
     }
 
     setupProperties(data) {
+        if (!data) return;
+        
         this.setupAnchorPoint(data.a);
         this.setupOpacity(data.o);
         this.setupPosition(data.p);

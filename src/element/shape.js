@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
 import Element from './element';
 
-class Shape extends PIXI.Graphics {
+export class Shape extends PIXI.Graphics {
     constructor(data, width, height) {
         super();
+        if (!data) return;
         this.name   = data.nm;
         this.width  = width;
         this.height = height;
@@ -126,14 +127,22 @@ class Shape extends PIXI.Graphics {
         return "0x" + this.toHex(r) + this.toHex(g) + this.toHex(b);
     }
 
+    drawPathForMask(shapePath) {
+        const moveTo = shapePath.moveTo;
+        this.moveTo(moveTo.x, moveTo.y);
+        shapePath.bezierCurveToPaths.forEach((path) => {
+            this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
+        });
+        this.closePath();
+    }
+
     drawPath(shapePath) {
         if (this.fill.enabled) {
             this.beginFill(this.fill.color);
         } else {
             this.lineStyle(1, this.fill.color);
         }
-        const moveTo = shapePath.moveTo;
-        this.moveTo(moveTo.x, moveTo.y);
+        this.moveTo(shapePath.moveTo.x, shapePath.moveTo.y);
         shapePath.bezierCurveToPaths.forEach((path) => {
             this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
         });
