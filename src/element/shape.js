@@ -101,7 +101,7 @@ export class Shape extends PIXI.Graphics {
         this.pivot = new PIXI.Point(data.a.k[0], data.a.k[1]);
         //this.alpha = data.o.k;
         this.setupPosition(data.p);
-        this.rotation = data.r.k;
+        this.rotation = Math.PI * data.r.k / 180.0;
         this.scale = new PIXI.Point(data.s.k[0] / 100.0, data.s.k[1] / 100.0);
     }
 

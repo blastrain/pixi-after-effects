@@ -38,7 +38,7 @@ export default class Element extends PIXI.Container {
 
     setupOpacity(data) {
         const opacity = data.k;
-        if (typeof opacity == 'number') {
+        if (typeof opacity === 'number') {
             this.alpha = opacity / 100.0;
         }
     }
@@ -58,8 +58,8 @@ export default class Element extends PIXI.Container {
 
     setupRotation(data) {
         const rotation = data.k;
-        if (typeof rotation == 'number') {
-            this.rotation = rotation;
+        if (typeof rotation === 'number') {
+            this.rotation =  Math.PI * rotation / 180.0;
         }
     }
 
