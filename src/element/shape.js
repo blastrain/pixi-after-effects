@@ -146,10 +146,12 @@ export class Shape extends PIXI.Graphics {
         shapePath.bezierCurveToPaths.forEach((path) => {
             this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
         });
-        if (this.fill.enabled) {
-            this.endFill();
-        } else {
-            this.closePath();
+        if (this.isClosed) {
+            if (this.fill.enabled) {
+                this.endFill();
+            } else {
+                this.closePath();
+            }
         }
     }
 
