@@ -11,6 +11,10 @@ export class ShapeElement extends Element {
         this.outFrame = outFrame;
         this.setupByDefinition(data.it);
         this.drawThis(0);
+        this.interactive = true;
+        this.on('click', function () {
+            console.log(this);
+        });
     }
 
     setupByDefinition(data) {
