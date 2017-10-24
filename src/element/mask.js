@@ -11,7 +11,7 @@ export default class MaskElement extends Element {
         this.alpha      = data.o.k / 100.0;
         const shape     = new ShapeElement();
         const shapePath = shape.createPath(data.pt.k);
-        shape.drawPathForMask(shapePath[0].fromPath);
+        //shape.drawPathForMask(shapePath[0].fromPath);
         this.shape = shape;
     }
 }

@@ -28,7 +28,7 @@ export default class CompElement extends Element {
         }
         const maskManager = renderer.maskManager;
         maskManager.pushMask(this, this.masks[0].shape);
-        this.mask = this.masks[0].shape;
+        //this.mask = this.masks[0].shape;
     }
 
     toPIXIBlendMode(mode) {
