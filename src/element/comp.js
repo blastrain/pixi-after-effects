@@ -8,7 +8,7 @@ export default class CompElement extends Element {
         this.hasMask      = data.hasMask;
         this.width        = data.w;
         this.height       = data.h;
-        this.blendMode    = this.blendMode(data.bm);
+        this.blendMode    = this.toPIXIBlendMode(data.bm);
         this.autoOriented = data.ao;
         if (this.hasMask && data.masksProperties) {
             this.addMask(data);
@@ -31,7 +31,7 @@ export default class CompElement extends Element {
         this.mask = this.masks[0].shape;
     }
 
-    blendMode(mode) {
+    toPIXIBlendMode(mode) {
         if (!PIXI.BLEND_MODES) {
             switch (mode) {
             case 0:
@@ -84,17 +84,27 @@ export default class CompElement extends Element {
 
     setupSubLayers(layers) {
         this.layers = layers;
+        let layerIndexMap = {};
         this.layers.forEach((layer) => {
             if (!layer) return;
-            this.addChild(layer);
+            layerIndexMap[layer.index] = layer;
+        });
+        this.layers.forEach((layer) => {
+            if (!layer) return;
+            if (layer.parentIndex) {
+                const parentLayer = layerIndexMap[layer.parentIndex];
+                parentLayer.addChild(layer);
+            } else {
+                this.addChild(layer);
+            }
         });
     }
 
     update(frame) {
+        super.update(frame);
         this.layers.forEach((layer) => {
             if (!layer) return;
             layer.update(frame);
         });
     }
-
 }

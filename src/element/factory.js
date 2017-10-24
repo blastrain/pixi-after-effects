@@ -1,5 +1,5 @@
 import CompElement  from './comp';
-import ShapeElement from './shape';
+import ShapeContainerElement from './shape';
 
 const ELEMENT_TYPE = {
     COMP:   0,
@@ -22,7 +22,7 @@ export default class ElementFactory {
         case ELEMENT_TYPE.IMAGE:
             break;
         case ELEMENT_TYPE.SHAPE:
-            elem = new ShapeElement(data);
+            elem = new ShapeContainerElement(data);
             break;
         case ELEMENT_TYPE.TEXT:
             break;

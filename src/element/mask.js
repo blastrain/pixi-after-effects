@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import Element from './element';
-import {Shape, ShapeElement} from './shape';
+import {ShapeElement,ShapeContainerElement} from './shape';
 
 export default class MaskElement extends Element {
     constructor(data) {
@@ -9,7 +9,7 @@ export default class MaskElement extends Element {
         this.inv        = data.inv;
         this.mode       = data.mode;
         this.alpha      = data.o.k / 100.0;
-        const shape     = new Shape();
+        const shape     = new ShapeElement();
         const shapePath = shape.createPath(data.pt.k);
         shape.drawPathForMask(shapePath[0].fromPath);
         this.shape = shape;
