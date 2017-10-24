@@ -10,7 +10,7 @@ export class ShapeElement extends Element {
         this.inFrame  = inFrame;
         this.outFrame = outFrame;
         this.setupByDefinition(data.it);
-        this.drawThis();
+        this.drawThis(0);
     }
 
     setupByDefinition(data) {
