@@ -164,6 +164,7 @@ export class ShapeElement extends Element {
 
     update(frame) {
         super.update(frame);
+        this.clear();
         this.drawThis(frame);
     }
 }
