@@ -42,17 +42,20 @@ export class ShapeElement extends Element {
 
     createPathByAnimation(data) {
         const lastIndex = data.length - 1;
-        return data.map((animData, index) => {
-            return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromPath:        animData.e ? this.createPath(animData.e[0]) : null,
-                toPath:          animData.s ? this.createPath(animData.s[0]) : null,
-            };
-        });
+        return {
+            hasAnimatedPath: true,
+            paths: data.map((animData, index) => {
+                return {
+                    name:            animData.n,
+                    startFrame:      animData.t,
+                    endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
+                    easingFromRatio: animData.i,
+                    easingToRatio:   animData.o,
+                    fromPath:        animData.e ? this.createPath(animData.e[0]) : null,
+                    toPath:          animData.s ? this.createPath(animData.s[0]) : null,
+                };
+            })
+        };
     }
 
     createPath(data) {
@@ -135,23 +138,29 @@ export class ShapeElement extends Element {
         }
     }
 
-    drawThis() {
+    drawThis(frame) {
         if (!this.fill) return;
         if (!this.shapePaths || this.shapePaths.length == 0) return;
-        if (!this.shapePaths[0].path) return;
-        if (this.shapePaths[0].path[0]) {
-            const animPath = this.shapePaths[0].path[0];
-            this.drawPath(animPath.fromPath);
-            return;
-        }
+
         this.shapePaths.forEach((shapePath) => {
-            this.drawPath(shapePath.path);
+            if (shapePath.path.hasAnimatedPath) {
+                this.isClosed = shapePath.isClosed;
+                shapePath.path.paths.forEach((animData) => {
+                    if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                        const toPath = animData.toPath;
+                        this.drawPath(toPath);
+                    }
+                });
+            } else {
+                this.isClosed = shapePath.isClosed;
+                this.drawPath(shapePath.path);
+            }
         });
     }
 
     update(frame) {
         super.update(frame);
-        this.drawThis();
+        this.drawThis(frame);
     }
 }
 
@@ -181,7 +190,7 @@ export default class ShapeContainerElement extends Element {
     update(frame) {
         super.update(frame);
         this.shapes.forEach((shape) => {
-            //shape.update(frame);
+            shape.update(frame);
         });
     }
 }
