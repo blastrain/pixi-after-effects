@@ -55,8 +55,8 @@ export class ShapeElement extends Element {
                     endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                     easingFromRatio: animData.i,
                     easingToRatio:   animData.o,
-                    fromPath:        animData.e ? this.createPath(animData.e[0]) : null,
-                    toPath:          animData.s ? this.createPath(animData.s[0]) : null,
+                    fromPath:        animData.s ? this.createPath(animData.s[0]) : null,
+                    toPath:          animData.e ? this.createPath(animData.e[0]) : null,
                 };
             })
         };
@@ -142,20 +142,50 @@ export class ShapeElement extends Element {
         }
     }
 
+    createAnimatePos(animData, frame, fromPos, toPos) {
+        const totalFrame = animData.endFrame - animData.startFrame;
+        const playFrame  = frame - animData.startFrame;
+        const posDiffX   = toPos.x - fromPos.x;
+        const posDiffY   = toPos.y - fromPos.y;
+        const posX       = 1.0 * playFrame * posDiffX / totalFrame + fromPos.x;
+        const posY       = 1.0 * playFrame * posDiffY / totalFrame + fromPos.y;
+        return new PIXI.Point(posX, posY);
+    }
+
+    createAnimatePath(animData, frame) {
+        const totalFrame = animData.endFrame - animData.startFrame;
+        const playFrame  = frame - animData.startFrame;
+        const fromPath   = animData.fromPath;
+        const toPath     = animData.toPath;
+        return {
+            moveTo: this.createAnimatePos(animData, frame, fromPath.moveTo, toPath.moveTo),
+            bezierCurveToPaths: fromPath.bezierCurveToPaths.map((path, index) => {
+                const fromBezierCurveToPath = fromPath.bezierCurveToPaths[index];
+                const toBezierCurveToPath   = toPath.bezierCurveToPaths[index];
+                const cp  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp, toBezierCurveToPath.cp);
+                const cp2 = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp2, toBezierCurveToPath.cp2);
+                const to  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.to, toBezierCurveToPath.to);
+                return { cp: cp, cp2: cp2, to: to };
+            })
+        };
+    }
+
     drawThis(frame) {
         if (!this.fill) return;
         if (!this.shapePaths || this.shapePaths.length == 0) return;
+        this.clear();
 
         this.shapePaths.forEach((shapePath) => {
             if (shapePath.path.hasAnimatedPath) {
                 this.isClosed = shapePath.isClosed;
                 shapePath.path.paths.forEach((animData) => {
                     if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                        const toPath = animData.toPath;
-                        this.drawPath(toPath);
+                        if (!animData.fromPath) return;
+                        const animatePath = this.createAnimatePath(animData, frame);
+                        this.drawPath(animatePath);
                     }
                 });
-            } else {
+            } else if (this.inFrame <= frame && frame <= this.outFrame) {
                 this.isClosed = shapePath.isClosed;
                 this.drawPath(shapePath.path);
             }
@@ -164,7 +194,6 @@ export class ShapeElement extends Element {
 
     update(frame) {
         super.update(frame);
-        this.clear();
         this.drawThis(frame);
     }
 }

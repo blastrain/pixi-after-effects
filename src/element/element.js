@@ -46,8 +46,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromAnchorPoint: animData.e,
-                toAnchorPoint:   animData.s,
+                fromAnchorPoint: animData.s,
+                toAnchorPoint:   animData.e,
             };
         });
     }
@@ -71,8 +71,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromOpacity:     animData.e / 100.0,
-                toOpacity:       animData.s / 100.0,
+                fromOpacity:     animData.s / 100.0,
+                toOpacity:       animData.e / 100.0,
             };
         });
     }
@@ -97,8 +97,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromPosition:    animData.e,
-                toPosition:      animData.s,
+                fromPosition:    animData.s,
+                toPosition:      animData.e,
             };
         });
     }
@@ -122,8 +122,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromRotation:    Math.PI * animData.e / 180.0,
-                toRotation:      Math.PI * animData.s / 180.0,
+                fromRotation:    Math.PI * animData.s / 180.0,
+                toRotation:      Math.PI * animData.e / 180.0,
             };
         });
     }
@@ -149,8 +149,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromScale:       animData.e,
-                toScale:         animData.s,
+                fromScale:       animData.s,
+                toScale:         animData.e,
             };
         });
     }
