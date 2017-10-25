@@ -23,6 +23,12 @@ export class ShapeElement extends Element {
             case "sh":
                 this.setupPath(def);
                 break;
+            case "st":
+                this.setupStroke(def);
+                break;
+            case "tm":
+                this.setupTrim(def);
+                break;
             case "fl":
                 this.setupFill(def);
                 break;
@@ -42,6 +48,25 @@ export class ShapeElement extends Element {
         shapePath.name     = data.nm;
         shapePath.path     = this.createPath(data.ks.k);
         this.shapePaths.push(shapePath);
+    }
+
+    setupStroke(data) {
+        const color = data.c.k;
+        let stroke  = {};
+        stroke.lineCap     = data.lc;
+        stroke.lineJoin    = data.lj;
+        stroke.miterLimit  = data.ml;
+        stroke.opacity     = data.o.k;
+        stroke.width       = data.w.k;
+        stroke.color       = this.rgbToHex(color[0], color[1], color[2]);
+        stroke.enabledFill = data.fillEnabled;
+        this.stroke        = stroke;
+        console.log(this);
+    }
+
+    setupTrim(data) {
+
+
     }
 
     createPathByAnimation(data) {
@@ -124,20 +149,38 @@ export class ShapeElement extends Element {
     }
 
     drawPath(shapePath) {
-        if (this.fill.enabled) {
-            this.beginFill(this.fill.color);
-        } else {
-            this.lineStyle(1, this.fill.color);
+        if (this.stroke) {
+            if (this.stroke.enabledFill) {
+                this.beginFill(this.stroke.color);
+            }
+            this.lineStyle(this.stroke.width, this.stroke.color);
+            //TODO: ignore miterLimit and lineCap and lineJoin
+        } else if (this.fill) {
+            if (this.fill.enabled) {
+                //this.beginFill(this.fill.color);
+                this.lineStyle(2, this.fill.color);
+            } else {
+                this.lineStyle(2, this.fill.color);                
+            }
         }
         this.moveTo(shapePath.moveTo.x, shapePath.moveTo.y);
         shapePath.bezierCurveToPaths.forEach((path) => {
             this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
         });
         if (this.isClosed) {
-            if (this.fill.enabled) {
-                this.endFill();
-            } else {
-                this.closePath();
+            if (this.stroke) {
+                if (this.stroke.enabledFill) {
+                    this.endFill();
+                } else {
+                    this.closePath();
+                }
+            } else if (this.fill) {
+                if (this.fill.enabled) {
+                    //this.endFill();
+                    this.closePath();
+                } else {
+                    this.closePath();
+                }
             }
         }
     }
@@ -171,7 +214,6 @@ export class ShapeElement extends Element {
     }
 
     drawThis(frame) {
-        if (!this.fill) return;
         if (!this.shapePaths || this.shapePaths.length == 0) return;
         this.clear();
 
