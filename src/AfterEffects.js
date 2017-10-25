@@ -25,7 +25,7 @@ export default class AfterEffects extends PIXI.Container {
         });
         this.layers    = data.layers.map((layer) => {
             return element.ElementFactory.create(layer);
-        });
+        }).filter((layer) => { return layer !== null });
         this.resolveLayerReference(this.layers);
         this.layers.reverse().forEach((layer) => {
             this.addChild(layer);
@@ -40,7 +40,6 @@ export default class AfterEffects extends PIXI.Container {
             assetMap[asset.id] = asset;
         });
         layers.forEach((layer) => {
-            if (!layer) return;
             if (!layer.referenceId) return;
 
             let asset = assetMap[layer.referenceId];

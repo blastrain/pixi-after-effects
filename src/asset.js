@@ -5,6 +5,6 @@ export default class Asset {
         this.id     = data.id;
         this.layers = data.layers.map((layer) => {
             return element.ElementFactory.create(layer);
-        });
+        }).filter((layer) => { return layer !== null });
     }
 }

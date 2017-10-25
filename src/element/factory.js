@@ -5,6 +5,7 @@ const ELEMENT_TYPE = {
     COMP:   0,
     SOLID:  1,
     IMAGE:  2,
+    NULL:   3,
     SHAPE:  4,
     TEXT:   5,
     CAMERA: 13,
@@ -28,7 +29,10 @@ export default class ElementFactory {
             break;
         case ELEMENT_TYPE.CAMERA:
             break;
+        case ELEMENT_TYPE.NULL:
+            break;
         default:
+            console.log(data);
             break;
         }
         return elem;
