@@ -161,8 +161,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromRotation:    Math.PI * animData.s / 180.0,
-                toRotation:      Math.PI * animData.e / 180.0,
+                fromRotation:    animData.s ? Math.PI * animData.s[0] / 180.0 : 0,
+                toRotation:      animData.e ? Math.PI * animData.e[0] / 180.0 : 0,
             };
         });
     }
