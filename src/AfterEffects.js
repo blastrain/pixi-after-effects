@@ -26,28 +26,14 @@ export default class AfterEffects extends PIXI.Container {
         this.layers    = data.layers.map((layer) => {
             return element.ElementFactory.create(layer);
         }).filter((layer) => { return layer !== null });
-        this.resolveLayerReference(this.layers);
         this.layers.reverse().forEach((layer) => {
+            if (layer.isCompType()) {
+                layer.setupReference(this.assets);
+            }
             this.addChild(layer);
         });
         console.log(data);
         console.log(this);
-    }
-
-    resolveLayerReference(layers) {
-        let assetMap = {};
-        this.assets.forEach((asset) => {
-            assetMap[asset.id] = asset;
-        });
-        layers.forEach((layer) => {
-            if (!layer.referenceId) return;
-
-            let asset = assetMap[layer.referenceId];
-            if (!asset) return;
-
-            this.resolveLayerReference(asset.layers);
-            layer.setupSubLayers(asset.layers);
-        });
     }
 
     update(nowTime) {
@@ -60,7 +46,7 @@ export default class AfterEffects extends PIXI.Container {
         const elapsedTime = nowTime - this.firstTime;
         let currentFrame  = elapsedTime * this.frameRate / 1000.0;
         if (currentFrame > this.totalFrame) {
-            currentFrame = this.totalFrame;
+            currentFrame = this.totalFrame - 0.01;
             if (this.isLoop) {
                 this.firstTime = nowTime;
             } else {

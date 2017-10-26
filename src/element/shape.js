@@ -2,13 +2,14 @@ import * as PIXI from 'pixi.js';
 import Element from './element';
 
 export class ShapeElement extends Element {
-    constructor(data, inFrame, outFrame) {
+    constructor(data, inFrame, outFrame, stretch) {
         super();
         if (!data) return;
         this.name   = data.nm;
         this.type   = data.ty;
         this.inFrame  = inFrame;
         this.outFrame = outFrame;
+        this.stretch  = stretch;
         this.setupByDefinition(data.it);
         this.drawThis(0);
         this.interactive = true;
@@ -29,6 +30,9 @@ export class ShapeElement extends Element {
             case "tm":
                 this.setupTrim(def);
                 break;
+            case "el":
+                this.setupEllipse(def);
+                break;
             case "fl":
                 this.setupFill(def);
                 break;
@@ -36,6 +40,7 @@ export class ShapeElement extends Element {
                 this.setupProperties(def);
                 break;
             default:
+                console.log(def);
                 break;
             }
         });
@@ -51,22 +56,58 @@ export class ShapeElement extends Element {
     }
 
     setupStroke(data) {
-        const color = data.c.k;
         let stroke  = {};
         stroke.lineCap     = data.lc;
         stroke.lineJoin    = data.lj;
         stroke.miterLimit  = data.ml;
         stroke.opacity     = data.o.k;
         stroke.width       = data.w.k;
-        stroke.color       = this.rgbToHex(color[0], color[1], color[2]);
+        stroke.color       = this.createColor(data.c);
         stroke.enabledFill = data.fillEnabled;
         this.stroke        = stroke;
-        console.log(this);
     }
 
     setupTrim(data) {
 
+    }
 
+    setupEllipse(data) {
+        if (!this.ellipses) this.ellipses = [];
+        let ellipse = {};
+        ellipse.direction = data.d;
+        ellipse.position  = this.createPosition(data.p);
+        ellipse.size      = this.createSize(data.s);
+        if (ellipse.position.length > 0 || ellipse.size.length > 0) {
+            ellipse.enabledAnimation = true;
+        }
+        this.ellipses.push(ellipse);
+    }
+
+    createSize(data) {
+        return this.createPosition(data);
+    }
+
+    createColor(data) {
+        if (typeof data.k[0] == 'number') {
+            return this.rgbArrayToHex(data.k);
+        } else {
+            return this.createAnimatedColor(data.k);
+        }
+    }
+
+    createAnimatedColor(data) {
+        const lastIndex = data.length - 1;
+        return data.map((animData, index) => {
+            return {
+                name:            animData.n,
+                startFrame:      animData.t,
+                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
+                easingFromRatio: animData.i,
+                easingToRatio:   animData.o,
+                fromColor:       animData.s ? this.rgbArrayToHex(animData.s) : "0x000000",
+                toColor:         animData.e ? this.rgbArrayToHex(animData.e) : "0x000000",
+            };
+        });
     }
 
     createPathByAnimation(data) {
@@ -118,25 +159,25 @@ export class ShapeElement extends Element {
     }
 
     setupFill(data) {
-        let fill    = {};
-        const color = data.c.k;
-        if (color && typeof color[0] === 'number') {
-            const hex  = this.rgbToHex(color[0], color[1], color[2]);
-            fill.color = hex;
-        }
+        let fill     = {};
+        fill.color   = this.createColor(data.c);
         fill.enabled = data.fillEnabled;
         fill.name    = data.nm;
-        fill.opacity = data.o.k;
+        fill.opacity = this.createOpacity(data.o);
         this.fill    = fill;
+    }
+
+    rgbArrayToHex(arr) {
+        return this.rgbToHex(arr[0], arr[1], arr[2]);
+    }
+    
+    rgbToHex(r, g, b) {
+        return "0x" + this.toHex(r) + this.toHex(g) + this.toHex(b);
     }
 
     toHex(c) {
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
-    }
-
-    rgbToHex(r, g, b) {
-        return "0x" + this.toHex(r) + this.toHex(g) + this.toHex(b);
     }
 
     drawPathForMask(shapePath) {
@@ -148,25 +189,24 @@ export class ShapeElement extends Element {
         this.closePath();
     }
 
-    drawPath(shapePath) {
+    beforeDraw() {
         if (this.stroke) {
             if (this.stroke.enabledFill) {
-                this.beginFill(this.stroke.color);
+                this.beginFill(this.strokeColor);
             }
-            this.lineStyle(this.stroke.width, this.stroke.color);
+            this.lineStyle(this.stroke.width, this.strokeColor);
             //TODO: ignore miterLimit and lineCap and lineJoin
         } else if (this.fill) {
             if (this.fill.enabled) {
-                //this.beginFill(this.fill.color);
-                this.lineStyle(2, this.fill.color);
+                this.beginFill(this.fill.color);
+                //this.lineStyle(2, this.fillColor);
             } else {
-                this.lineStyle(2, this.fill.color);                
+                this.lineStyle(2, this.fillColor);
             }
         }
-        this.moveTo(shapePath.moveTo.x, shapePath.moveTo.y);
-        shapePath.bezierCurveToPaths.forEach((path) => {
-            this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
-        });
+    }
+
+    afterDraw() {
         if (this.isClosed) {
             if (this.stroke) {
                 if (this.stroke.enabledFill) {
@@ -176,13 +216,24 @@ export class ShapeElement extends Element {
                 }
             } else if (this.fill) {
                 if (this.fill.enabled) {
-                    //this.endFill();
-                    this.closePath();
+                    this.endFill();
+                    //this.closePath();
                 } else {
                     this.closePath();
                 }
             }
         }
+    }
+
+    drawPath(shapePath) {
+        this.beforeDraw();
+
+        this.moveTo(shapePath.moveTo.x, shapePath.moveTo.y);
+        shapePath.bezierCurveToPaths.forEach((path) => {
+            this.bezierCurveTo(path.cp.x, path.cp.y, path.cp2.x, path.cp2.y, path.to.x, path.to.y);
+        });
+
+        this.afterDraw();
     }
 
     createAnimatePos(animData, frame, fromPos, toPos) {
@@ -213,25 +264,112 @@ export class ShapeElement extends Element {
         };
     }
 
+    setupStrokeColor(frame) {
+        if (!this.stroke) return;
+
+        if (typeof this.stroke.color !== 'string') {
+            this.stroke.color.forEach((animData) => {
+                if (animData.startFrame <= frame  && frame <= animData.endFrame) {
+                    this.strokeColor = animData.fromColor;
+                }
+            });
+        } else {
+            this.strokeColor = this.stroke.color;
+        }
+    }
+
+    setupFillColor(frame) {
+        if (!this.fill) return;
+
+        if (typeof this.fill.color !== 'string') {
+            this.fill.color.forEach((animData) => {
+                if (animData.startFrame <= frame  && frame <= animData.endFrame) {
+                    this.fillColor = animData.fromColor;
+                }
+            });
+        } else {
+            this.fillColor = this.fill.color;
+        }
+    }
+
     drawThis(frame) {
-        if (!this.shapePaths || this.shapePaths.length == 0) return;
         this.clear();
 
-        this.shapePaths.forEach((shapePath) => {
-            if (shapePath.path.hasAnimatedPath) {
-                this.isClosed = shapePath.isClosed;
-                shapePath.path.paths.forEach((animData) => {
-                    if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                        if (!animData.fromPath) return;
-                        const animatePath = this.createAnimatePath(animData, frame);
-                        this.drawPath(animatePath);
+        this.setupStrokeColor(frame);
+        this.setupFillColor(frame);
+
+        if (this.shapePaths) {
+            this.shapePaths.forEach((shapePath) => {
+                if (shapePath.path.hasAnimatedPath) {
+                    this.isClosed = shapePath.isClosed;
+                    shapePath.path.paths.forEach((animData) => {
+                        if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                            if (!animData.fromPath) return;
+                            const animatePath = this.createAnimatePath(animData, frame);
+                            this.drawPath(animatePath);
+                        }
+                    });
+                    let paths    = shapePath.path.paths;
+                    let lastPath = paths[paths.length - 2];
+                    if (lastPath.endFrame <= frame) {
+                        this.drawPath(lastPath.toPath);
                     }
-                });
-            } else if (this.inFrame <= frame && frame <= this.outFrame) {
-                this.isClosed = shapePath.isClosed;
-                this.drawPath(shapePath.path);
-            }
-        });
+                } else if (this.inFrame <= frame && frame <= this.outFrame) {
+                    this.isClosed = shapePath.isClosed;
+                    this.drawPath(shapePath.path);
+                }
+            });
+        }
+        
+        if (this.ellipses) {
+            this.beforeDraw();
+            this.ellipses.forEach((ellipse) => {
+                if (ellipse.enabledAnimation) {
+                    let pos = null;
+                    if (ellipse.position.length > 0) {
+                        ellipse.position.forEach((animData) => {
+                            if (animData.startFrame <= frame  && frame <= animData.endFrame) {
+                                const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
+                                const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
+                                const frameDiff    = animData.endFrame - animData.startFrame;
+                                const playFrame    = frame - animData.startFrame;
+                                const perFramePosX = 1.0 * posDiffX / frameDiff;
+                                const perFramePosY = 1.0 * posDiffY / frameDiff;
+                                const posX         = playFrame * perFramePosX;
+                                const posY         = playFrame * perFramePosY;
+                                pos = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                            }
+                        });
+                    } else {
+                        pos = ellipse.position;
+                    }
+                    let size = null;
+                    if (ellipse.size.length > 0) {
+                        ellipse.size.forEach((animData) => {
+                            if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                                const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
+                                const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
+                                const frameDiff    = animData.endFrame - animData.startFrame;
+                                const playFrame    = frame - animData.startFrame;
+                                const perFramePosX = 1.0 * posDiffX / frameDiff;
+                                const perFramePosY = 1.0 * posDiffY / frameDiff;
+                                const posX         = playFrame * perFramePosX;
+                                const posY         = playFrame * perFramePosY;
+                                size = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                            }
+                        });
+                    } else {
+                        size = ellipse.size;
+                    }
+                    if (!pos || !size) return;
+
+                    this.drawEllipse(pos.x, pos.y, size.x, size.y);
+                } else {
+                    this.drawEllipse(ellipse.position.x, ellipse.position.y, ellipse.size.x, ellipse.size.y);
+                }
+            });
+            this.afterDraw();
+        }
     }
 
     update(frame) {
@@ -245,7 +383,7 @@ export default class ShapeContainerElement extends Element {
         super(data);
         this.setupBounds(data.bounds);
         this.shapes = data.shapes.map((shape) => {
-            return new ShapeElement(shape, this.inFrame, this.outFrame);
+            return new ShapeElement(shape, this.inFrame, this.outFrame, this.stretch);
         });
         this.shapes.forEach((shape) => {
             this.addChild(shape);

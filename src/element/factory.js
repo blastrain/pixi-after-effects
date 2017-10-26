@@ -1,3 +1,4 @@
+import Element from './element';
 import CompElement  from './comp';
 import ShapeContainerElement from './shape';
 
@@ -30,6 +31,7 @@ export default class ElementFactory {
         case ELEMENT_TYPE.CAMERA:
             break;
         case ELEMENT_TYPE.NULL:
+            elem = new CompElement(data);
             break;
         default:
             console.log(data);

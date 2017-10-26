@@ -15,6 +15,44 @@ export default class CompElement extends Element {
         }
     }
 
+    setupReference(assets) {
+        this.assets   = assets;
+        this.assetMap = {};
+        assets.forEach((asset) => {
+            this.assetMap[asset.id] = asset;
+        });
+        if (!this.referenceId) return;
+
+        let asset = this.assetMap[this.referenceId];
+        if (!asset) return;
+        
+        this.layers = asset.layers;
+        this.resolveLayerReference(this.layers);
+        this.layers.forEach((layer) => {
+            if (!layer.hasParent) {
+                this.addChild(layer);
+            }
+        });
+    }
+
+    resolveLayerReference(layers) {
+        let layerIndexMap = {};
+        layers.forEach((layer) => {
+            layerIndexMap[layer.index] = layer;
+        });
+        layers.forEach((layer) => {
+            if (layer.hasParent) {
+                const parentLayer = layerIndexMap[layer.parentIndex];
+                parentLayer.addChild(layer);
+            }
+        });
+        layers.forEach((layer) => {
+            if (layer.isCompType()) {
+                layer.setupReference(this.assets);
+            }
+        });
+    }
+    
     addMask(data) {
         this.masks = data.masksProperties.map((maskData) => {
             return new MaskElement(maskData);
@@ -102,9 +140,15 @@ export default class CompElement extends Element {
 
     update(frame) {
         super.update(frame);
-        this.layers.forEach((layer) => {
-            if (!layer) return;
-            layer.update(frame);
-        });
+        if (!this.layers) {
+            this.alpha = 1;
+            this.children.forEach((child) => {
+                child.update(frame);
+            });
+        } else {
+            this.layers.forEach((layer) => {
+                layer.update(frame);
+            });
+        }
     }
 }

@@ -9,12 +9,17 @@ export default class Element extends PIXI.Graphics {
         this.type         = data.ty;
         this.isCompleted  = data.completed;
         this.index        = data.ind;
+        this.hasParent    = data.hasOwnProperty("parent");
         this.parentIndex  = data.parent;
         this.inFrame      = data.ip;
         this.outFrame     = data.op;
         this.sr           = data.sr || 1;
-        this.st           = data.st;
+        this.stretch      = data.st;
         this.setupProperties(data.ks);
+    }
+
+    isCompType() {
+        return this.type === 0;
     }
 
     setupProperties(data) {
@@ -28,18 +33,26 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupAnchorPoint(data) {
-        const anchorPoint = data.k;
-        if (typeof anchorPoint[0] === 'number') {
-            this.pivot = new PIXI.Point(anchorPoint[0], anchorPoint[1]);
+        const anchorPoint = this.createAnchorPoint(data);
+        if (anchorPoint.length > 0) {
+            this.hasAnimatedAnchorPoint = true;
+            this.animatedAnchorPoints   = anchorPoint;
         } else {
-            this.setupAnimatedAnchorPoint(data.k);
+            this.pivot = anchorPoint;
         }
     }
 
-    setupAnimatedAnchorPoint(data) {
-        this.hasAnimatedAnchorPoint = true;
+    createAnchorPoint(data) {
+        if (typeof data.k[0] === 'number') {
+            return new PIXI.Point(data.k[0], data.k[1]);
+        } else {
+            return this.createAnimatedAnchorPoint(data.k);
+        }
+    }
+
+    createAnimatedAnchorPoint(data) {
         const lastIndex = data.length - 1;
-        this.animatedAnchorPoints = data.map((animData, index) => {
+        return data.map((animData, index) => {
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -53,18 +66,27 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupOpacity(data) {
-        const opacity = data.k;
-        if (typeof opacity === 'number') {
-            this.alpha = opacity / 100.0;
+        const opacity = this.createOpacity(data);
+        if (opacity.length > 0) {
+            this.hasAnimatedOpacity = true;
+            this.animatedOpacities  = opacity;
         } else {
-            this.setupAnimatedOpacity(data.k);
+            this.alpha = opacity;
         }
     }
 
-    setupAnimatedOpacity(data) {
-        this.hasAnimatedOpacity = true;
+    createOpacity(data) {
+        const opacity = data.k;
+        if (typeof opacity === 'number') {
+            return opacity / 100.0;
+        } else {
+            return this.createAnimatedOpacity(data.k);
+        }
+    }
+
+    createAnimatedOpacity(data) {
         const lastIndex = data.length - 1;
-        this.animatedOpacities = data.map((animData, index) => {
+        return data.map((animData, index) => {
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -78,19 +100,27 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupPosition(data) {
-        const pos = data.k;
-        if (typeof pos[0] === 'number') {
-            this.x = pos[0];
-            this.y = pos[1];
+        const pos = this.createPosition(data);
+        if (pos.length > 0) {
+            this.hasAnimatedPosition = true;
+            this.animatedPositions   = pos;
         } else {
-            this.setupAnimatedPosition(data.k);
+            this.position = pos;
         }
     }
 
-    setupAnimatedPosition(data) {
-        this.hasAnimatedPosition = true;
+    createPosition(data) {
+        const pos = data.k;
+        if (typeof pos[0] === 'number') {
+            return new PIXI.Point(pos[0], pos[1]);
+        } else {
+            return this.createAnimatedPosition(data.k);
+        }
+    }
+
+    createAnimatedPosition(data) {
         const lastIndex = data.length - 1;
-        this.animatedPositions = data.map((animData, index) => {
+        return data.map((animData, index) => {
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -104,18 +134,27 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupRotation(data) {
-        const rotation = data.k;
-        if (typeof rotation === 'number') {
-            this.rotation =  Math.PI * rotation / 180.0;
+        const rotation = this.createRotation(data);
+        if (rotation.length > 0) {
+            this.hasAnimatedRotation = true;
+            this.animatedRotations   = rotation;
         } else {
-            this.setupAnimatedRotation(data.k);
+            this.rotation = rotation;
         }
     }
 
-    setupAnimatedRotation(data) {
-        this.hasAnimatedRotation = true;
+    createRotation(data) {
+        const rotation = data.k;
+        if (typeof rotation === 'number') {
+            return Math.PI * rotation / 180.0;
+        } else {
+            return this.createAnimatedRotation(data.k);
+        }
+    }
+
+    createAnimatedRotation(data) {
         const lastIndex = data.length - 1;
-        this.animatedRotations = data.map((animData, index) => {
+        return data.map((animData, index) => {
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -129,20 +168,29 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupScale(data) {
-        const scale = data.k;
-        if (typeof scale[0] === 'number') {
-            this.scaleX = scale[0] / 100.0;
-            this.scaleY = scale[1] / 100.0;
-            this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
+        const scale = this.createScale(data);
+        if (scale.length > 0) {
+            this.hasAnimatedScale = true;
+            this.animatedScales   = scale;
         } else {
-            this.setupAnimatedScale(data.k);
+            this.scale = scale;
         }
     }
 
-    setupAnimatedScale(data) {
-        this.hasAnimatedScale = true;
+    createScale(data) {
+        const scale = data.k;
+        if (typeof scale[0] === 'number') {
+            const scaleX = scale[0] / 100.0;
+            const scaleY = scale[1] / 100.0;
+            return new PIXI.Point(scaleX, scaleY);
+        } else {
+            return this.createAnimatedScale(data.k);
+        }
+    }
+
+    createAnimatedScale(data) {
         const lastIndex = data.length - 1;
-        this.animatedScales = data.map((animData, index) => {
+        return data.map((animData, index) => {
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -171,6 +219,10 @@ export default class Element extends PIXI.Graphics {
                 isAnimated = true;
             }
         });
+        if (!isAnimated && frame > this.animatedAnchorPoints[this.animatedAnchorPoints.length - 1].endFrame) {
+            const anchorPoint = this.animatedAnchorPoints[this.animatedAnchorPoints.length - 2].toAnchorPoint;
+            this.pivot = new PIXI.Point(anchorPoint[0], anchorPoint[1]);
+        }
         return isAnimated;
     }
 
@@ -187,6 +239,10 @@ export default class Element extends PIXI.Graphics {
                 isAnimated = true;
             }
         });
+        if (!isAnimated && frame > this.animatedOpacities[this.animatedOpacities.length - 1].endFrame) {
+            const opacity = this.animatedOpacities[this.animatedOpacities.length - 2].toOpacity;
+            this.alpha    = opacity;
+        }
         return isAnimated;
     }
 
@@ -207,6 +263,10 @@ export default class Element extends PIXI.Graphics {
                 isAnimated         = true;
             }
         });
+        if (!isAnimated && frame > this.animatedPositions[this.animatedPositions.length - 1].endFrame) {
+            const position = this.animatedPositions[this.animatedPositions.length - 2].toPosition;
+            this.position  = new PIXI.Point(position[0], position[1]);
+        }
         return isAnimated;
     }
 
@@ -223,6 +283,10 @@ export default class Element extends PIXI.Graphics {
                 isAnimated     = true;
             }
         });
+        if (!isAnimated && frame > this.animatedRotations[this.animatedRotations.length - 1].endFrame) {
+            const rotation = this.animatedRotations[this.animatedRotations.length - 2].toRotation;
+            this.rotation  = rotation;
+        }
         return isAnimated;
     }
 
@@ -244,6 +308,10 @@ export default class Element extends PIXI.Graphics {
                 isAnimated  = true;
             }
         });
+        if (!isAnimated && frame > this.animatedScales[this.animatedScales.length - 1].endFrame) {
+            const scale = this.animatedScales[this.animatedScales.length - 2].toScale;
+            this.scale  = new PIXI.Point(scale[0] / 100.0, scale[1] / 100.0);
+        }
         return isAnimated
     }
 
@@ -256,7 +324,14 @@ export default class Element extends PIXI.Graphics {
     }
 
     update(frame) {
-        if (!this.hasAnimateProperty()) {
+        if (this.inFrame - this.stretch <= frame && frame <= this.outFrame - this.stretch) {
+            this.visible = true;
+        } else if (this.inFrame <= frame && frame <= this.outFrame) {
+            this.visible = true;
+        } else {
+            this.visible = false;
+        }
+        if (!this.visible || !this.hasAnimateProperty()) {
             return;
         }
         let isAnimated = false;
@@ -274,11 +349,6 @@ export default class Element extends PIXI.Graphics {
         }
         if (this.hasAnimatedScale && this.animateScale(frame)) {
             isAnimated = true;
-        }
-        if (isAnimated) {
-            if (this.alpha === 0) this.alpha = 1;
-        } else {
-            this.alpha = 0;
         }
     }
 }
