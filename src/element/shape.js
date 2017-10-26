@@ -44,6 +44,7 @@ export class ShapeElement extends Element {
                 break;
             }
         });
+        if (this.shapePaths) this.shapePaths.reverse();
     }
 
     setupPath(data) {
@@ -299,7 +300,7 @@ export class ShapeElement extends Element {
         this.setupFillColor(frame);
 
         if (this.shapePaths) {
-            this.shapePaths.forEach((shapePath) => {
+            this.shapePaths.forEach((shapePath, index) => {
                 if (shapePath.path.hasAnimatedPath) {
                     this.isClosed = shapePath.isClosed;
                     shapePath.path.paths.forEach((animData) => {
@@ -307,16 +308,25 @@ export class ShapeElement extends Element {
                             if (!animData.fromPath) return;
                             const animatePath = this.createAnimatePath(animData, frame);
                             this.drawPath(animatePath);
+                            if (index !== 0) {
+                                this.addHole();
+                            }
                         }
                     });
                     let paths    = shapePath.path.paths;
                     let lastPath = paths[paths.length - 2];
                     if (lastPath.endFrame <= frame) {
                         this.drawPath(lastPath.toPath);
+                        if (index !== 0) {
+                            this.addHole();
+                        }
                     }
                 } else if (this.inFrame <= frame && frame <= this.outFrame) {
                     this.isClosed = shapePath.isClosed;
                     this.drawPath(shapePath.path);
+                    if (index !== 0) {
+                        this.addHole();
+                    }
                 }
             });
         }
