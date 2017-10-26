@@ -36,11 +36,16 @@ export default class CompElement extends Element {
     }
 
     resolveLayerReference(layers) {
+        layers.sort((a, b) => {
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
+        });
         let layerIndexMap = {};
         layers.forEach((layer) => {
             layerIndexMap[layer.index] = layer;
         });
-        layers.forEach((layer) => {
+        layers.reverse().forEach((layer) => {
             if (layer.hasParent) {
                 const parentLayer = layerIndexMap[layer.parentIndex];
                 parentLayer.addChild(layer);
@@ -70,19 +75,6 @@ export default class CompElement extends Element {
     }
 
     toPIXIBlendMode(mode) {
-        if (!PIXI.BLEND_MODES) {
-            switch (mode) {
-            case 0:
-                return PIXI.blendModes.NORMAL;
-                break;
-            case 2:
-                return PIXI.blendModes.SCREEN;
-                break;
-            default:
-                break;
-            }
-            return PIXI.blendModes.NORMAL;
-        }
         switch(mode) {
         case 0:
             return PIXI.BLEND_MODES.NORMAL;
