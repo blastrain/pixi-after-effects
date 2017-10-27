@@ -193,16 +193,16 @@ export class ShapeElement extends Element {
     beforeDraw() {
         if (this.stroke) {
             if (this.stroke.enabledFill) {
-                this.beginFill(this.strokeColor);
+                this.beginFill(this.strokeColorHex);
             }
-            this.lineStyle(this.stroke.width, this.strokeColor);
+            this.lineStyle(this.stroke.width, this.strokeColorHex);
             //TODO: ignore miterLimit and lineCap and lineJoin
         } else if (this.fill) {
             if (this.fill.enabled) {
-                this.beginFill(this.fill.color);
+                this.beginFill(this.fillColorHex);
                 //this.lineStyle(2, this.fillColor);
             } else {
-                this.lineStyle(2, this.fillColor);
+                this.lineStyle(2, this.fillColorHex);
             }
         }
     }
@@ -269,13 +269,22 @@ export class ShapeElement extends Element {
         if (!this.stroke) return;
 
         if (typeof this.stroke.color !== 'string') {
+            const firstColor = this.stroke.color[0];
+            if (frame < firstColor.startFrame) {
+                this.strokeColorHex = firstColor.fromColor;
+                return;
+            }
             this.stroke.color.forEach((animData) => {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
-                    this.strokeColor = animData.fromColor;
+                    this.strokeColorHex = animData.fromColor;
                 }
             });
+            const lastColor = this.stroke.color[this.stroke.color.length - 2];
+            if (frame > lastColor.endFrame) {
+                this.strokeColorHex = lastColor.fromColor;
+            }
         } else {
-            this.strokeColor = this.stroke.color;
+            this.strokeColorHex = this.stroke.color;
         }
     }
 
@@ -283,14 +292,81 @@ export class ShapeElement extends Element {
         if (!this.fill) return;
 
         if (typeof this.fill.color !== 'string') {
+            const firstColor = this.fill.color[0];
+            if (frame < firstColor.startFrame) {
+                this.fillColorHex = firstColor.fromColor;
+                return;
+            }
             this.fill.color.forEach((animData) => {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
-                    this.fillColor = animData.fromColor;
+                    this.fillColorHex = animData.fromColor;
                 }
             });
+            const lastColor = this.fill.color[this.fill.color.length - 2];
+            if (frame > lastColor.endFrame) {
+                this.fillColorHex = lastColor.toColor;
+            }
         } else {
-            this.fillColor = this.fill.color;
+            this.fillColorHex = this.fill.color;
         }
+    }
+
+    createEllipsePosition(frame, ellipse) {
+        if (ellipse.position.length > 0) {
+            let pos = null;
+            ellipse.position.forEach((animData) => {
+                if (animData.startFrame <= frame  && frame <= animData.endFrame) {
+                    const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
+                    const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
+                    const frameDiff    = animData.endFrame - animData.startFrame;
+                    const playFrame    = frame - animData.startFrame;
+                    const perFramePosX = 1.0 * posDiffX / frameDiff;
+                    const perFramePosY = 1.0 * posDiffY / frameDiff;
+                    const posX         = playFrame * perFramePosX;
+                    const posY         = playFrame * perFramePosY;
+                    pos = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                }
+            });
+            const lastPos = ellipse.position[ellipse.position.length - 2];
+            if (frame > lastPos.endFrame) {
+                pos = lastPos.toPos;
+            }
+            return pos;
+        }
+        return ellipse.position;
+    }
+
+    createEllipseSize(frame, ellipse) {
+        if (ellipse.size.length > 0) {
+            let size = null;
+            ellipse.size.forEach((animData) => {
+                if (animData.startFrame <= frame  && frame <= animData.endFrame) {
+                    const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
+                    const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
+                    const frameDiff    = animData.endFrame - animData.startFrame;
+                    const playFrame    = frame - animData.startFrame;
+                    const perFramePosX = 1.0 * posDiffX / frameDiff;
+                    const perFramePosY = 1.0 * posDiffY / frameDiff;
+                    const posX         = playFrame * perFramePosX;
+                    const posY         = playFrame * perFramePosY;
+                    size = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                }
+            });
+            const lastSize = ellipse.size[ellipse.size.length - 2];
+            if (frame > lastSize.endFrame) {
+                size = lastSize.toPos;
+            }
+            return size;
+        }
+        return ellipse.size;
+    }
+
+    drawEllipseAnimation(frame, ellipse) {
+        const pos  = this.createEllipsePosition(frame, ellipse);
+        const size = this.createEllipseSize(frame, ellipse);
+        if (!pos || !size) return;
+
+        this.drawEllipse(pos.x, pos.y, size.x, size.y);
     }
 
     drawThis(frame) {
@@ -303,6 +379,7 @@ export class ShapeElement extends Element {
             this.shapePaths.forEach((shapePath, index) => {
                 if (shapePath.path.hasAnimatedPath) {
                     this.isClosed = shapePath.isClosed;
+                    let paths     = shapePath.path.paths;
                     shapePath.path.paths.forEach((animData) => {
                         if (animData.startFrame <= frame && frame <= animData.endFrame) {
                             if (!animData.fromPath) return;
@@ -313,7 +390,6 @@ export class ShapeElement extends Element {
                             }
                         }
                     });
-                    let paths    = shapePath.path.paths;
                     let lastPath = paths[paths.length - 2];
                     if (lastPath.endFrame <= frame) {
                         this.drawPath(lastPath.toPath);
@@ -335,45 +411,7 @@ export class ShapeElement extends Element {
             this.beforeDraw();
             this.ellipses.forEach((ellipse) => {
                 if (ellipse.enabledAnimation) {
-                    let pos = null;
-                    if (ellipse.position.length > 0) {
-                        ellipse.position.forEach((animData) => {
-                            if (animData.startFrame <= frame  && frame <= animData.endFrame) {
-                                const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
-                                const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
-                                const frameDiff    = animData.endFrame - animData.startFrame;
-                                const playFrame    = frame - animData.startFrame;
-                                const perFramePosX = 1.0 * posDiffX / frameDiff;
-                                const perFramePosY = 1.0 * posDiffY / frameDiff;
-                                const posX         = playFrame * perFramePosX;
-                                const posY         = playFrame * perFramePosY;
-                                pos = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
-                            }
-                        });
-                    } else {
-                        pos = ellipse.position;
-                    }
-                    let size = null;
-                    if (ellipse.size.length > 0) {
-                        ellipse.size.forEach((animData) => {
-                            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                                const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
-                                const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
-                                const frameDiff    = animData.endFrame - animData.startFrame;
-                                const playFrame    = frame - animData.startFrame;
-                                const perFramePosX = 1.0 * posDiffX / frameDiff;
-                                const perFramePosY = 1.0 * posDiffY / frameDiff;
-                                const posX         = playFrame * perFramePosX;
-                                const posY         = playFrame * perFramePosY;
-                                size = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
-                            }
-                        });
-                    } else {
-                        size = ellipse.size;
-                    }
-                    if (!pos || !size) return;
-
-                    this.drawEllipse(pos.x, pos.y, size.x, size.y);
+                    this.drawEllipseAnimation(frame, ellipse);
                 } else {
                     this.drawEllipse(ellipse.position.x, ellipse.position.y, ellipse.size.x, ellipse.size.y);
                 }
