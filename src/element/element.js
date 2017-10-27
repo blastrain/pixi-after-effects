@@ -93,8 +93,8 @@ export default class Element extends PIXI.Graphics {
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
                 easingFromRatio: animData.i,
                 easingToRatio:   animData.o,
-                fromOpacity:     animData.s / 100.0,
-                toOpacity:       animData.e / 100.0,
+                fromOpacity:     (animData.s ? animData.s[0] : 0) / 100.0,
+                toOpacity:       (animData.e ? animData.e[0] : 0) / 100.0,
             };
         });
     }
@@ -205,6 +205,10 @@ export default class Element extends PIXI.Graphics {
 
     animateAnchorPoint(frame) {
         let isAnimated = false;
+        if (frame < this.animatedAnchorPoints[0].startFrame) {
+            const anchorPoint = this.animatedAnchorPoints[0].fromAnchorPoint;
+            this.pivot = new PIXI.Point(anchorPoint[0], anchorPoint[1]);
+        }
         this.animatedAnchorPoints.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const anchorPointDiffX = animData.toAnchorPoint[0] - animData.fromAnchorPoint[0];
@@ -228,6 +232,10 @@ export default class Element extends PIXI.Graphics {
 
     animateOpacity(frame) {
         let isAnimated = false;
+        if (frame < this.animatedOpacities[0].startFrame) {
+            const opacity = this.animatedOpacities[0].fromOpacity;
+            this.alpha    = opacity;
+        }
         this.animatedOpacities.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const opacityDiff = animData.toOpacity - animData.fromOpacity;
@@ -248,6 +256,10 @@ export default class Element extends PIXI.Graphics {
 
     animatePosition(frame) {
         let isAnimated = false;
+        if (frame < this.animatedPositions[0].startFrame) {
+            const position = this.animatedPositions[0].fromPosition;
+            this.position  = new PIXI.Point(position[0], position[1]);
+        }
         this.animatedPositions.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
@@ -272,6 +284,10 @@ export default class Element extends PIXI.Graphics {
 
     animateRotation(frame) {
         let isAnimated = false;
+        if (frame < this.animatedRotations[0].startFrame) {
+            const rotation = this.animatedRotations[0].fromRotation;
+            this.rotation  = rotation;
+        }
         this.animatedRotations.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const rotDiff     = animData.toRotation - animData.fromRotation;
@@ -292,6 +308,10 @@ export default class Element extends PIXI.Graphics {
 
     animateScale(frame) {
         let isAnimated = false;
+        if (frame < this.animatedScales[0].startFrame) {
+            const scale = this.animatedScales[0].fromScale;
+            this.scale  = new PIXI.Point(scale[0] / 100.0, scale[1] / 100.0);
+        }
         this.animatedScales.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const scaleDiffX   = animData.toScale[0] - animData.fromScale[0];
