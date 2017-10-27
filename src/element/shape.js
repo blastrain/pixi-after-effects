@@ -434,6 +434,7 @@ export default class ShapeContainerElement extends Element {
             return new ShapeElement(shape, this.inFrame, this.outFrame, this.stretch);
         });
         this.shapes.forEach((shape) => {
+            shape.scale = new PIXI.Point(this.scaleX, this.scaleY);
             this.addChild(shape);
         });
     }

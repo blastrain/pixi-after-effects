@@ -173,7 +173,9 @@ export default class Element extends PIXI.Graphics {
             this.hasAnimatedScale = true;
             this.animatedScales   = scale;
         } else {
-            this.scale = scale;
+            this.scaleX = scale.x;
+            this.scaleY = scale.y;
+            this.scale  = scale;
         }
     }
 
