@@ -15,8 +15,8 @@ export default class CompElement extends Element {
         }
         this.blendMode    = this.toPIXIBlendMode(data.bm);
         this.autoOriented = data.ao;
-        if (this.hasMask && data.masksProperties) {
-            this.addMask(data);
+        if (data.masksProperties) {
+            this.masksProperties = data.masksProperties;
         }
     }
 
@@ -30,11 +30,20 @@ export default class CompElement extends Element {
 
         let asset = this.assetMap[this.referenceId];
         if (!asset) return;
-        
+
         this.layers = asset.layers;
         this.resolveLayerReference(this.layers);
-        this.layers.forEach((layer) => {
-            if (!layer.hasParent) {
+        this.layers.forEach((layer, index) => {
+            if (layer.hasMask) {
+                if (!this.masks) this.masks = [];
+                const maskLayer = new MaskElement(layer);
+                this.addChild(maskLayer);
+                this.addChild(layer);
+                this.masks.push({
+                    maskTargetLayer: layer,
+                    maskLayer: maskLayer,
+                });
+            } else if (!layer.hasParent) {
                 this.addChild(layer);
             }
         });
@@ -63,22 +72,6 @@ export default class CompElement extends Element {
         });
     }
     
-    addMask(data) {
-        this.masks = data.masksProperties.map((maskData) => {
-            return new MaskElement(maskData);
-        });
-        if (!this.masks[0]) return;
-        
-        console.log(this.masks[0]);
-        const renderer = PIXI.autoDetectRenderer();
-        if (!renderer.maskManager) {
-            renderer.maskManager = new PIXI.MaskManager(renderer);
-        }
-        const maskManager = renderer.maskManager;
-        maskManager.pushMask(this, this.masks[0].shape);
-        //this.mask = this.masks[0].shape;
-    }
-
     toPIXIBlendMode(mode) {
         switch(mode) {
         case 0:
@@ -117,26 +110,22 @@ export default class CompElement extends Element {
         return PIXI.BLEND_MODES.NORMAL;
     }
 
-    setupSubLayers(layers) {
-        this.layers = layers;
-        let layerIndexMap = {};
-        this.layers.forEach((layer) => {
-            if (!layer) return;
-            layerIndexMap[layer.index] = layer;
-        });
-        this.layers.forEach((layer) => {
-            if (!layer) return;
-            if (layer.parentIndex) {
-                const parentLayer = layerIndexMap[layer.parentIndex];
-                parentLayer.addChild(layer);
+    updateMask(frame) {
+        this.masks.forEach((maskData) => {
+            let drawnMask = maskData.maskLayer.update(frame);
+            if (drawnMask) {
+                maskData.maskTargetLayer.mask = maskData.maskLayer;
             } else {
-                this.addChild(layer);
+                maskData.maskTargetLayer.mask = null;
             }
         });
     }
 
     update(frame) {
         super.update(frame);
+        if (this.masks) {
+            this.updateMask(frame);
+        }
         if (!this.layers) {
             this.alpha = 1;
             this.children.forEach((child) => {

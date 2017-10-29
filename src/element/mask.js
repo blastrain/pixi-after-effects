@@ -2,16 +2,52 @@ import * as PIXI from 'pixi.js';
 import Element from './element';
 import {ShapeElement,ShapeContainerElement} from './shape';
 
-export default class MaskElement extends Element {
-    constructor(data) {
-        super(data);
+export default class MaskElement extends ShapeElement {
+    constructor(compLayer) {
+        super();
+        const data = compLayer.masksProperties[0];
+        this.isMaskLayer = true;
+        this.maskTargetLayer = compLayer;
         this.isClosed   = data.cl;
-        this.inv        = data.inv;
+        this.isInverted = data.inv;
         this.mode       = data.mode;
-        this.alpha      = data.o.k / 100.0;
-        const shape     = new ShapeElement();
-        const shapePath = shape.createPath(data.pt.k);
-        //shape.drawPathForMask(shapePath[0].fromPath);
-        this.shape = shape;
+        this.inFrame    = compLayer.inFrame;
+        this.outFrame   = compLayer.outFrame;
+        this.setupOpacity(data.o);
+        this.shapePath  = this.createPath(data.pt.k);
+        this.fillColorHex = "0x000000";
+        this.fill = { enabled: true };
+    }
+
+    drawMask(frame) {
+        let drawnMask   = false;
+        const shapePath = this.shapePath;
+        if (shapePath.hasAnimatedPath) {
+            this.isClosed = shapePath.isClosed;
+            let paths     = shapePath.paths;
+            shapePath.paths.forEach((animData) => {
+                if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                    if (!animData.fromPath) return;
+                    const animatePath = this.createAnimatePath(animData, frame);
+                    this.drawPath(animatePath);
+                    drawnMask = true;
+                }
+            });
+            let lastPath = paths[paths.length - 2];
+            if (lastPath.endFrame <= frame) {
+                this.drawPath(lastPath.toPath);
+                drawnMask = true;
+            }
+        } else if (this.inFrame <= frame && frame <= this.outFrame) {
+            this.isClosed = shapePath.isClosed;
+            this.drawPath(shapePath.path);
+            drawnMask = true;
+        }
+        return drawnMask;
+    }
+
+    update(frame) {
+        this.clear();
+        return this.drawMask(frame);
     }
 }
