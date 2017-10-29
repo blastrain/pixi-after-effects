@@ -69,7 +69,28 @@ export class ShapeElement extends Element {
     }
 
     setupTrim(data) {
+        let trim = {};
+        trim.m     = data.m;
+        trim.o     = data.o;
+        trim.name  = data.nm;
+        trim.start = this.createTrimAnimation(data.s.k);
+        trim.end   = this.createTrimAnimation(data.e.k);
+        this.trim  = trim;
+    }
 
+    createTrimAnimation(data) {
+        const lastIndex = data.length - 1;
+        return data.map((animData, index) => {
+            return {
+                name:            animData.n,
+                startFrame:      animData.t,
+                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
+                easingFromRatio: animData.i,
+                easingToRatio:   animData.o,
+                fromRatio:       animData.s ? animData.s[0] : null,
+                toRatio:         animData.e ? animData.e[0] : null,
+            };
+        });
     }
 
     setupEllipse(data) {
@@ -369,13 +390,74 @@ export class ShapeElement extends Element {
         this.drawEllipse(pos.x, pos.y, size.x, size.y);
     }
 
+    drawTrim(frame) {
+        if (frame < this.trim.start[0].startFrame &&
+            frame < this.trim.end[0].startFrame) return;
+
+        let trimStartRatio = 0;
+        this.trim.start.forEach((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                const ratioDiff  = animData.toRatio - animData.fromRatio;
+                const totalFrame = animData.endFrame - animData.startFrame;
+                const playFrame  = frame - animData.startFrame;
+                const perFrameRatio  = 1.0 * ratioDiff / totalFrame;
+                trimStartRatio = playFrame * perFrameRatio + animData.fromRatio;
+            }
+        });
+        let last = this.trim.start[this.trim.start.length - 2];
+        if (last.endFrame <= frame) {
+            trimStartRatio = last.toRatio;
+        }
+
+        let trimEndRatio = 0;
+        this.trim.end.forEach((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.fromRatio) return;
+                const ratioDiff  = animData.toRatio - animData.fromRatio;
+                const totalFrame = animData.endFrame - animData.startFrame;
+                const playFrame  = frame - animData.startFrame;
+                const perFrameRatio  = 1.0 * ratioDiff / totalFrame;
+                trimEndRatio = playFrame * perFrameRatio + animData.fromRatio;
+            }
+        });
+        last = this.trim.end[this.trim.end.length - 2];
+        if (last.endFrame <= frame) {
+            trimEndRatio = last.toRatio;
+        }
+
+        if (trimStartRatio > trimEndRatio) {
+            const tmp      = trimStartRatio;
+            trimStartRatio = trimEndRatio;
+            trimEndRatio   = tmp;
+        }
+        this.beforeDraw();
+        this.shapePaths.forEach((shapePath, index) => {
+            const path = shapePath.path;
+
+            const fromPath = path.moveTo;
+            const toPath   = path.bezierCurveToPaths[0];
+            const xDiff    = toPath.to.x - fromPath.x;
+            const yDiff    = toPath.to.y - fromPath.y;
+
+            const startX = fromPath.x + xDiff * trimStartRatio / 100;
+            const startY = fromPath.y + yDiff * trimStartRatio / 100;
+            const endX   = fromPath.x + xDiff * trimEndRatio / 100;
+            const endY   = fromPath.y + yDiff * trimEndRatio / 100;
+            this.moveTo(startX, startY);
+            this.lineTo(endX, endY);
+        });
+        this.afterDraw();
+    }
+
     drawThis(frame) {
         this.clear();
 
         this.setupStrokeColor(frame);
         this.setupFillColor(frame);
 
-        if (this.shapePaths) {
+        if (this.trim) {
+            this.drawTrim(frame);
+        } else if (this.shapePaths) {
             this.shapePaths.forEach((shapePath, index) => {
                 if (shapePath.path.hasAnimatedPath) {
                     this.isClosed = shapePath.isClosed;
