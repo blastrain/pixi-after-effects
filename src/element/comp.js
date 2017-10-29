@@ -5,7 +5,6 @@ import MaskElement from './mask';
 export default class CompElement extends Element {
     constructor(data) {
         super(data);
-        this.hasMask      = data.hasMask;
         this.width        = data.w;
         this.height       = data.h;
         if (this.scaleX < 0) {
@@ -15,9 +14,6 @@ export default class CompElement extends Element {
         }
         this.blendMode    = this.toPIXIBlendMode(data.bm);
         this.autoOriented = data.ao;
-        if (data.masksProperties) {
-            this.masksProperties = data.masksProperties;
-        }
     }
 
     setupReference(assets) {
@@ -37,8 +33,8 @@ export default class CompElement extends Element {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
                 const maskLayer = new MaskElement(layer);
-                this.addChild(maskLayer);
                 this.addChild(layer);
+                layer.addChild(maskLayer);
                 this.masks.push({
                     maskTargetLayer: layer,
                     maskLayer: maskLayer,

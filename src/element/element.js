@@ -15,7 +15,11 @@ export default class Element extends PIXI.Graphics {
         this.outFrame     = data.op;
         this.sr           = data.sr || 1;
         this.stretch      = data.st;
+        this.hasMask      = data.hasMask;
         this.setupProperties(data.ks);
+        if (data.masksProperties) {
+            this.masksProperties = data.masksProperties;
+        }
     }
 
     isCompType() {

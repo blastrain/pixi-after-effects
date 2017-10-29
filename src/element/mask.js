@@ -3,16 +3,16 @@ import Element from './element';
 import {ShapeElement,ShapeContainerElement} from './shape';
 
 export default class MaskElement extends ShapeElement {
-    constructor(compLayer) {
+    constructor(maskTargetLayer) {
         super();
-        const data = compLayer.masksProperties[0];
+        const data = maskTargetLayer.masksProperties[0];
         this.isMaskLayer = true;
-        this.maskTargetLayer = compLayer;
+        this.maskTargetLayer = maskTargetLayer;
         this.isClosed   = data.cl;
         this.isInverted = data.inv;
         this.mode       = data.mode;
-        this.inFrame    = compLayer.inFrame;
-        this.outFrame   = compLayer.outFrame;
+        this.inFrame    = maskTargetLayer.inFrame;
+        this.outFrame   = maskTargetLayer.outFrame;
         this.setupOpacity(data.o);
         this.shapePath  = this.createPath(data.pt.k);
         this.fillColorHex = "0x000000";
