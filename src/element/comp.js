@@ -8,6 +8,11 @@ export default class CompElement extends Element {
         this.hasMask      = data.hasMask;
         this.width        = data.w;
         this.height       = data.h;
+        if (this.scaleX < 0) {
+            // flip mode.
+            // reassign scale value because overwritten scale by this.width's setter
+            this.scale.x = this.scaleX;
+        }
         this.blendMode    = this.toPIXIBlendMode(data.bm);
         this.autoOriented = data.ao;
         if (this.hasMask && data.masksProperties) {
