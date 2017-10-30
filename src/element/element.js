@@ -26,6 +26,10 @@ export default class Element extends PIXI.Graphics {
         return this.type === 0;
     }
 
+    isImageType() {
+        return this.type === 2;
+    }
+
     setupProperties(data) {
         if (!data) return;
 

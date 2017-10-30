@@ -1,5 +1,6 @@
 import Element from './element';
 import CompElement  from './comp';
+import ImageElement from './image';
 import ShapeContainerElement from './shape';
 
 const ELEMENT_TYPE = {
@@ -22,6 +23,7 @@ export default class ElementFactory {
         case ELEMENT_TYPE.SOLID:
             break;
         case ELEMENT_TYPE.IMAGE:
+            elem = new ImageElement(data);
             break;
         case ELEMENT_TYPE.SHAPE:
             elem = new ShapeContainerElement(data);

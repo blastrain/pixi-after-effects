@@ -6,6 +6,8 @@ import Asset from './asset';
 export default class AfterEffects extends PIXI.Container {
     constructor(jsonPath) {
         super();
+        this.jsonPath = jsonPath;
+        this.baseName = this.jsonPath.split('/').slice(0, -1).join('/');
         request.get(jsonPath).end((err, res) => {
             this.setup(res.body);
         });
@@ -21,19 +23,53 @@ export default class AfterEffects extends PIXI.Container {
         this.isLoop      = false;
         this.isCompleted = false;
         this.assets      = data.assets.map((asset) => {
-            return new Asset(asset);
+            return new Asset(asset, this.baseName);
         });
         this.layers    = data.layers.map((layer) => {
             return element.ElementFactory.create(layer);
         }).filter((layer) => { return layer !== null });
         this.layers.reverse().forEach((layer) => {
+        let layerIndexMap = {};
+        layers.forEach((layer) => {
+            layerIndexMap[layer.index] = layer;
+        });
+        layers.reverse().forEach((layer) => {
             if (layer.isCompType()) {
                 layer.setupReference(this.assets);
+            } else if (layer.isImageType()) {
+                layer.setupImage(this.assets);
             }
-            this.addChild(layer);
+            if (layer.hasMask) {
+                if (!this.masks) this.masks = [];
+                if (layer.isImageType()) return;
+                const maskLayer = new element.MaskElement(layer);
+                this.addChild(layer);
+                layer.addChild(maskLayer);
+                this.masks.push({
+                    maskTargetLayer: layer,
+                    maskLayer: maskLayer,
+                });
+            } else if (layer.hasParent) {
+                const parentLayer = layerIndexMap[layer.parentIndex];
+                parentLayer.addChild(layer);
+            } else {
+                this.addChild(layer);
+            }
         });
+        this.layers = layers;
         console.log(data);
         console.log(this);
+    }
+
+    updateMask(frame) {
+        this.masks.forEach((maskData) => {
+            let drawnMask = maskData.maskLayer.update(frame);
+            if (drawnMask) {
+                maskData.maskTargetLayer.mask = maskData.maskLayer;
+            } else {
+                maskData.maskTargetLayer.mask = null;
+            }
+        });
     }
 
     update(nowTime) {
@@ -52,6 +88,9 @@ export default class AfterEffects extends PIXI.Container {
             } else {
                 this.isCompleted = true;
             }
+        }
+        if (this.masks) {
+            this.updateMask(currentFrame);
         }
         this.layers.forEach((layer) => {
             layer.update(currentFrame);

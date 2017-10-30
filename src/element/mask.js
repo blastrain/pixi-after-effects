@@ -40,7 +40,7 @@ export default class MaskElement extends ShapeElement {
             }
         } else if (this.inFrame <= frame && frame <= this.outFrame) {
             this.isClosed = shapePath.isClosed;
-            this.drawPath(shapePath.path);
+            this.drawPath(shapePath);
             drawnMask = true;
         }
         return drawnMask;

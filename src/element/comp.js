@@ -35,6 +35,7 @@ export default class CompElement extends Element {
         this.layers.forEach((layer, index) => {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
+                if (layer.isImageType()) return;
                 const maskLayer = new MaskElement(layer);
                 this.addChild(layer);
                 layer.addChild(maskLayer);
@@ -67,6 +68,8 @@ export default class CompElement extends Element {
         layers.forEach((layer) => {
             if (layer.isCompType()) {
                 layer.setupReference(this.assets);
+            } else if (layer.isImageType()) {
+                layer.setupImage(this.assets);
             }
         });
     }
