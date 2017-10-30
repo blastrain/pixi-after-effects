@@ -25,10 +25,9 @@ export default class AfterEffects extends PIXI.Container {
         this.assets      = data.assets.map((asset) => {
             return new Asset(asset, this.baseName);
         });
-        this.layers    = data.layers.map((layer) => {
+        let layers = data.layers.map((layer) => {
             return element.ElementFactory.create(layer);
         }).filter((layer) => { return layer !== null });
-        this.layers.reverse().forEach((layer) => {
         let layerIndexMap = {};
         layers.forEach((layer) => {
             layerIndexMap[layer.index] = layer;
