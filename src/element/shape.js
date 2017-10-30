@@ -16,10 +16,6 @@ export class ShapeElement extends Element {
             this.setupShapeIteration(data.it);
         }
         this.drawThis(0);
-        this.interactive = true;
-        this.on('click', function () {
-            console.log(this);
-        });
     }
 
     setupShapeByType(data) {

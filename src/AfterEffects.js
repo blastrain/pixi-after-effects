@@ -2,15 +2,23 @@ const request = require('superagent');
 import * as PIXI from 'pixi.js';
 import * as element from './element';
 import Asset from './asset';
+import AEDataLoader from './loader';
 
 export default class AfterEffects extends PIXI.Container {
     constructor(jsonPath) {
         super();
-        this.jsonPath = jsonPath;
-        this.baseName = this.jsonPath.split('/').slice(0, -1).join('/');
-        request.get(jsonPath).end((err, res) => {
-            this.setup(res.body);
+        if (!jsonPath) return;
+        AEDataLoader.loadJSON(jsonPath).then((data) => {
+            this.setup(data);
+        }, (err) => {
+            console.log(err);
         });
+    }
+
+    static fromData(data) {
+        const ae = new AfterEffects();
+        ae.setup(data);
+        return ae;
     }
 
     setup(data) {
@@ -22,22 +30,9 @@ export default class AfterEffects extends PIXI.Container {
         this.version     = data.v;
         this.isLoop      = false;
         this.isCompleted = false;
-        this.assets      = data.assets.map((asset) => {
-            return new Asset(asset, this.baseName);
-        });
-        let layers = data.layers.map((layer) => {
-            return element.ElementFactory.create(layer);
-        }).filter((layer) => { return layer !== null });
-        let layerIndexMap = {};
-        layers.forEach((layer) => {
-            layerIndexMap[layer.index] = layer;
-        });
-        layers.reverse().forEach((layer) => {
-            if (layer.isCompType()) {
-                layer.setupReference(this.assets);
-            } else if (layer.isImageType()) {
-                layer.setupImage(this.assets);
-            }
+        this.assets      = data.assets;
+        this.layers      = data.layers;
+        this.layers.reverse().forEach((layer) => {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
                 if (layer.isImageType()) return;
@@ -55,9 +50,27 @@ export default class AfterEffects extends PIXI.Container {
                 this.addChild(layer);
             }
         });
-        this.layers = layers;
-        console.log(data);
-        console.log(this);
+    }
+
+    find(name) {
+        let nodeMap = {};
+        this.findByName(name, this).forEach((node) => {
+            nodeMap[node] = node;
+        });
+        console.log(nodeMap);
+        return Object.values(nodeMap);
+    }
+
+    findByName(name, node) {
+        let foundNodes = [];
+        if (node.name === name) foundNodes.push(node);
+        node.children.forEach((child) => {
+            if (child.name === name) foundNodes.push(child);
+            this.findByName(name, child).forEach((node) => {
+                foundNodes.push(node);
+            });
+        });
+        return foundNodes;
     }
 
     updateMask(frame) {

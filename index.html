@@ -1,19 +1,30 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
-    <script src="node_modules/pixi-tween.js/build/pixi-tween.js"></script>
     <script src="dist/pixi-ae.min.js"></script>
   </head>
   <body>
     <script>
-      var renderer = new PIXI.WebGLRenderer(2000, 800, { antialias: true, backgroundColor: 0xffffff });
+      var renderer = new PIXI.WebGLRenderer(2000, 600, { antialias: true, backgroundColor: 0xffffff });
       document.body.appendChild(renderer.view);
-      var ae = new PIXI.AfterEffects('./data.json');
       var stage = new PIXI.Container();
-      stage.addChild(ae);
+      var ae = null;
+      PIXI.AEDataLoader.loadJSON('./examples/bodymovin.json').then((data) => {
+          ae = PIXI.AfterEffects.fromData(data);
+          console.log(data);
+          ae.find("D").forEach((d) => {
+              d.interactive = true;
+              d.on('click', () => {
+                  console.log("tapped D");
+              });
+          });
+          stage.addChild(ae);
+      }, (err) => {
+          console.log(err);
+      });
       requestAnimationFrame(animate);
       function animate(nowTime) {
-          ae.update(nowTime);
+          if (ae) ae.update(nowTime);
           renderer.render(stage);
           requestAnimationFrame(animate);
       }
