@@ -5,8 +5,11 @@ import MaskElement from './mask';
 export default class CompElement extends Element {
     constructor(data) {
         super(data);
-        this.width        = data.w;
-        this.height       = data.h;
+        if (data.w > 0 && data.h > 0) {
+            this.width  = data.w * this.scaleX;
+            this.height = data.h * this.scaleY;
+            this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
+        }
         if (this.scaleX < 0) {
             // flip mode.
             // reassign scale value because overwritten scale by this.width's setter
