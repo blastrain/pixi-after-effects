@@ -2,7 +2,7 @@ import * as element from './element';
 
 export default class Asset {
     constructor(data, jsonPath) {
-        this.id     = data.id;
+        this.id = data.id;
         if (data.p) {
             this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + '/' + data.p);
         }

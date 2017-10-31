@@ -73,7 +73,7 @@ export default class CompElement extends Element {
             }
         });
     }
-    
+
     toPIXIBlendMode(mode) {
         switch(mode) {
         case 0:

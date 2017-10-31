@@ -86,7 +86,7 @@ export class ShapeElement extends Element {
     }
 
     createTrim(data) {
-        if (typeof data == 'number') {
+        if (typeof data === 'number') {
             return data;
         }
         return this.createTrimAnimation(data);
@@ -124,7 +124,7 @@ export class ShapeElement extends Element {
     }
 
     createColor(data) {
-        if (typeof data.k[0] == 'number') {
+        if (typeof data.k[0] === 'number') {
             return this.rgbArrayToHex(data.k);
         } else {
             return this.createAnimatedColor(data.k);
@@ -206,7 +206,7 @@ export class ShapeElement extends Element {
     rgbArrayToHex(arr) {
         return this.rgbToHex(arr[0], arr[1], arr[2]);
     }
-    
+
     rgbToHex(r, g, b) {
         return "0x" + this.toHex(r) + this.toHex(g) + this.toHex(b);
     }
@@ -241,7 +241,6 @@ export class ShapeElement extends Element {
         } else if (this.fill) {
             if (this.fill.enabled) {
                 this.beginFill(this.fillColorHex);
-                //this.lineStyle(2, this.fillColor);
             } else {
                 this.lineStyle(2, this.fillColorHex);
             }
@@ -249,22 +248,21 @@ export class ShapeElement extends Element {
     }
 
     afterDraw() {
-        if (this.isClosed) {
-            if (this.stroke) {
-                if (this.stroke.enabledFill) {
-                    this.endFill();
-                } else if (this.fill) {
-                    this.endFill();
-                } else {
-                    this.closePath();
-                }
+        if (!this.isClosed) return;
+
+        if (this.stroke) {
+            if (this.stroke.enabledFill) {
+                this.endFill();
             } else if (this.fill) {
-                if (this.fill.enabled) {
-                    this.endFill();
-                    //this.closePath();
-                } else {
-                    this.closePath();
-                }
+                this.endFill();
+            } else {
+                this.closePath();
+            }
+        } else if (this.fill) {
+            if (this.fill.enabled) {
+                this.endFill();
+            } else {
+                this.closePath();
             }
         }
     }
@@ -433,7 +431,7 @@ export class ShapeElement extends Element {
             this.afterDraw();
             return;
         }
-        
+
         if (frame < this.trim.start[0].startFrame &&
             frame < this.trim.end[0].startFrame) return;
 
@@ -492,6 +490,42 @@ export class ShapeElement extends Element {
         this.afterDraw();
     }
 
+    drawShapePath(frame, shapePath, index) {
+        if (shapePath.path.hasAnimatedPath) {
+            this.isClosed = shapePath.isClosed;
+            let paths     = shapePath.path.paths;
+            shapePath.path.paths.forEach((animData) => {
+                if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                    if (!animData.fromPath) return;
+                    const animatePath = this.createAnimatePath(animData, frame);
+                    this.drawPath(animatePath);
+                    if (index !== 0 && this.graphicsData.length > 1) {
+                        this.addHole();
+                    }
+                }
+            });
+            let lastPath = paths[paths.length - 2];
+            if (lastPath.endFrame <= frame) {
+                this.drawPath(lastPath.toPath);
+                if (index !== 0 && this.graphicsData.length > 1) {
+                    this.addHole();
+                }
+            }
+        } else if (this.inFrame <= frame && frame <= this.outFrame) {
+            this.isClosed = shapePath.isClosed;
+            this.drawPath(shapePath.path);
+            if (index !== 0 && this.graphicsData.length > 1) {
+                this.addHole();
+            }
+        }
+    }
+
+    drawShapePaths(frame) {
+        this.shapePaths.forEach((shapePath, index) => {
+            this.drawShapePath(frame, shapePath, index);
+        });
+    }
+
     drawThis(frame) {
         this.clear();
 
@@ -501,37 +535,9 @@ export class ShapeElement extends Element {
         if (this.trim) {
             this.drawTrim(frame);
         } else if (this.shapePaths) {
-            this.shapePaths.forEach((shapePath, index) => {
-                if (shapePath.path.hasAnimatedPath) {
-                    this.isClosed = shapePath.isClosed;
-                    let paths     = shapePath.path.paths;
-                    shapePath.path.paths.forEach((animData) => {
-                        if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                            if (!animData.fromPath) return;
-                            const animatePath = this.createAnimatePath(animData, frame);
-                            this.drawPath(animatePath);
-                            if (index !== 0 && this.graphicsData.length > 1) {
-                                this.addHole();
-                            }
-                        }
-                    });
-                    let lastPath = paths[paths.length - 2];
-                    if (lastPath.endFrame <= frame) {
-                        this.drawPath(lastPath.toPath);
-                        if (index !== 0 && this.graphicsData.length > 1) {
-                            this.addHole();
-                        }
-                    }
-                } else if (this.inFrame <= frame && frame <= this.outFrame) {
-                    this.isClosed = shapePath.isClosed;
-                    this.drawPath(shapePath.path);
-                    if (index !== 0 && this.graphicsData.length > 1) {
-                        this.addHole();
-                    }
-                }
-            });
+            this.drawShapePaths(frame);
         }
-        
+
         if (this.ellipses) {
             this.beforeDraw();
             this.ellipses.forEach((ellipse) => {

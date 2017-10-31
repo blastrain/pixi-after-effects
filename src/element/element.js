@@ -383,21 +383,11 @@ export default class Element extends PIXI.Graphics {
         if (!this.visible || !this.hasAnimateProperty()) {
             return;
         }
-        let isAnimated = false;
-        if (this.hasAnimatedAnchorPoint && this.animateAnchorPoint(frame)) {
-            isAnimated = true;
-        }
-        if (this.hasAnimatedOpacity && this.animateOpacity(frame)) {
-            isAnimated = true;
-        }
-        if (this.hasAnimatedPosition && this.animatePosition(frame)) {
-            isAnimated = true;
-        }
-        if (this.hasAnimatedRotation && this.animateRotation(frame)) {
-            isAnimated = true;
-        }
-        if (this.hasAnimatedScale && this.animateScale(frame)) {
-            isAnimated = true;
-        }
+
+        if (this.hasAnimatedAnchorPoint) this.animateAnchorPoint(frame);
+        if (this.hasAnimatedOpacity)     this.animateOpacity(frame);
+        if (this.hasAnimatedPosition)    this.animatePosition(frame);
+        if (this.hasAnimatedRotation)    this.animateRotation(frame);
+        if (this.hasAnimatedScale)       this.animateScale(frame);
     }
 }

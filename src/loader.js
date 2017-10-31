@@ -23,7 +23,7 @@ export default class AEDataLoader {
     }
 
     static loadAssets(data, jsonPath) {
-        const baseName = jsonPath.split('/').slice(0, -1).join('/');        
+        const baseName = jsonPath.split('/').slice(0, -1).join('/');
         return data.assets.map((asset) => {
             return new Asset(asset, baseName);
         });
@@ -45,7 +45,7 @@ export default class AEDataLoader {
 
     static load(data, jsonPath) {
         const assets = AEDataLoader.loadAssets(data, jsonPath);
-        let layers   = AEDataLoader.loadLayers(data);
+        const layers = AEDataLoader.loadLayers(data);
         AEDataLoader.resolveReference(layers, assets);
         data.assets  = assets;
         data.layers  = layers;
