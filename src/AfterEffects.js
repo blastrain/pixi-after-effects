@@ -85,6 +85,7 @@ export default class AfterEffects extends PIXI.Container {
                 this.firstTime = nowTime;
             } else {
                 this.isCompleted = true;
+                this.emit('completed', this);
             }
         }
         if (this.masks) {
@@ -118,8 +119,8 @@ export default class AfterEffects extends PIXI.Container {
     resume() {
         const elapsedTime = this.nowTime - this.firstTime;
         const nowTime     = performance.now();
-        this.firstTime = nowTime - elapsedTime;
-        this.isPlaying = true;
+        this.firstTime    = nowTime - elapsedTime;
+        this.isPlaying    = true;
     }
 
     stop() {

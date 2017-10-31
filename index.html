@@ -20,6 +20,7 @@
                   console.log("tapped D");
               });
           });
+          ae.on("completed", (o) => { console.log("completed!", o); });
           stage.addChild(ae);
       }, (err) => {
           console.log(err);
@@ -31,7 +32,7 @@
           requestAnimationFrame(animate);
       }
       var Menu = function() {
-          this.play   = function() { ae.play(true) }
+          this.play   = function() { ae.play() }
           this.stop   = function() { ae.stop() }
           this.pause  = function() { ae.pause() }
           this.resume = function() { ae.resume() }
