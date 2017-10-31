@@ -1,8 +1,10 @@
 import * as PIXI from 'pixi.js';
+import ElementFinder from './finder';
 
 export default class Element extends PIXI.Graphics {
     constructor(data) {
         super();
+        this.finder = new ElementFinder();
         if (!data) return;
         this.name         = data.nm;
         this.referenceId  = data.refId;
@@ -20,6 +22,10 @@ export default class Element extends PIXI.Graphics {
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
+    }
+
+    find(name) {
+        return this.finder.findByName(name, this);
     }
 
     isCompType() {

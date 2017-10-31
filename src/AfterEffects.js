@@ -1,12 +1,12 @@
-const request = require('superagent');
 import * as PIXI from 'pixi.js';
 import * as element from './element';
-import Asset from './asset';
+import Asset        from './asset';
 import AEDataLoader from './loader';
 
 export default class AfterEffects extends PIXI.Container {
     constructor(jsonPath) {
         super();
+        this.finder = new element.ElementFinder();
         if (!jsonPath) return;
         AEDataLoader.loadJSON(jsonPath).then((data) => {
             this.setup(data);
@@ -54,23 +54,7 @@ export default class AfterEffects extends PIXI.Container {
     }
 
     find(name) {
-        let nodeMap = {};
-        this.findByName(name, this).forEach((node) => {
-            nodeMap[node] = node;
-        });
-        return Object.values(nodeMap);
-    }
-
-    findByName(name, node) {
-        let foundNodes = [];
-        if (node.name === name) foundNodes.push(node);
-        node.children.forEach((child) => {
-            if (child.name === name) foundNodes.push(child);
-            this.findByName(name, child).forEach((node) => {
-                foundNodes.push(node);
-            });
-        });
-        return foundNodes;
+        return this.finder.findByName(name, this);
     }
 
     updateMask(frame) {
