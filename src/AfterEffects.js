@@ -50,6 +50,7 @@ export default class AfterEffects extends PIXI.Container {
                 this.addChild(layer);
             }
         });
+        this.showFirstFrame();
     }
 
     find(name) {
@@ -57,7 +58,6 @@ export default class AfterEffects extends PIXI.Container {
         this.findByName(name, this).forEach((node) => {
             nodeMap[node] = node;
         });
-        console.log(nodeMap);
         return Object.values(nodeMap);
     }
 
@@ -85,12 +85,14 @@ export default class AfterEffects extends PIXI.Container {
     }
 
     update(nowTime) {
+        if (!this.isPlaying) return;
         if (!this.layers) return;
         if (!this.firstTime) {
             this.firstTime = nowTime;
         }
         if (this.isCompleted) return;
-        
+
+        this.nowTime      = nowTime;
         const elapsedTime = nowTime - this.firstTime;
         let currentFrame  = elapsedTime * this.frameRate / 1000.0;
         if (currentFrame > this.totalFrame) {
@@ -107,5 +109,39 @@ export default class AfterEffects extends PIXI.Container {
         this.layers.forEach((layer) => {
             layer.update(currentFrame);
         });
+    }
+
+    showFirstFrame() {
+        if (this.masks) {
+            this.updateMask(0);
+        }
+        this.layers.forEach((layer) => {
+            layer.update(0);
+        });
+    }
+
+    play(isLoop) {
+        this.isLoop      = isLoop || false;
+        this.firstTime   = null;
+        this.isCompleted = false;
+        this.isPlaying   = true;
+    }
+
+    pause() {
+        this.isPlaying = false;
+    }
+
+    resume() {
+        const elapsedTime = this.nowTime - this.firstTime;
+        const nowTime     = performance.now();
+        this.firstTime = nowTime - elapsedTime;
+        this.isPlaying = true;
+    }
+
+    stop() {
+        this.firstTime   = null;
+        this.isCompleted = true;
+        this.isPlaying   = false;
+        this.showFirstFrame();
     }
 }
