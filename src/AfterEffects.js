@@ -32,6 +32,12 @@ export default class AfterEffects extends PIXI.Container {
         this.isCompleted = false;
         this.assets      = data.assets;
         this.layers      = data.layers;
+
+        let layerIndexMap = {};
+        this.layers.forEach((layer) => {
+            layerIndexMap[layer.index] = layer;
+        });
+
         this.layers.reverse().forEach((layer) => {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
