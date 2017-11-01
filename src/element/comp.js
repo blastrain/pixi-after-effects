@@ -79,7 +79,7 @@ export default class CompElement extends Element {
         case 0:
             return PIXI.BLEND_MODES.NORMAL;
         case 1:
-            return PIXI.BLEND_MODES.MULTI_PLY;
+            return PIXI.BLEND_MODES.MULTIPLY;
         case 2:
             return PIXI.BLEND_MODES.SCREEN;
         case 3:
