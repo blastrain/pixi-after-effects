@@ -506,6 +506,12 @@ export class ShapeElement extends Element {
         if (shapePath.path.hasAnimatedPath) {
             this.isClosed = shapePath.isClosed;
             let paths     = shapePath.path.paths;
+            if (frame < paths[0].startFrame) {
+                this.drawPath(paths[0].fromPath);
+                if (index !== 0 && this.graphicsData.length > 1) {
+                    this.addHole();
+                }
+            }
             shapePath.path.paths.forEach((animData) => {
                 if (animData.startFrame <= frame && frame <= animData.endFrame) {
                     if (!animData.fromPath) return;
