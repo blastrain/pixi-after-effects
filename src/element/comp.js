@@ -6,9 +6,9 @@ export default class CompElement extends Element {
     constructor(data) {
         super(data);
         if (data.w > 0 && data.h > 0) {
-            this.width  = data.w * this.scaleX;
-            this.height = data.h * this.scaleY;
-            this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
+            this.originWidth  = data.w;
+            this.originHeight = data.h;
+            this.scale        = new PIXI.Point(this.scaleX, this.scaleY);
         }
         if (this.scaleX < 0) {
             // flip mode.
