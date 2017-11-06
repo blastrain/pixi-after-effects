@@ -58,8 +58,8 @@ export default class CompElement extends Element {
 
     resolveLayerReference(layers) {
         layers.sort((a, b) => {
-            if (a < b) return -1;
-            if (a > b) return 1;
+            if (a.index < b.index) return -1;
+            if (a.index > b.index) return 1;
             return 0;
         });
         let layerIndexMap = {};
