@@ -6,8 +6,11 @@ export default class Asset {
         if (data.p) {
             this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + '/' + data.p);
         }
-        if (!data.layers) return;
-        this.layers = data.layers.map((layer) => {
+        this.layers = data.layers || [];
+    }
+
+    createLayers() {
+        return this.layers.map((layer) => {
             return element.ElementFactory.create(layer);
         }).filter((layer) => { return layer !== null });
     }

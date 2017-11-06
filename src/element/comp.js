@@ -30,7 +30,7 @@ export default class CompElement extends Element {
         let asset = this.assetMap[this.referenceId];
         if (!asset) return;
 
-        this.layers = asset.layers;
+        this.layers = asset.createLayers();
         this.layers.forEach((layer) => {
             layer.inFrame   += this.startTime;
             layer.outFrame  += this.startTime;
