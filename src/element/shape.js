@@ -2,14 +2,14 @@ import * as PIXI from 'pixi.js';
 import Element from './element';
 
 export class ShapeElement extends Element {
-    constructor(data, inFrame, outFrame, stretch) {
+    constructor(data, inFrame, outFrame, startTime) {
         super();
         if (!data) return;
         this.name   = data.nm;
         this.type   = data.ty;
-        this.inFrame  = inFrame;
-        this.outFrame = outFrame;
-        this.stretch  = stretch;
+        this.inFrame   = inFrame;
+        this.outFrame  = outFrame;
+        this.startTime = startTime;
         if (!data.it) {
             this.setupShapeByType(data);
         } else {
@@ -218,6 +218,18 @@ export class ShapeElement extends Element {
         }
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    updateAnimationFrameByBaseFrame(animBaseFrame) {
+        super.updateAnimationFrameByBaseFrame(animBaseFrame);
+        if (!this.shapePaths) return;
+        this.shapePaths.forEach((shapePath) => {
+            if (!shapePath.path.hasAnimatedPath) return;
+            shapePath.path.paths.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        });
     }
 
     drawPathForMask(shapePath) {
@@ -567,7 +579,7 @@ export default class ShapeContainerElement extends Element {
             this.height = 0;
         }
         this.shapes = data.shapes.map((shape) => {
-            return new ShapeElement(shape, this.inFrame, this.outFrame, this.stretch);
+            return new ShapeElement(shape, this.inFrame, this.outFrame, this.startTime);
         });
         this.shapes.forEach((shape) => {
             if (this.scaleX && this.scaleY) {
@@ -576,6 +588,15 @@ export default class ShapeContainerElement extends Element {
                 shape.scale = new PIXI.Point(this.scaleX, this.scaleY);
             }
             this.addChild(shape);
+        });
+    }
+
+    updateAnimationFrameByBaseFrame(animBaseFrame) {
+        super.updateAnimationFrameByBaseFrame(animBaseFrame);
+        this.shapes.forEach((shape) => {
+            shape.inFrame  += animBaseFrame;
+            shape.outFrame += animBaseFrame;
+            shape.updateAnimationFrameByBaseFrame(animBaseFrame);
         });
     }
 

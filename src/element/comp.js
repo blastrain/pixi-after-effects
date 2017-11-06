@@ -31,11 +31,18 @@ export default class CompElement extends Element {
         if (!asset) return;
 
         this.layers = asset.layers;
+        this.layers.forEach((layer) => {
+            layer.inFrame   += this.startTime;
+            layer.outFrame  += this.startTime;
+            layer.startTime += this.startTime;
+            layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
+        });
         this.resolveLayerReference(this.layers);
         this.layers.forEach((layer, index) => {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
                 if (layer.isImageType()) return;
+
                 const maskLayer = new MaskElement(layer);
                 this.addChild(layer);
                 layer.addChild(maskLayer);

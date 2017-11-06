@@ -15,8 +15,8 @@ export default class Element extends PIXI.Graphics {
         this.parentIndex  = data.parent;
         this.inFrame      = data.ip;
         this.outFrame     = data.op;
-        this.sr           = data.sr || 1;
-        this.stretch      = data.st;
+        this.stretch      = data.sr || 1;
+        this.startTime    = data.st;
         this.hasMask      = data.hasMask;
         this.setupProperties(data.ks);
         if (data.masksProperties) {
@@ -44,6 +44,39 @@ export default class Element extends PIXI.Graphics {
         this.setupOpacity(data.o);
         this.setupRotation(data.r);
         this.setupScale(data.s);
+    }
+
+    updateAnimationFrameByBaseFrame(animBaseFrame) {
+        if (this.hasAnimatedAnchorPoint) {
+            this.animatedScales.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        }
+        if (this.hasAnimatedOpacity) {
+            this.animatedOpacities.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        }
+        if (this.hasAnimatedPosition) {
+            this.animatedPositions.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame += animBaseFrame;
+            });
+        }
+        if (this.hasAnimatedRotation) {
+            this.animatedRotations.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        }
+        if (this.hasAnimatedScale) {
+            this.animatedScales.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        }
     }
 
     setupAnchorPoint(data) {
@@ -359,23 +392,8 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedScale;
     }
 
-    hasVisibleChildren(frame, node) {
-        if (!node || !node.children) return false;
-        for (let i = 0; i < node.children.length; ++i) {
-            const child = node.children[i];
-            if (child.inFrame <= frame && frame <= child.outFrame) return true;
-            if (child.inFrame - child.stretch <= frame && frame <= child.outFrame - child.stretch) return true;
-            if (this.hasVisibleChildren(child)) return true;
-        }
-        return false;
-    }
-
     update(frame) {
-        if (this.inFrame - this.stretch <= frame && frame <= this.outFrame - this.stretch) {
-            this.visible = true;
-        } else if (this.inFrame <= frame && frame <= this.outFrame) {
-            this.visible = true;
-        } else if (this.hasVisibleChildren(frame, this)) {
+        if (this.inFrame <= frame && frame <= this.outFrame) {
             this.visible = true;
         } else {
             this.visible = false;
