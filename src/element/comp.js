@@ -16,6 +16,7 @@ export default class CompElement extends Element {
             this.scale.x = this.scaleX;
         }
         this.blendMode    = this.toPIXIBlendMode(data.bm);
+        this.clonedLayers = [];
         this.autoOriented = data.ao;
     }
 
@@ -37,7 +38,7 @@ export default class CompElement extends Element {
             layer.startTime += this.startTime;
             layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
         });
-        this.resolveLayerReference(this.layers);
+        this.resolveLayerReference(this.layers, asset);
         this.layers.forEach((layer, index) => {
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
@@ -54,9 +55,34 @@ export default class CompElement extends Element {
                 this.addChild(layer);
             }
         });
+        this.clonedLayers.forEach((layer) => {
+            this.addChild(layer);
+        });
     }
 
-    resolveLayerReference(layers) {
+    createParentLayer(layer, asset) {
+        if (!layer.hasParent) return null;
+
+        const parentLayer = asset.createLayerByIndex(layer.parentIndex);
+        if (parentLayer.shapes) {
+            parentLayer.shapes.forEach((shape) => {
+                const parent = shape.parent;
+                if (parent) parent.removeChild(shape);
+            });
+            parentLayer.shapes = [];
+            parentLayer.inFrame  = layer.inFrame;
+            parentLayer.outFrame = layer.outFrame;
+        }
+        parentLayer.addChild(layer);
+        const nextParentLayer = this.createParentLayer(parentLayer, asset);
+        if (nextParentLayer) {
+            nextParentLayer.addChild(parentLayer);
+            return nextParentLayer;
+        }
+        return parentLayer;
+    }
+
+    resolveLayerReference(layers, asset) {
         layers.sort((a, b) => {
             if (a.index < b.index) return -1;
             if (a.index > b.index) return 1;
@@ -67,10 +93,8 @@ export default class CompElement extends Element {
             layerIndexMap[layer.index] = layer;
         });
         layers.reverse().forEach((layer) => {
-            if (layer.hasParent) {
-                const parentLayer = layerIndexMap[layer.parentIndex];
-                parentLayer.addChild(layer);
-            }
+            const parentLayer = this.createParentLayer(layer, asset);
+            if (parentLayer) this.clonedLayers.push(parentLayer);
         });
         layers.forEach((layer) => {
             if (layer.isCompType()) {
@@ -145,5 +169,9 @@ export default class CompElement extends Element {
                 layer.update(frame);
             });
         }
+        this.clonedLayers.forEach((layer) => {
+            layer.update(frame);
+            layer.visible = true;
+        });
     }
 }

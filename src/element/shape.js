@@ -619,8 +619,8 @@ export default class ShapeContainerElement extends Element {
 
     update(frame) {
         super.update(frame);
-        this.shapes.forEach((shape) => {
-            shape.update(frame);
+        this.children.forEach((child) => {
+            child.update(frame);
         });
     }
 }

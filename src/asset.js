@@ -14,4 +14,13 @@ export default class Asset {
             return element.ElementFactory.create(layer);
         }).filter((layer) => { return layer !== null });
     }
+
+    createLayerByIndex(index) {
+        const foundLayers = this.layers.filter((layer) => {
+            return layer.ind === index
+        });
+        if (foundLayers.length === 0) return null;
+
+        return element.ElementFactory.create(foundLayers[0]);
+    }
 }
