@@ -230,6 +230,24 @@ export class ShapeElement extends Element {
                 animData.endFrame   += animBaseFrame;
             });
         });
+        if (this.ellipses) {
+            this.ellipses.forEach((ellipse) => {
+                if (!ellipse.enabledAnimation) return;
+
+                if (ellipse.size.length > 0) {
+                    ellipse.size.forEach((animData) => {
+                        animData.startFrame += animBaseFrame;
+                        animData.endFrame   += animBaseFrame;
+                    });
+                }
+                if (ellipse.position.length > 0) {
+                    ellipse.position.forEach((animData) => {
+                        animData.startFrame += animBaseFrame;
+                        animData.endFrame   += animBaseFrame;
+                    });
+                }
+            });
+        }
     }
 
     drawPathForMask(shapePath) {
@@ -419,7 +437,7 @@ export class ShapeElement extends Element {
         const size = this.createEllipseSize(frame, ellipse);
         if (!pos || !size) return;
 
-        this.drawEllipse(pos.x, pos.y, size.x, size.y);
+        this.drawEllipse(pos.x, pos.y, size.x / 2.0, size.y / 2.0);
     }
 
     drawTrim(frame) {
@@ -562,7 +580,7 @@ export class ShapeElement extends Element {
                 if (ellipse.enabledAnimation) {
                     this.drawEllipseAnimation(frame, ellipse);
                 } else {
-                    this.drawEllipse(ellipse.position.x, ellipse.position.y, ellipse.size.x, ellipse.size.y);
+                    this.drawEllipse(ellipse.position.x, ellipse.position.y, ellipse.size.x / 2.0, ellipse.size.y / 2.0);
                 }
             });
             this.afterDraw();
