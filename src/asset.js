@@ -3,7 +3,9 @@ import * as element from './element';
 export default class Asset {
     constructor(data, jsonPath) {
         this.id = data.id;
-        if (data.p) {
+        if (data.imagePath) {
+            this.texture = new PIXI.Texture.fromImage(data.imagePath);
+        } else if (data.p) {
             this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + '/' + data.p);
         }
         this.layers = data.layers || [];

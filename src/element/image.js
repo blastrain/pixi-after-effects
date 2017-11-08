@@ -4,9 +4,15 @@ import Element from './element';
 export default class ImageElement extends Element {
     constructor(data) {
         super(data);
+        if (data.image) {
+            this.image = data.image;
+            this.addChild(this.image);
+        }
     }
 
     setupImage(assets) {
+        if (this.image) return;
+
         this.assets = assets;
         this.assetMap = {};
         assets.forEach((asset) => {

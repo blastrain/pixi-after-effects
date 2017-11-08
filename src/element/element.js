@@ -22,6 +22,30 @@ export default class Element extends PIXI.Graphics {
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
+        if (data.events) {
+            Object.keys(data.events).forEach((eventName) => {
+                if (this.isInteractiveEvent(eventName)) this.interactive = true;
+                this.on(eventName, data.events[eventName]);
+            });
+        }
+    }
+
+    isInteractiveEvent(eventName) {
+        if (!this.interactiveEventMap) {
+            const interactiveEvents = [
+                'click',       'mousedown',   'mousemove',        'mouseout',
+                'mouseover',   'mouseup',     'mouseupoutside',   'pointercancel',
+                'pointerdown', 'pointermove', 'pointerout',       'pointerover',
+                'pointertap',  'pointerup',   'pointerupoutside', 'removed',
+                'rightclick',  'rightdown',   'rightup',          'rightupoutside', 'tap',
+                'touchcancel', 'touchend',    'touchendoutside',  'touchmove',      'touchstart',
+            ];
+            this.interactiveEventMap = {};
+            interactiveEvents.forEach((event) => {
+                this.interactiveEventMap[event] = true;
+            });
+        }
+        return this.interactiveEventMap[eventName];
     }
 
     find(name) {

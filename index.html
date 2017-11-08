@@ -10,16 +10,18 @@
       document.body.appendChild(renderer.view);
       var stage = new PIXI.Container();
       var ae = null;
-      PIXI.AEDataLoader.loadJSON('./examples/bodymovin.json').then((data) => {
+      var interceptor = new PIXI.AEDataInterceptor({
+          'D': {
+              events: {
+                  click: () => {
+                      console.log("tapped D");
+                  },
+              }
+          },
+      });
+      PIXI.AEDataLoader.loadJSONWithInterceptor('./examples/training/data.json', interceptor).then((data) => {
           ae = PIXI.AfterEffects.fromData(data);
           ae.scale = new PIXI.Point(0.5, 0.5);
-          console.log(data);
-          ae.find("D").forEach((d) => {
-              d.interactive = true;
-              d.on('click', () => {
-                  console.log("tapped D");
-              });
-          });
           ae.on("completed", (o) => { console.log("completed!", o); });
           stage.addChild(ae);
       }, (err) => {
