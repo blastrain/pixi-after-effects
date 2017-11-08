@@ -416,20 +416,8 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedScale;
     }
 
-    existsVisibleChildren(frame, node) {
-        if (!node) return false;
-        for (let i = 0; i < node.children.length; ++i) {
-            const child = node.children[i];
-            if (child.inFrame <= frame && frame <= child.outFrame) return true;
-            if (this.existsVisibleChildren(frame, node.children[i])) return true;
-        };
-        return false;
-    }
-
     update(frame) {
         if (this.inFrame <= frame && frame <= this.outFrame) {
-            this.visible = true;
-        } else if (this.existsVisibleChildren(frame, this)) {
             this.visible = true;
         } else {
             this.visible = false;
