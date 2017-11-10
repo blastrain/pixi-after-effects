@@ -30,6 +30,9 @@ export class ShapeElement extends Element {
         case "tm":
             this.setupTrim(data);
             break;
+        case "rc":
+            this.setupRect(data);
+            break;
         case "el":
             this.setupEllipse(data);
             break;
@@ -109,6 +112,19 @@ export class ShapeElement extends Element {
         });
     }
 
+    setupRect(data) {
+        if (!this.rects) this.rects = [];
+        let rect = {};
+        rect.name      = data.nm;
+        rect.direction = data.d;
+        rect.position  = this.createPosition(data.p);
+        rect.size      = this.createSize(data.s);
+        if (rect.position.length > 0 || rect.size.length > 0) {
+            rect.enabledAnimation = true;
+        }
+        this.rects.push(rect);
+    }
+    
     setupEllipse(data) {
         if (!this.ellipses) this.ellipses = [];
         let ellipse = {};
@@ -252,6 +268,24 @@ export class ShapeElement extends Element {
                 }
             });
         }
+        if (this.rects) {
+            this.rects.forEach((rect) => {
+                if (!rect.enabledAnimation) return;
+
+                if (rect.size.length > 0) {
+                    rect.size.forEach((animData) => {
+                        animData.startFrame += animBaseFrame;
+                        animData.endFrame   += animBaseFrame;
+                    });
+                }
+                if (rect.position.length > 0) {
+                    rect.position.forEach((animData) => {
+                        animData.startFrame += animBaseFrame;
+                        animData.endFrame   += animBaseFrame;
+                    });
+                }
+            });
+        }
     }
 
     drawPathForMask(shapePath) {
@@ -388,10 +422,10 @@ export class ShapeElement extends Element {
         }
     }
 
-    createEllipsePosition(frame, ellipse) {
-        if (ellipse.position.length > 0) {
+    createShapePosition(frame, shape) {
+        if (shape.position.length > 0) {
             let pos = null;
-            ellipse.position.forEach((animData) => {
+            shape.position.forEach((animData) => {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
                     const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                     const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
@@ -404,19 +438,19 @@ export class ShapeElement extends Element {
                     pos = new PIXI.Point(posX, posY);
                 }
             });
-            const lastPos = ellipse.position[ellipse.position.length - 2];
+            const lastPos = shape.position[shape.position.length - 2];
             if (frame > lastPos.endFrame) {
                 pos = lastPos.toPos;
             }
             return pos;
         }
-        return ellipse.position;
+        return shape.position;
     }
 
-    createEllipseSize(frame, ellipse) {
-        if (ellipse.size.length > 0) {
+    createShapeSize(frame, shape) {
+        if (shape.size.length > 0) {
             let size = null;
-            ellipse.size.forEach((animData) => {
+            shape.size.forEach((animData) => {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
                     const sizeDiffW  = animData.toPosition[0] - animData.fromPosition[0];
                     const sizeDiffH  = animData.toPosition[1] - animData.fromPosition[1];
@@ -429,21 +463,29 @@ export class ShapeElement extends Element {
                     size = new PIXI.Point(sizeWidth, sizeHeight);
                 }
             });
-            const lastSize = ellipse.size[ellipse.size.length - 2];
+            const lastSize = shape.size[shape.size.length - 2];
             if (frame > lastSize.endFrame) {
                 size = lastSize.toPos;
             }
             return size;
         }
-        return ellipse.size;
+        return shape.size;
     }
 
     drawEllipseAnimation(frame, ellipse) {
-        const pos  = this.createEllipsePosition(frame, ellipse);
-        const size = this.createEllipseSize(frame, ellipse);
+        const pos  = this.createShapePosition(frame, ellipse);
+        const size = this.createShapeSize(frame, ellipse);
         if (!pos || !size) return;
 
         this.drawEllipse(pos.x, pos.y, size.x / 2.0, size.y / 2.0);
+    }
+
+    drawRectAnimation(frame, rect) {
+        const pos  = this.createShapePosition(frame, rect);
+        const size = this.createShapeSize(frame, rect);
+        if (!pos || !size) return;
+
+        this.drawRect(pos.x, pos.y, size.x, size.y);
     }
 
     drawTrim(frame) {
@@ -587,6 +629,17 @@ export class ShapeElement extends Element {
                     this.drawEllipseAnimation(frame, ellipse);
                 } else {
                     this.drawEllipse(ellipse.position.x, ellipse.position.y, ellipse.size.x / 2.0, ellipse.size.y / 2.0);
+                }
+            });
+            this.afterDraw();
+        }
+        if (this.rects) {
+            this.beforeDraw();
+            this.rects.forEach((rect) => {
+                if (rect.enabledAnimation) {
+                    this.drawRectAnimation(frame, rect);
+                } else {
+                    this.drawRect(rect.position.x, rect.position.y, rect.size.x, rect.size.y);
                 }
             });
             this.afterDraw();
