@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import Element from './element';
+import BezierEasing from 'bezier-easing';
 
 export class ShapeElement extends Element {
     constructor(data, inFrame, outFrame, startTime) {
@@ -95,14 +96,15 @@ export class ShapeElement extends Element {
     createTrimAnimation(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromRatio:       animData.s ? animData.s[0] : null,
-                toRatio:         animData.e ? animData.e[0] : null,
+                name:       animData.n,
+                startFrame: animData.t,
+                endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:     easing,
+                fromRatio:  animData.s ? animData.s[0] : null,
+                toRatio:    animData.e ? animData.e[0] : null,
             };
         });
     }
@@ -134,14 +136,15 @@ export class ShapeElement extends Element {
     createAnimatedColor(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : null;
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromColor:       animData.s ? this.rgbArrayToHex(animData.s) : "0x000000",
-                toColor:         animData.e ? this.rgbArrayToHex(animData.e) : "0x000000",
+                name:       animData.n,
+                startFrame: animData.t,
+                endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:     easing,
+                fromColor:  animData.s ? this.rgbArrayToHex(animData.s) : "0x000000",
+                toColor:    animData.e ? this.rgbArrayToHex(animData.e) : "0x000000",
             };
         });
     }
@@ -151,14 +154,15 @@ export class ShapeElement extends Element {
         return {
             hasAnimatedPath: true,
             paths: data.map((animData, index) => {
+                const easing = (animData.i && animData.o) ?
+                      BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : null;
                 return {
-                    name:            animData.n,
-                    startFrame:      animData.t,
-                    endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                    easingFromRatio: animData.i,
-                    easingToRatio:   animData.o,
-                    fromPath:        animData.s ? this.createPath(animData.s[0]) : null,
-                    toPath:          animData.e ? this.createPath(animData.e[0]) : null,
+                    name:       animData.n,
+                    startFrame: animData.t,
+                    endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
+                    easing:     easing,
+                    fromPath:   animData.s ? this.createPath(animData.s[0]) : null,
+                    toPath:     animData.e ? this.createPath(animData.e[0]) : null,
                 };
             })
         };
@@ -310,11 +314,13 @@ export class ShapeElement extends Element {
 
     createAnimatePos(animData, frame, fromPos, toPos) {
         const totalFrame = animData.endFrame - animData.startFrame;
-        const playFrame  = frame - animData.startFrame;
+        const playFrame  = (frame - animData.startFrame) * 1.0;
         const posDiffX   = toPos.x - fromPos.x;
         const posDiffY   = toPos.y - fromPos.y;
-        const posX       = 1.0 * playFrame * posDiffX / totalFrame + fromPos.x;
-        const posY       = 1.0 * playFrame * posDiffY / totalFrame + fromPos.y;
+        const playRatio  = playFrame / totalFrame;
+        const posRatio   = animData.easing(playRatio);
+        const posX       = posDiffX * posRatio + fromPos.x;
+        const posY       = posDiffY * posRatio + fromPos.y;
         return new PIXI.Point(posX, posY);
     }
 
@@ -389,13 +395,13 @@ export class ShapeElement extends Element {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
                     const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                     const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
-                    const frameDiff    = animData.endFrame - animData.startFrame;
-                    const playFrame    = frame - animData.startFrame;
-                    const perFramePosX = 1.0 * posDiffX / frameDiff;
-                    const perFramePosY = 1.0 * posDiffY / frameDiff;
-                    const posX         = playFrame * perFramePosX;
-                    const posY         = playFrame * perFramePosY;
-                    pos = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                    const totalFrame   = animData.endFrame - animData.startFrame;
+                    const playFrame    = (frame - animData.startFrame) * 1.0;
+                    const playRatio    = playFrame / totalFrame;
+                    const posRatio     = animData.easing(playRatio);
+                    const posX         = posDiffX * posRatio + animData.fromPosition[0];
+                    const posY         = posDiffY * posRatio + animData.fromPosition[1];
+                    pos = new PIXI.Point(posX, posY);
                 }
             });
             const lastPos = ellipse.position[ellipse.position.length - 2];
@@ -412,15 +418,15 @@ export class ShapeElement extends Element {
             let size = null;
             ellipse.size.forEach((animData) => {
                 if (animData.startFrame <= frame  && frame <= animData.endFrame) {
-                    const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
-                    const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
-                    const frameDiff    = animData.endFrame - animData.startFrame;
-                    const playFrame    = frame - animData.startFrame;
-                    const perFramePosX = 1.0 * posDiffX / frameDiff;
-                    const perFramePosY = 1.0 * posDiffY / frameDiff;
-                    const posX         = playFrame * perFramePosX;
-                    const posY         = playFrame * perFramePosY;
-                    size = new PIXI.Point(animData.fromPosition[0] + posX, animData.fromPosition[1] + posY);
+                    const sizeDiffW  = animData.toPosition[0] - animData.fromPosition[0];
+                    const sizeDiffH  = animData.toPosition[1] - animData.fromPosition[1];
+                    const totalFrame = animData.endFrame - animData.startFrame;
+                    const playFrame  = (frame - animData.startFrame) * 1.0;
+                    const playRatio  = playFrame / totalFrame;
+                    const sizeRatio  = animData.easing(playRatio);
+                    const sizeWidth  = sizeDiffW * sizeRatio + animData.fromPosition[0];
+                    const sizeHeight = sizeDiffH * sizeRatio + animData.fromPosition[1];
+                    size = new PIXI.Point(sizeWidth, sizeHeight);
                 }
             });
             const lastSize = ellipse.size[ellipse.size.length - 2];

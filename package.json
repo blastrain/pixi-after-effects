@@ -12,6 +12,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babelify": "^7.3.0",
+    "bezier-easing": "^2.0.3",
     "brfs": "^1.4.3",
     "browserify": "^14.5.0",
     "dat.gui": "^0.6.1",

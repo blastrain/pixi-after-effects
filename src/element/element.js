@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import ElementFinder from './finder';
+import BezierEasing from 'bezier-easing';
 
 export default class Element extends PIXI.Graphics {
     constructor(data) {
@@ -124,12 +125,13 @@ export default class Element extends PIXI.Graphics {
     createAnimatedAnchorPoint(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : null;
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
                 endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
+                easing:          easing,
                 fromAnchorPoint: animData.s,
                 toAnchorPoint:   animData.e,
             };
@@ -158,14 +160,15 @@ export default class Element extends PIXI.Graphics {
     createAnimatedOpacity(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromOpacity:     (animData.s ? animData.s[0] : 0) / 100.0,
-                toOpacity:       (animData.e ? animData.e[0] : 0) / 100.0,
+                name:        animData.n,
+                startFrame:  animData.t,
+                endFrame:    (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:      easing,
+                fromOpacity: (animData.s ? animData.s[0] : 0) / 100.0,
+                toOpacity:   (animData.e ? animData.e[0] : 0) / 100.0,
             };
         });
     }
@@ -192,14 +195,21 @@ export default class Element extends PIXI.Graphics {
     createAnimatedPosition(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            let easing = null;
+            if (animData.i && animData.o) {
+                if (typeof animData.i.x === 'number') {
+                    easing = BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y)
+                } else {
+                    easing = BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0])
+                }
+            }
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromPosition:    animData.s,
-                toPosition:      animData.e,
+                name:         animData.n,
+                startFrame:   animData.t,
+                endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:       easing,
+                fromPosition: animData.s,
+                toPosition:   animData.e,
             };
         });
     }
@@ -226,14 +236,15 @@ export default class Element extends PIXI.Graphics {
     createAnimatedRotation(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromRotation:    animData.s ? Math.PI * animData.s[0] / 180.0 : 0,
-                toRotation:      animData.e ? Math.PI * animData.e[0] / 180.0 : 0,
+                name:         animData.n,
+                startFrame:   animData.t,
+                endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:       easing,
+                fromRotation: animData.s ? Math.PI * animData.s[0] / 180.0 : 0,
+                toRotation:   animData.e ? Math.PI * animData.e[0] / 180.0 : 0,
             };
         });
     }
@@ -264,14 +275,15 @@ export default class Element extends PIXI.Graphics {
     createAnimatedScale(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
+            const easing = (animData.i && animData.o) ?
+                  BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]) : null;
             return {
-                name:            animData.n,
-                startFrame:      animData.t,
-                endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-                easingFromRatio: animData.i,
-                easingToRatio:   animData.o,
-                fromScale:       animData.s,
-                toScale:         animData.e,
+                name:       animData.n,
+                startFrame: animData.t,
+                endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
+                easing:     easing,
+                fromScale:  animData.s,
+                toScale:    animData.e,
             };
         });
     }
@@ -286,12 +298,12 @@ export default class Element extends PIXI.Graphics {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const anchorPointDiffX = animData.toAnchorPoint[0] - animData.fromAnchorPoint[0];
                 const anchorPointDiffY = animData.toAnchorPoint[1] - animData.fromAnchorPoint[1];
-                const frameDiff        = animData.endFrame - animData.startFrame;
-                const playFrame        = frame - animData.startFrame;
-                const perFrameAnchorPointX = anchorPointDiffX / frameDiff;
-                const perFrameAnchorPointY = anchorPointDiffY / frameDiff;
-                const anchorPointX = playFrame * perFrameAnchorPointX + animData.fromAnchorPoint[0];
-                const anchorPointY = playFrame * perFrameAnchorPointY + animData.fromAnchorPoint[1];
+                const totalFrame       = animData.endFrame - animData.startFrame;
+                const playFrame        = (frame - animData.startFrame) * 1.0;
+                const playRatio        = playFrame / totalFrame;
+                const posRatio         = animData.easing(playRatio);
+                const anchorPointX = posRatio * anchorPointDiffX + animData.fromAnchorPoint[0];
+                const anchorPointY = posRatio * anchorPointDiffY + animData.fromAnchorPoint[1];
                 this.pivot = new PIXI.Point(anchorPointX, anchorPoinY);
                 isAnimated = true;
             }
@@ -312,10 +324,11 @@ export default class Element extends PIXI.Graphics {
         this.animatedOpacities.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const opacityDiff = animData.toOpacity - animData.fromOpacity;
-                const frameDiff   = animData.endFrame - animData.startFrame;
-                const playFrame   = frame - animData.startFrame;
-                const perFrameOpacity = 1.0 * opacityDiff / frameDiff;
-                const opacity         = playFrame * perFrameOpacity + animData.fromOpacity;
+                const totalFrame  = animData.endFrame - animData.startFrame;
+                const playFrame   = (frame - animData.startFrame) * 1.0;
+                const playRatio   = playFrame / totalFrame;
+                const opacityRatio = animData.easing(playRatio);
+                const opacity = opacityDiff * opacityRatio + animData.fromOpacity;
                 this.alpha = opacity;
                 isAnimated = true;
             }
@@ -337,12 +350,12 @@ export default class Element extends PIXI.Graphics {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                 const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
-                const frameDiff    = animData.endFrame - animData.startFrame;
-                const playFrame    = frame - animData.startFrame;
-                const perFramePosX = 1.0 * posDiffX / frameDiff;
-                const perFramePosY = 1.0 * posDiffY / frameDiff;
-                const posX         = playFrame * perFramePosX;
-                const posY         = playFrame * perFramePosY;
+                const totalFrame   = animData.endFrame - animData.startFrame;
+                const playFrame    = (frame - animData.startFrame) * 1.0;
+                const playRatio    = playFrame / totalFrame;
+                const posRatio     = animData.easing(playRatio);
+                const posX         = posDiffX * posRatio;
+                const posY         = posDiffY * posRatio;
                 this.x             = animData.fromPosition[0] + posX;
                 this.y             = animData.fromPosition[1] + posY;
                 isAnimated         = true;
@@ -363,13 +376,14 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedRotations.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                const rotDiff     = animData.toRotation - animData.fromRotation;
-                const frameDiff   = animData.endFrame - animData.startFrame;
-                const playFrame   = frame - animData.startFrame;
-                const perFrameRot = 1.0 * rotDiff / frameDiff;
-                const rotation    = playFrame * perFrameRot;
-                this.rotation  = animData.fromRotation + rotation;
-                isAnimated     = true;
+                const rotDiff    = animData.toRotation - animData.fromRotation;
+                const totalFrame = animData.endFrame - animData.startFrame;
+                const playFrame  = (frame - animData.startFrame) * 1.0;
+                const playRatio  = playFrame / totalFrame;
+                const rotation   = playFrame * rotDiff / totalFrame + animData.fromRotation;
+                const rotRatio   = animData.easing(playRatio);
+                this.rotation    = rotDiff * rotRatio + animData.fromRotation;
+                isAnimated       = true;
             }
         });
         if (!isAnimated && frame > this.animatedRotations[this.animatedRotations.length - 1].endFrame) {
@@ -387,14 +401,14 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedScales.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                const scaleDiffX   = animData.toScale[0] - animData.fromScale[0];
-                const scaleDiffY   = animData.toScale[1] - animData.fromScale[1];
-                const frameDiff    = animData.endFrame - animData.startFrame;
-                const playFrame    = frame - animData.startFrame;
-                const perFrameScaleX = 1.0 * scaleDiffX / frameDiff;
-                const perFrameScaleY = 1.0 * scaleDiffY / frameDiff;
-                const scaleX         = playFrame * perFrameScaleX + animData.fromScale[0];
-                const scaleY         = playFrame * perFrameScaleY + animData.fromScale[1];
+                const scaleDiffX = animData.toScale[0] - animData.fromScale[0];
+                const scaleDiffY = animData.toScale[1] - animData.fromScale[1];
+                const totalFrame = animData.endFrame - animData.startFrame;
+                const playFrame  = (frame - animData.startFrame) * 1.0;
+                const playRatio  = playFrame / totalFrame;
+                const scaleRatio = animData.easing(playRatio);
+                const scaleX     = scaleDiffX * scaleRatio + animData.fromScale[0];
+                const scaleY     = scaleDiffY * scaleRatio + animData.fromScale[1];
                 this.scaleX = scaleX / 100.0;
                 this.scaleY = scaleY / 100.0;
                 this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
