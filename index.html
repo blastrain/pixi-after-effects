@@ -35,6 +35,7 @@
       }
       var Menu = function() {
           this.play   = function() { ae.play() }
+          this.loop   = function() { ae.play(true) }
           this.stop   = function() { ae.stop() }
           this.pause  = function() { ae.pause() }
           this.resume = function() { ae.resume() }
@@ -42,6 +43,7 @@
       var menu  = new Menu();
       var panel = new dat.GUI();
       panel.add(menu, "play");
+      panel.add(menu, "loop");
       panel.add(menu, "stop");
       panel.add(menu, "pause");
       panel.add(menu, "resume");
