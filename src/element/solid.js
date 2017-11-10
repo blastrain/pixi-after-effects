@@ -9,8 +9,8 @@ export default class SolidElement extends Element {
         this.sh    = data.sh;
     }
 
-    update(frame) {
-        super.update(frame);
+    __updateWithFrame(frame) {
+        super.__updateWithFrame(frame);
         this.clear();
         this.beginFill(this.color);
         this.drawRect(0, 0, this.sw, this.sh);

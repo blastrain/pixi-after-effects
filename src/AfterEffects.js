@@ -26,12 +26,14 @@ export default class AfterEffects extends PIXI.Container {
         this.height      = data.h;
         this.totalFrame  = data.op;
         this.frameRate   = data.fr;
-        this.outPoint    = data.op;
         this.version     = data.v;
-        this.isLoop      = false;
-        this.isCompleted = false;
         this.assets      = data.assets;
         this.layers      = data.layers;
+        this.player      = new element.ElementPlayer(this.frameRate, this.totalFrame, (frame) => {
+            this.updateWithFrame(frame);
+        }, () => {
+            this.emit('completed', this);
+        });
 
         let layerIndexMap = {};
         this.layers.forEach((layer) => {
@@ -39,6 +41,7 @@ export default class AfterEffects extends PIXI.Container {
         });
 
         this.layers.reverse().forEach((layer) => {
+            layer.frameRate = this.frameRate;
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
                 if (layer.isImageType()) return;
@@ -56,7 +59,7 @@ export default class AfterEffects extends PIXI.Container {
                 this.addChild(layer);
             }
         });
-        this.showFirstFrame();
+        this.player.showFirstFrame();
     }
 
     find(name) {
@@ -65,7 +68,7 @@ export default class AfterEffects extends PIXI.Container {
 
     updateMask(frame) {
         this.masks.forEach((maskData) => {
-            let drawnMask = maskData.maskLayer.update(frame);
+            let drawnMask = maskData.maskLayer.updateWithFrame(frame);
             if (drawnMask) {
                 maskData.maskTargetLayer.mask = maskData.maskLayer;
             } else {
@@ -75,64 +78,35 @@ export default class AfterEffects extends PIXI.Container {
     }
 
     update(nowTime) {
-        if (!this.isPlaying) return;
         if (!this.layers) return;
-        if (!this.firstTime) {
-            this.firstTime = nowTime;
-        }
-        if (this.isCompleted) return;
-
-        this.nowTime      = nowTime;
-        const elapsedTime = nowTime - this.firstTime;
-        let currentFrame  = elapsedTime * this.frameRate / 1000.0;
-        if (currentFrame > this.totalFrame) {
-            currentFrame = this.totalFrame - 0.01;
-            if (this.isLoop) {
-                this.firstTime = nowTime;
-            } else {
-                this.isCompleted = true;
-                this.emit('completed', this);
-            }
-        }
-        if (this.masks) {
-            this.updateMask(currentFrame);
-        }
+        this.player.update(nowTime);
         this.layers.forEach((layer) => {
-            layer.update(currentFrame);
+            layer.update(nowTime);
         });
     }
 
-    showFirstFrame() {
+    updateWithFrame(frame) {
         if (this.masks) {
-            this.updateMask(0);
+            this.updateMask(frame);
         }
         this.layers.forEach((layer) => {
-            layer.update(0);
+            layer.updateWithFrame(frame);
         });
     }
 
     play(isLoop) {
-        this.isLoop      = isLoop || false;
-        this.firstTime   = null;
-        this.isCompleted = false;
-        this.isPlaying   = true;
+        this.player.play(isLoop);
     }
 
     pause() {
-        this.isPlaying = false;
+        this.player.pause();
     }
 
     resume() {
-        const elapsedTime = this.nowTime - this.firstTime;
-        const nowTime     = performance.now();
-        this.firstTime    = nowTime - elapsedTime;
-        this.isPlaying    = true;
+        this.player.resume();
     }
 
     stop() {
-        this.firstTime   = null;
-        this.isCompleted = true;
-        this.isPlaying   = false;
-        this.showFirstFrame();
+        this.player.stop();
     }
 }

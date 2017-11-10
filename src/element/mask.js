@@ -46,7 +46,7 @@ export default class MaskElement extends ShapeElement {
         return drawnMask;
     }
 
-    update(frame) {
+    __updateWithFrame(frame) {
         this.clear();
         return this.drawMask(frame);
     }

@@ -646,8 +646,8 @@ export class ShapeElement extends Element {
         }
     }
 
-    update(frame) {
-        super.update(frame);
+    __updateWithFrame(frame) {
+        super.__updateWithFrame(frame);
         this.drawThis(frame);
     }
 }
@@ -674,6 +674,13 @@ export default class ShapeContainerElement extends Element {
         });
     }
 
+    set frameRate(value) {
+        super.frameRate = value;
+        this.children.forEach((child) => {
+            child.frameRate = value;
+        });
+    }
+
     updateAnimationFrameByBaseFrame(animBaseFrame) {
         super.updateAnimationFrameByBaseFrame(animBaseFrame);
         this.shapes.forEach((shape) => {
@@ -694,10 +701,10 @@ export default class ShapeContainerElement extends Element {
         this.bounds   = bounds;
     }
 
-    update(frame) {
-        super.update(frame);
+    __updateWithFrame(frame) {
+        super.__updateWithFrame(frame);
         this.children.forEach((child) => {
-            child.update(frame);
+            child.__updateWithFrame(frame);
         });
     }
 }

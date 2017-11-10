@@ -20,6 +20,27 @@ export default class CompElement extends Element {
         this.autoOriented = data.ao;
     }
 
+    set frameRate(value) {
+        super.frameRate = value;
+        if (this.masks) {
+            this.masks.forEach((maskData) => {
+                maskData.maskLayer.frameRate = value;
+            });
+        }
+        if (!this.layers) {
+            this.children.forEach((child) => {
+                child.frameRate = value;
+            });
+        } else {
+            this.layers.forEach((layer) => {
+                layer.frameRate = value;
+            });
+        }
+        this.clonedLayers.forEach((layer) => {
+            layer.frameRate = value;
+        });
+    }
+
     setupReference(assets) {
         this.assets   = assets;
         this.assetMap = {};
@@ -145,7 +166,7 @@ export default class CompElement extends Element {
 
     updateMask(frame) {
         this.masks.forEach((maskData) => {
-            let drawnMask = maskData.maskLayer.update(frame);
+            let drawnMask = maskData.maskLayer.__updateWithFrame(frame);
             if (drawnMask) {
                 maskData.maskTargetLayer.mask = maskData.maskLayer;
             } else {
@@ -154,23 +175,23 @@ export default class CompElement extends Element {
         });
     }
 
-    update(frame) {
-        super.update(frame);
+    __updateWithFrame(frame) {
+        super.__updateWithFrame(frame);
         if (this.masks) {
             this.updateMask(frame);
         }
         if (!this.layers) {
             this.alpha = 1;
             this.children.forEach((child) => {
-                child.update(frame);
+                child.__updateWithFrame(frame);
             });
         } else {
             this.layers.forEach((layer) => {
-                layer.update(frame);
+                layer.__updateWithFrame(frame);
             });
         }
         this.clonedLayers.forEach((layer) => {
-            layer.update(frame);
+            layer.__updateWithFrame(frame);
             layer.visible = true;
         });
     }

@@ -11,15 +11,35 @@
       var stage = new PIXI.Container();
       var ae = null;
       var interceptor = new PIXI.AEDataInterceptor({
-          'D': {
+          '00': { //B
+              outPoint: 103,
               events: {
-                  click: () => {
-                      console.log("tapped D");
+                  click: (event) => {
+                      event.target.play();
                   },
               }
           },
+          '0': { //O
+              outPoint: 103,
+              events: {
+                  click: (event) => {
+                      event.target.play(true);
+                  },
+              }
+          },
+          'D': {
+              outPoint: 103,
+              events: {
+                  click: (event) => {
+                      event.target.play();
+                  },
+                  completed: () => {
+                      console.log("completed D");
+                  }
+              }
+          },
       });
-      PIXI.AEDataLoader.loadJSONWithInterceptor('./examples/training/data.json', interceptor).then((data) => {
+      PIXI.AEDataLoader.loadJSONWithInterceptor('./examples/bodymovin.json', interceptor).then((data) => {
           ae = PIXI.AfterEffects.fromData(data);
           ae.scale = new PIXI.Point(0.5, 0.5);
           ae.on("completed", (o) => { console.log("completed!", o); });

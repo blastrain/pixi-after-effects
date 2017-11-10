@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import ElementFinder from './finder';
+import ElementPlayer from './player';
 import BezierEasing from 'bezier-easing';
 
 export default class Element extends PIXI.Graphics {
@@ -20,6 +21,11 @@ export default class Element extends PIXI.Graphics {
         this.startTime    = data.st;
         this.hasMask      = data.hasMask;
         this.setupProperties(data.ks);
+        this.player = new ElementPlayer(0, this.outFrame, (frame) => {
+            this.updateWithFrameBySelfPlayer(frame);
+        }, () => {
+            this.emit('completed', this);
+        });
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
@@ -29,6 +35,11 @@ export default class Element extends PIXI.Graphics {
                 this.on(eventName, data.events[eventName]);
             });
         }
+    }
+
+    set frameRate(value) {
+        if (!this.player) return;
+        this.player.frameRate = value;
     }
 
     isInteractiveEvent(eventName) {
@@ -430,7 +441,25 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedScale;
     }
 
-    update(frame) {
+    update(nowTime) {
+        if (!this.player) return;
+        this.player.update(nowTime);
+    }
+
+    // called from self player
+    updateWithFrameBySelfPlayer(frame) {
+        this.__updateWithFrame(frame);
+    }
+
+    // called from parent layer. if self player is playing, stop it.
+    updateWithFrame(frame) {
+        if (this.player && this.player.isPlaying) {
+            this.player.stop();
+        }
+        this.__updateWithFrame(frame);
+    }
+
+    __updateWithFrame(frame) {
         if (this.inFrame <= frame && frame <= this.outFrame) {
             this.visible = true;
         } else {
@@ -445,5 +474,25 @@ export default class Element extends PIXI.Graphics {
         if (this.hasAnimatedPosition)    this.animatePosition(frame);
         if (this.hasAnimatedRotation)    this.animateRotation(frame);
         if (this.hasAnimatedScale)       this.animateScale(frame);
+    }
+
+    play(isLoop) {
+        if (!this.player) return;
+        this.player.play(isLoop);
+    }
+
+    pause() {
+        if (!this.player) return;
+        this.player.pause();
+    }
+
+    resume() {
+        if (!this.player) return;
+        this.player.resume();
+    }
+
+    stop() {
+        if (!this.player) return;
+        this.player.stop();
     }
 }

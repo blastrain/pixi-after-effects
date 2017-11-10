@@ -15,6 +15,8 @@ export default class AEDataInterceptor {
             if (cfg.image)     data.image     = cfg.image;
             if (cfg.imagePath) data.imagePath = cfg.imagePath;
             if (cfg.events)    data.events    = cfg.events;
+            if (cfg.inPoint)   data.ip        = cfg.inPoint;
+            if (cfg.outPoint)  data.op        = cfg.outPoint;
         }
         return data;
     }
