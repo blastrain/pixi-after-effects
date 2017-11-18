@@ -1,7 +1,15 @@
 import * as PIXI from 'pixi.js';
+import AfterEffects  from '../AfterEffects';
 import ElementFinder from './finder';
 import ElementPlayer from './player';
 import BezierEasing from 'bezier-easing';
+
+const TRACK_MATTE_TYPE = {
+    ALPHA:          1,
+    ALPHA_INVERTED: 2,
+    LUMA:           3,
+    LUMA_INVERTED:  4,
+};
 
 export default class Element extends PIXI.Graphics {
     constructor(data) {
@@ -21,6 +29,12 @@ export default class Element extends PIXI.Graphics {
         this.startTime    = data.st;
         this.hasMask      = data.hasMask;
         this.setupProperties(data.ks);
+        if (data.tt) {
+            this.hasTrackMatteType = true;
+            this.trackMatteType    = data.tt;
+        } else if (data.td) {
+            this.isTrackMatteData = true;
+        }
         this.player = new ElementPlayer(0, this.outFrame, (frame) => {
             this.updateWithFrameBySelfPlayer(frame);
         }, () => {
@@ -35,6 +49,28 @@ export default class Element extends PIXI.Graphics {
                 this.on(eventName, data.events[eventName]);
             });
         }
+    }
+
+    __root(node) {
+        if (node instanceof AfterEffects) return node;
+        if (node.parent) return this.__root(node.parent);
+        return null;
+    }
+
+    root() {
+        return this.__root(this);
+    }
+
+    addChild(child) {
+        super.addChild(child);
+        if (this.isInvertedMask) {
+            child.isInvertedMask = true;
+        }
+    }
+
+    isInvertTrackMatteType() {
+        return this.trackMatteType == TRACK_MATTE_TYPE.ALPHA_INVERTED ||
+               this.trackMatteType == TRACK_MATTE_TYPE.LUMA_INVERTED;
     }
 
     set frameRate(value) {
@@ -293,8 +329,8 @@ export default class Element extends PIXI.Graphics {
                 startFrame: animData.t,
                 endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:     easing,
-                fromScale:  animData.s,
-                toScale:    animData.e,
+                fromScale:  animData.s ? animData.s : [0],
+                toScale:    animData.e ? animData.e : [0],
             };
         });
     }
@@ -307,6 +343,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedAnchorPoints.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.easing) return;
                 const anchorPointDiffX = animData.toAnchorPoint[0] - animData.fromAnchorPoint[0];
                 const anchorPointDiffY = animData.toAnchorPoint[1] - animData.fromAnchorPoint[1];
                 const totalFrame       = animData.endFrame - animData.startFrame;
@@ -334,6 +371,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedOpacities.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.easing) return;
                 const opacityDiff = animData.toOpacity - animData.fromOpacity;
                 const totalFrame  = animData.endFrame - animData.startFrame;
                 const playFrame   = (frame - animData.startFrame) * 1.0;
@@ -359,6 +397,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedPositions.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.easing) return;
                 const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                 const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
                 const totalFrame   = animData.endFrame - animData.startFrame;
@@ -387,6 +426,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedRotations.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.easing) return;
                 const rotDiff    = animData.toRotation - animData.fromRotation;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
@@ -412,6 +452,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedScales.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
+                if (!animData.easing) return;
                 const scaleDiffX = animData.toScale[0] - animData.fromScale[0];
                 const scaleDiffY = animData.toScale[1] - animData.fromScale[1];
                 const totalFrame = animData.endFrame - animData.startFrame;
@@ -466,7 +507,7 @@ export default class Element extends PIXI.Graphics {
             this.visible = false;
         }
         if (!this.visible || !this.hasAnimateProperty()) {
-            return;
+            return true;
         }
 
         if (this.hasAnimatedAnchorPoint) this.animateAnchorPoint(frame);
@@ -474,6 +515,7 @@ export default class Element extends PIXI.Graphics {
         if (this.hasAnimatedPosition)    this.animatePosition(frame);
         if (this.hasAnimatedRotation)    this.animateRotation(frame);
         if (this.hasAnimatedScale)       this.animateScale(frame);
+        return true;
     }
 
     play(isLoop) {

@@ -2,26 +2,76 @@ import * as PIXI from 'pixi.js';
 import Element from './element';
 import {ShapeElement,ShapeContainerElement} from './shape';
 
+const MASK_MODE = {
+    NONE:       0,
+    ADDITIVE:   1,
+    SUBTRACT:   2,
+    LIGHTEN:    3,
+    DARKEN:     4,
+    DIFFERENCE: 5,
+};
+
 export default class MaskElement extends ShapeElement {
     constructor(maskTargetLayer) {
         super();
+        this.maskShapePaths = maskTargetLayer.masksProperties.map((maskProperty) => {
+            return this.createPath(maskProperty.pt.k);
+        });
         const data = maskTargetLayer.masksProperties[0];
         this.isMaskLayer = true;
         this.maskTargetLayer = maskTargetLayer;
         this.isClosed   = data.cl;
-        this.isInverted = data.inv;
-        this.mode       = data.mode;
+        this.isInvertedMask = data.inv;
+        this.maskMode   = this.toMaskMode(data.mode);
+        this.setBlendModeByMaskMode(this.maskMode);
         this.inFrame    = maskTargetLayer.inFrame;
         this.outFrame   = maskTargetLayer.outFrame;
         this.setupOpacity(data.o);
-        this.shapePath  = this.createPath(data.pt.k);
         this.fillColorHex = "0x000000";
         this.fill = { enabled: true };
     }
 
-    drawMask(frame) {
+    setBlendModeByMaskMode(mode) {
+        switch (mode) {
+        case MASK_MODE.LIGHTEN:
+            this.blendMode = PIXI.BLEND_MODES.LIGHTEN;
+            break;
+        case MASK_MODE.DARKEN:
+            this.blendMode = PIXI.BLEND_MODES.DARKEN;
+            break;
+        case MASK_MODE.DEFFERENCE:
+            this.blendMode = PIXI.BLEND_MODES.DEFFERENCE;
+            break;
+        }
+    }
+
+    toMaskMode(mode) {
+        let maskMode = MASK_MODE.ADDITIVE;
+        switch (mode) {
+        case "n":
+            maskMode = MASK_MODE.NONE;
+            break;
+        case "a":
+            maskMode = MASK_MODE.ADDITIVE;
+            break;
+        case "s":
+            maskMode = MASK_MODE.SUBTRACT;
+            break;
+        case "l":
+            maskMode = MASK_MODE.LIGHTEN;
+            break;
+        case "d":
+            maskMode = MASK_MODE.DARKEN;
+            break;
+        case "f":
+            maskMode = MASK_MODE.DIFFERENCE;
+            break;
+        }
+        return maskMode;
+    }
+
+    drawMask(frame, shapePath) {
         let drawnMask   = false;
-        const shapePath = this.shapePath;
         if (shapePath.hasAnimatedPath) {
             this.isClosed = shapePath.isClosed;
             let paths     = shapePath.paths;
@@ -30,24 +80,65 @@ export default class MaskElement extends ShapeElement {
                     if (!animData.fromPath) return;
                     const animatePath = this.createAnimatePath(animData, frame);
                     this.drawPath(animatePath);
+                    if (this.isInvertedMask) {
+                        this.addHole();
+                    }
                     drawnMask = true;
                 }
             });
             let lastPath = paths[paths.length - 2];
             if (lastPath.endFrame <= frame) {
                 this.drawPath(lastPath.toPath);
+                if (this.isInvertedMask) this.addHole();
                 drawnMask = true;
             }
         } else if (this.inFrame <= frame && frame <= this.outFrame) {
             this.isClosed = shapePath.isClosed;
+
             this.drawPath(shapePath);
+            if (this.isInvertedMask) {
+                this.addHole();
+            }
             drawnMask = true;
         }
         return drawnMask;
     }
 
+    setupScreenSize() {
+        const ae = this.root();
+        this.screenWidth  = ae.width;
+        this.screenHeight = ae.height;
+    }
+
+    drawAllMask(frame) {
+        let drawnMask   = false;
+        if (this.inFrame <= frame && frame <= this.outFrame && this.isInvertedMask) {
+            if (!this.screenWidth || !this.screenHeight) {
+                this.setupScreenSize();
+            }
+            this.beforeDraw();
+            const x = -this.screenWidth  / 2;
+            const y = -this.screenHeight / 2;
+            const w = this.screenWidth  * 2;
+            const h = this.screenHeight * 2;
+            this.moveTo(x, y);
+            this.lineTo(x + w, y);
+            this.lineTo(x + w, y + h);
+            this.lineTo(x, y + h);
+            this.afterDraw();
+            drawnMask = true;
+        }
+        this.maskShapePaths.forEach((shapePath) => {
+            if (this.drawMask(frame, shapePath)) {
+                drawnMask = true;
+            }
+        });
+        return drawnMask;
+    }
+
     __updateWithFrame(frame) {
+        if (this.maskMode == MASK_MODE.NONE) return false;
         this.clear();
-        return this.drawMask(frame);
+        return this.drawAllMask(frame);
     }
 }

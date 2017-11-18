@@ -41,6 +41,32 @@ export default class CompElement extends Element {
         });
     }
 
+    addMaskLayer(layer) {
+        if (!layer.hasMask) return;
+
+        if (!this.masks) this.masks = [];
+
+        const maskLayer = new MaskElement(layer);
+        layer.addChild(maskLayer);
+        layer.maskLayer = maskLayer;
+        this.masks.push({
+            maskTargetLayer: layer,
+            maskLayer: maskLayer,
+        });
+    }
+
+    setupTrackMatteLayer(layer, trackMatteLayer) {
+        trackMatteLayer.isInvertedMask = layer.isInvertTrackMatteType();
+        trackMatteLayer.alpha          = 0; // none visible
+        layer.maskLayer                = trackMatteLayer;
+        layer.addChild(trackMatteLayer);
+        if (!this.masks) this.masks = [];
+        this.masks.push({
+            maskTargetLayer: layer,
+            maskLayer: trackMatteLayer,
+        });
+    }
+
     setupReference(assets) {
         this.assets   = assets;
         this.assetMap = {};
@@ -61,22 +87,23 @@ export default class CompElement extends Element {
         });
         this.resolveLayerReference(this.layers, asset);
         this.layers.forEach((layer, index) => {
-            if (layer.hasMask) {
-                if (!this.masks) this.masks = [];
-                if (layer.isImageType()) return;
+            if (layer.hasParent) return;
 
-                const maskLayer = new MaskElement(layer);
-                this.addChild(layer);
-                layer.addChild(maskLayer);
-                this.masks.push({
-                    maskTargetLayer: layer,
-                    maskLayer: maskLayer,
-                });
-            } else if (!layer.hasParent) {
-                this.addChild(layer);
+            if (layer.hasTrackMatteType) {
+                const trackMatteLayer = this.layers[index + 1];
+                this.setupTrackMatteLayer(layer, trackMatteLayer);
+            } else {
+                this.addMaskLayer(layer);
             }
+
+            if (layer.isTrackMatteData) return;
+            this.addChild(layer);
         });
         this.clonedLayers.forEach((layer) => {
+            layer.inFrame   += this.startTime;
+            layer.outFrame  += this.startTime;
+            layer.startTime += this.startTime;
+            layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
             this.addChild(layer);
         });
     }
@@ -94,6 +121,7 @@ export default class CompElement extends Element {
             parentLayer.inFrame  = layer.inFrame;
             parentLayer.outFrame = layer.outFrame;
         }
+        this.addMaskLayer(layer);
         parentLayer.addChild(layer);
         const nextParentLayer = this.createParentLayer(parentLayer, asset);
         if (nextParentLayer) {
@@ -108,10 +136,6 @@ export default class CompElement extends Element {
             if (a.index < b.index) return -1;
             if (a.index > b.index) return 1;
             return 0;
-        });
-        let layerIndexMap = {};
-        layers.forEach((layer) => {
-            layerIndexMap[layer.index] = layer;
         });
         layers.reverse().forEach((layer) => {
             const parentLayer = this.createParentLayer(layer, asset);
@@ -166,9 +190,15 @@ export default class CompElement extends Element {
 
     updateMask(frame) {
         this.masks.forEach((maskData) => {
-            let drawnMask = maskData.maskLayer.__updateWithFrame(frame);
+            let maskLayer = maskData.maskLayer;
+
+            if (maskLayer.isTrackMatteData) {
+                maskLayer = maskLayer.maskLayer;
+            }
+
+            let drawnMask = maskLayer.__updateWithFrame(frame);
             if (drawnMask) {
-                maskData.maskTargetLayer.mask = maskData.maskLayer;
+                maskData.maskTargetLayer.mask = maskLayer;
             } else {
                 maskData.maskTargetLayer.mask = null;
             }

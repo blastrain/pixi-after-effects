@@ -44,7 +44,7 @@ export default class AfterEffects extends PIXI.Container {
             layer.frameRate = this.frameRate;
             if (layer.hasMask) {
                 if (!this.masks) this.masks = [];
-                if (layer.isImageType()) return;
+                
                 const maskLayer = new element.MaskElement(layer);
                 this.addChild(layer);
                 layer.addChild(maskLayer);

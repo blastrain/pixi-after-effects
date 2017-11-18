@@ -186,6 +186,7 @@ export class ShapeElement extends Element {
 
     createPath(data) {
         if (!data.v) return this.createPathByAnimation(data);
+        data = JSON.parse(JSON.stringify(data)); //TODO: more smartly clone data
         let path = {};
         data.v.forEach((_v, index) => {
             data.i[index][0] += data.v[index][0];
