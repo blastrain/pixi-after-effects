@@ -41,11 +41,11 @@ export default class Element extends PIXI.Graphics {
             this.emit('completed', this);
         });
         this.deltaPlayer = new ElementPlayer(0, this.outFrame, (frame) => {
-          this.updateWithFrameBySelfPlayer(frame);
+            this.updateWithFrameBySelfPlayer(frame);
         }, () => {
-          this.emit('completed', this);
+            this.emit('completed', this);
         });
-        this.activePlayer = this.activePlayer;
+        this.activePlayer = this.player;
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
@@ -489,15 +489,13 @@ export default class Element extends PIXI.Graphics {
     }
 
     update(nowTime) {
-        if (!this.activePlayer) return;
-        this.activePlayer = this.player;
-        this.activePlayer.update(nowTime);
+        if (!this.player) return;
+        this.player.update(nowTime);
     }
 
     updateByDelta(deltaTime) {
-        if (!this.activePlayer) return;
-        this.activePlayer = this.deltaPlayer;
-        this.activePlayer.update(deltaTime);
+        if (!this.deltaPlayer) return;
+        this.deltaPlayer.update(deltaTime);
     }
 
     // called from self player
@@ -532,22 +530,38 @@ export default class Element extends PIXI.Graphics {
     }
 
     play(isLoop) {
-        if (!this.activePlayer) return;
-        this.activePlayer.play(isLoop);
+        if (this.player) {
+            this.player.play(isLoop);
+        }
+        if (this.deltaPlayer) {
+            this.deltaPlayer.play(isLoop);
+        }
     }
 
     pause() {
-        if (!this.activePlayer) return;
-        this.activePlayer.pause();
+        if (this.player) {
+            this.player.pause();
+        }
+        if (this.deltaPlayer) {
+            this.deltaPlayer.pause();
+        }
     }
 
     resume() {
-        if (!this.activePlayer) return;
-        this.activePlayer.resume();
+        if (this.player) {
+            this.player.resume();
+        }
+        if (this.deltaPlayer) {
+            this.deltaPlayer.resume();
+        }
     }
 
     stop() {
-        if (!this.activePlayer) return;
-        this.activePlayer.stop();
+        if (this.player) {
+            this.player.stop();
+        }
+        if (this.deltaPlayer) {
+            this.deltaPlayer.stop();
+        }
     }
 }

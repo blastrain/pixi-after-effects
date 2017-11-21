@@ -23,9 +23,9 @@ export default class ElementDeltaPlayer {
         let currentFrame = (this.elapsedTime * this.frameRate / 1000.0) % this.totalFrame;
         if (currentFrame > this.totalFrame) {
             if (!this.isLoop) {
-              currentFrame = this.totalFrame - 0.01;
-              this.isCompleted = true;
-              if (this.completed) this.completed();
+                currentFrame = this.totalFrame - 0.01;
+                this.isCompleted = true;
+                if (this.completed) this.completed();
             }
         }
         this.updater(currentFrame);

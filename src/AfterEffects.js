@@ -39,7 +39,6 @@ export default class AfterEffects extends PIXI.Container {
         }, () => {
           this.emit('completed', this);
         });
-        this.activePlayer = this.player;
 
         let layerIndexMap = {};
         this.layers.forEach((layer) => {
@@ -65,7 +64,8 @@ export default class AfterEffects extends PIXI.Container {
                 this.addChild(layer);
             }
         });
-        this.activePlayer.showFirstFrame();
+        this.player.showFirstFrame();
+        this.deltaPlayer.showFirstFrame();
     }
 
     find(name) {
@@ -85,17 +85,15 @@ export default class AfterEffects extends PIXI.Container {
 
     update(nowTime) {
         if (!this.layers) return;
-        this.activePlayer = this.player;
-        this.activePlayer.update(nowTime);
+        this.player.update(nowTime);
         this.layers.forEach((layer) => {
-          layer.update(nowTime);
+            layer.update(nowTime);
         });
     }
 
     updateByDelta(deltaTime) {
         if (!this.layers) return;
-        this.activePlayer = this.deltaPlayer;
-        this.activePlayer.update(deltaTime);
+        this.deltaPlayer.update(deltaTime);
         this.layers.forEach((layer) => {
             layer.updateByDelta(deltaTime);
         });
@@ -111,18 +109,22 @@ export default class AfterEffects extends PIXI.Container {
     }
 
     play(isLoop) {
-        this.activePlayer.play(isLoop);
+        this.player.play(isLoop);
+        this.deltaPlayer.play(isLoop);
     }
 
     pause() {
-        this.activePlayer.pause();
+        this.player.pause();
+        this.deltaPlayer.pause();
     }
 
     resume() {
-        this.activePlayer.resume();
+        this.player.resume();
+        this.deltaPlayer.resume();
     }
 
     stop() {
-        this.activePlayer.stop();
+        this.player.stop();
+        this.deltaPlayer.stop();
     }
 }
