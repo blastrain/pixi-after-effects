@@ -1,4 +1,4 @@
-export default class ElementPlayer {
+export default class DeltaElementPlayer {
     constructor(frameRate, totalFrame, updater, completed) {
         this.frameRate   = frameRate;
         this.totalFrame  = totalFrame;
@@ -12,24 +12,20 @@ export default class ElementPlayer {
         this.updater(0);
     }
 
-    update(nowTime) {
+    update(deltaTime) {
         if (this.frameRate === 0) return;
         if (!this.isPlaying) return;
-        if (!this.firstTime) {
-            this.firstTime = nowTime;
+        if (!this.elapsedTime) {
+          this.elapsedTime = 0;
         }
         if (this.isCompleted) return;
-
-        this.nowTime      = nowTime;
-        const elapsedTime = nowTime - this.firstTime;
-        let currentFrame  = elapsedTime * this.frameRate / 1000.0;
+        this.elapsedTime += deltaTime;
+        let currentFrame = (this.elapsedTime * this.frameRate / 1000.0) % this.totalFrame;
         if (currentFrame > this.totalFrame) {
-            currentFrame = this.totalFrame - 0.01;
-            if (this.isLoop) {
-                this.firstTime = nowTime;
-            } else {
-                this.isCompleted = true;
-                if (this.completed) this.completed();
+            if (!this.isLoop) {
+              currentFrame = this.totalFrame - 0.01;
+              this.isCompleted = true;
+              if (this.completed) this.completed();
             }
         }
         this.updater(currentFrame);
@@ -37,7 +33,6 @@ export default class ElementPlayer {
 
     play(isLoop) {
         this.isLoop      = isLoop || false;
-        this.firstTime   = null;
         this.isCompleted = false;
         this.isPlaying   = true;
     }
@@ -47,16 +42,13 @@ export default class ElementPlayer {
     }
 
     resume() {
-        const elapsedTime = this.nowTime - this.firstTime;
-        const nowTime     = performance.now();
-        this.firstTime    = nowTime - elapsedTime;
-        this.isPlaying    = true;
+        this.isPlaying = true;
     }
 
     stop() {
-        this.firstTime   = null;
         this.isCompleted = true;
         this.isPlaying   = false;
+        this.elapsedTime = 0;
         this.showFirstFrame();
     }
 }

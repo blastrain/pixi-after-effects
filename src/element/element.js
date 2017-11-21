@@ -40,6 +40,12 @@ export default class Element extends PIXI.Graphics {
         }, () => {
             this.emit('completed', this);
         });
+        this.deltaPlayer = new ElementPlayer(0, this.outFrame, (frame) => {
+          this.updateWithFrameBySelfPlayer(frame);
+        }, () => {
+          this.emit('completed', this);
+        });
+        this.activePlayer = this.activePlayer;
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
@@ -74,8 +80,8 @@ export default class Element extends PIXI.Graphics {
     }
 
     set frameRate(value) {
-        if (!this.player) return;
-        this.player.frameRate = value;
+        if (!this.activePlayer) return;
+        this.activePlayer.frameRate = value;
     }
 
     isInteractiveEvent(eventName) {
@@ -482,9 +488,16 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedScale;
     }
 
-    update(deltaTime) {
-        if (!this.player) return;
-        this.player.update(deltaTime);
+    update(nowTime) {
+        if (!this.activePlayer) return;
+        this.activePlayer = this.player;
+        this.activePlayer.update(nowTime);
+    }
+
+    updateByDelta(deltaTime) {
+        if (!this.activePlayer) return;
+        this.activePlayer = this.deltaPlayer;
+        this.activePlayer.update(deltaTime);
     }
 
     // called from self player
@@ -494,8 +507,8 @@ export default class Element extends PIXI.Graphics {
 
     // called from parent layer. if self player is playing, stop it.
     updateWithFrame(frame) {
-        if (this.player && this.player.isPlaying) {
-            this.player.stop();
+        if (this.activePlayer && this.activePlayer.isPlaying) {
+            this.activePlayer.stop();
         }
         this.__updateWithFrame(frame);
     }
@@ -519,22 +532,22 @@ export default class Element extends PIXI.Graphics {
     }
 
     play(isLoop) {
-        if (!this.player) return;
-        this.player.play(isLoop);
+        if (!this.activePlayer) return;
+        this.activePlayer.play(isLoop);
     }
 
     pause() {
-        if (!this.player) return;
-        this.player.pause();
+        if (!this.activePlayer) return;
+        this.activePlayer.pause();
     }
 
     resume() {
-        if (!this.player) return;
-        this.player.resume();
+        if (!this.activePlayer) return;
+        this.activePlayer.resume();
     }
 
     stop() {
-        if (!this.player) return;
-        this.player.stop();
+        if (!this.activePlayer) return;
+        this.activePlayer.stop();
     }
 }

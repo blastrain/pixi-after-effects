@@ -1,70 +1,72 @@
 <html>
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
-    <script src="node_modules/dat.gui/build/dat.gui.min.js"></script>
-    <script src="dist/pixi-ae.min.js"></script>
-  </head>
-  <body>
-    <script>
-      var app = new PIXI.Application({ wdith: 2000, height: 600, antialias: true, backgroundColor: 0xffffff });
-      document.body.appendChild(app.view);
-      var stage = new PIXI.Container();
-      var ae = null;
-      var interceptor = new PIXI.AEDataInterceptor({
-          '00': { //B
-              outPoint: 103,
-              events: {
-                  click: (event) => {
-                      event.target.play();
-                  },
-              }
-          },
-          '0': { //O
-              outPoint: 103,
-              events: {
-                  click: (event) => {
-                      event.target.play(true);
-                  },
-              }
-          },
-          'D': {
-              outPoint: 103,
-              events: {
-                  click: (event) => {
-                      event.target.play();
-                  },
-                  completed: () => {
-                      console.log("completed D");
-                  }
-              }
-          },
-      });
-      PIXI.AEDataLoader.loadJSONWithInterceptor('./examples/bodymovin.json', interceptor).then((data) => {
-          ae = PIXI.AfterEffects.fromData(data);
-          ae.scale = new PIXI.Point(0.5, 0.5);
-          ae.on("completed", (o) => { console.log("completed!", o); });
-          app.stage.addChild(ae);
-          app.start();
-      }, (err) => {
-          console.log(err);
-      });
-      app.ticker.add(function(deltaTime) {
-        if (ae) ae.update(deltaTime * 1000 / app.ticker.FPS);
-      });
-      var Menu = function() {
-          this.play   = function() { ae.play() }
-          this.loop   = function() { ae.play(true) }
-          this.stop   = function() { ae.stop() }
-          this.pause  = function() { ae.pause() }
-          this.resume = function() { ae.resume() }
-      };
-      var menu  = new Menu();
-      var panel = new dat.GUI();
-      panel.add(menu, "play");
-      panel.add(menu, "loop");
-      panel.add(menu, "stop");
-      panel.add(menu, "pause");
-      panel.add(menu, "resume");
-    </script>
-  </body>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+  <script src="node_modules/dat.gui/build/dat.gui.min.js"></script>
+  <script src="dist/pixi-ae.min.js"></script>
+</head>
+<body>
+<script>
+    var renderer = new PIXI.WebGLRenderer(2000, 600, { antialias: true, backgroundColor: 0xffffff });
+    document.body.appendChild(renderer.view);
+    var stage = new PIXI.Container();
+    var ae = null;
+    var interceptor = new PIXI.AEDataInterceptor({
+        '00': { //B
+            outPoint: 103,
+            events: {
+                click: (event) => {
+                    event.target.play();
+                },
+            }
+        },
+        '0': { //O
+            outPoint: 103,
+            events: {
+                click: (event) => {
+                    event.target.play(true);
+                },
+            }
+        },
+        'D': {
+            outPoint: 103,
+            events: {
+                click: (event) => {
+                    event.target.play();
+                },
+                completed: () => {
+                    console.log("completed D");
+                }
+            }
+        },
+    });
+    PIXI.AEDataLoader.loadJSONWithInterceptor('./examples/bodymovin.json', interceptor).then((data) => {
+        ae = PIXI.AfterEffects.fromData(data);
+        ae.scale = new PIXI.Point(0.5, 0.5);
+        ae.on("completed", (o) => { console.log("completed!", o); });
+        stage.addChild(ae);
+    }, (err) => {
+        console.log(err);
+    });
+    requestAnimationFrame(animate);
+    function animate(nowTime) {
+        if (ae) ae.update(nowTime);
+        renderer.render(stage);
+        requestAnimationFrame(animate);
+    }
+    var Menu = function() {
+        this.play   = function() { ae.play() }
+        this.loop   = function() { ae.play(true) }
+        this.stop   = function() { ae.stop() }
+        this.pause  = function() { ae.pause() }
+        this.resume = function() { ae.resume() }
+    };
+    var menu  = new Menu();
+    var panel = new dat.GUI();
+    panel.add(menu, "play");
+    panel.add(menu, "loop");
+    panel.add(menu, "stop");
+    panel.add(menu, "pause");
+    panel.add(menu, "resume");
+</script>
+</body>
 </html>
