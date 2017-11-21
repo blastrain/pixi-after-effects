@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import AfterEffects  from '../AfterEffects';
 import ElementFinder from './finder';
 import ElementPlayer from './player';
+import ElementDeltaPlayer from './deltaPlayer';
 import BezierEasing from 'bezier-easing';
 
 const TRACK_MATTE_TYPE = {
@@ -40,12 +41,11 @@ export default class Element extends PIXI.Graphics {
         }, () => {
             this.emit('completed', this);
         });
-        this.deltaPlayer = new ElementPlayer(0, this.outFrame, (frame) => {
+        this.deltaPlayer = new ElementDeltaPlayer(0, this.outFrame, (frame) => {
             this.updateWithFrameBySelfPlayer(frame);
         }, () => {
             this.emit('completed', this);
         });
-        this.activePlayer = this.player;
         if (data.masksProperties) {
             this.masksProperties = data.masksProperties;
         }
@@ -80,8 +80,12 @@ export default class Element extends PIXI.Graphics {
     }
 
     set frameRate(value) {
-        if (!this.activePlayer) return;
-        this.activePlayer.frameRate = value;
+        if (this.player) {
+            this.player.frameRate = value;
+        }
+        if (this.deltaPlayer) {
+            this.deltaPlayer.frameRate = value;
+        }
     }
 
     isInteractiveEvent(eventName) {
@@ -505,8 +509,11 @@ export default class Element extends PIXI.Graphics {
 
     // called from parent layer. if self player is playing, stop it.
     updateWithFrame(frame) {
-        if (this.activePlayer && this.activePlayer.isPlaying) {
-            this.activePlayer.stop();
+        if (this.player && this.player.isPlaying) {
+            this.player.stop();
+        }
+        if (this.deltaPlayer && this.deltaPlayer.isPlaying) {
+            this.deltaPlayer.stop();
         }
         this.__updateWithFrame(frame);
     }
