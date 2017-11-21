@@ -482,9 +482,9 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedScale;
     }
 
-    update(nowTime) {
+    update(deltaTime) {
         if (!this.player) return;
-        this.player.update(nowTime);
+        this.player.update(deltaTime);
     }
 
     // called from self player

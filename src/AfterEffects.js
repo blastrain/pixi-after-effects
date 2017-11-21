@@ -77,11 +77,11 @@ export default class AfterEffects extends PIXI.Container {
         });
     }
 
-    update(nowTime) {
+    update(deltaTime) {
         if (!this.layers) return;
-        this.player.update(nowTime);
+        this.player.update(deltaTime);
         this.layers.forEach((layer) => {
-            layer.update(nowTime);
+            layer.update(deltaTime);
         });
     }
 

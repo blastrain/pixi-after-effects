@@ -6,8 +6,8 @@
   </head>
   <body>
     <script>
-      var renderer = new PIXI.WebGLRenderer(2000, 600, { antialias: true, backgroundColor: 0xffffff });
-      document.body.appendChild(renderer.view);
+      var app = new PIXI.Application({ wdith: 2000, height: 600, antialias: true, backgroundColor: 0xffffff });
+      document.body.appendChild(app.view);
       var stage = new PIXI.Container();
       var ae = null;
       var interceptor = new PIXI.AEDataInterceptor({
@@ -43,16 +43,14 @@
           ae = PIXI.AfterEffects.fromData(data);
           ae.scale = new PIXI.Point(0.5, 0.5);
           ae.on("completed", (o) => { console.log("completed!", o); });
-          stage.addChild(ae);
+          app.stage.addChild(ae);
+          app.start();
       }, (err) => {
           console.log(err);
       });
-      requestAnimationFrame(animate);
-      function animate(nowTime) {
-          if (ae) ae.update(nowTime);
-          renderer.render(stage);
-          requestAnimationFrame(animate);
-      }
+      app.ticker.add(function(deltaTime) {
+        if (ae) ae.update(deltaTime * 1000 / app.ticker.FPS);
+      });
       var Menu = function() {
           this.play   = function() { ae.play() }
           this.loop   = function() { ae.play(true) }
