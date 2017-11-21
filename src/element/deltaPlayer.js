@@ -1,4 +1,4 @@
-export default class DeltaElementPlayer {
+export default class ElementDeltaPlayer {
     constructor(frameRate, totalFrame, updater, completed) {
         this.frameRate   = frameRate;
         this.totalFrame  = totalFrame;
