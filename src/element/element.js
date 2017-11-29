@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import AfterEffects  from '../AfterEffects';
 import ElementFinder from './finder';
 import ElementPlayer from './player';
-import ElementDeltaPlayer from './deltaPlayer';
+import ElementDeltaPlayer from './delta_player';
 import BezierEasing from 'bezier-easing';
 
 const TRACK_MATTE_TYPE = {

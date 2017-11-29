@@ -16,14 +16,16 @@ export default class ElementDeltaPlayer {
         if (this.frameRate === 0) return;
         if (!this.isPlaying) return;
         if (!this.elapsedTime) {
-          this.elapsedTime = 0;
+            this.elapsedTime = 0;
         }
         if (this.isCompleted) return;
         this.elapsedTime += deltaTime;
-        let currentFrame = (this.elapsedTime * this.frameRate / 1000.0) % this.totalFrame;
+        let currentFrame = this.elapsedTime * this.frameRate / 1000.0;
         if (currentFrame > this.totalFrame) {
-            if (!this.isLoop) {
-                currentFrame = this.totalFrame - 0.01;
+            currentFrame = this.totalFrame - 0.01;
+            if (this.isLoop) {
+                this.elapsedTime = 0;
+            } else {
                 this.isCompleted = true;
                 if (this.completed) this.completed();
             }
