@@ -362,7 +362,7 @@ export default class Element extends PIXI.Graphics {
                 const posRatio         = animData.easing(playRatio);
                 const anchorPointX = posRatio * anchorPointDiffX + animData.fromAnchorPoint[0];
                 const anchorPointY = posRatio * anchorPointDiffY + animData.fromAnchorPoint[1];
-                this.pivot = new PIXI.Point(anchorPointX, anchorPoinY);
+                this.pivot = new PIXI.Point(anchorPointX, anchorPointY);
                 isAnimated = true;
             }
         });
