@@ -28,6 +28,7 @@ export default class ElementDeltaPlayer {
             } else {
                 this.isCompleted = true;
                 if (this.completed) this.completed();
+                return;
             }
         }
         this.updater(currentFrame);
