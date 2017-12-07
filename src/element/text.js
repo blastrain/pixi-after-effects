@@ -37,8 +37,9 @@ export default class TextElement extends Element {
             fontSize:   this.fontSize,
             fill:       this.fontColor,
         });
-        this.text.x -= this.text.width / 2 + this.justification;
-        this.text.y -= (this.tracking - this.justification);
+        const dh = this.baseLineHeight - this.fontSize;
+        this.text.x -= this.text.width - this.tracking * this.baseLineShift;
+        this.text.y -= this.text.height - dh;
         this.addChild(this.text);
     }
 }
