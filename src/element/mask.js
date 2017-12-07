@@ -75,6 +75,11 @@ export default class MaskElement extends ShapeElement {
         if (shapePath.hasAnimatedPath) {
             this.isClosed = shapePath.isClosed;
             let paths     = shapePath.paths;
+            if (frame < shapePath.paths[0].startFrame) {
+                this.drawPath(shapePath.paths[0].fromPath);
+                if (this.isInvertedMask) this.addHole();
+                drawnMask = true;
+            }
             shapePath.paths.forEach((animData) => {
                 if (animData.startFrame <= frame && frame <= animData.endFrame) {
                     if (!animData.fromPath) return;
