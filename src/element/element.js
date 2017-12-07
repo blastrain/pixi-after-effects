@@ -272,6 +272,8 @@ export default class Element extends PIXI.Graphics {
     }
 
     setupRotation(data) {
+        if (!data) return; // not 'r' property at z rotation pattern
+
         const rotation = this.createRotation(data);
         if (rotation.length > 0) {
             this.hasAnimatedRotation = true;
