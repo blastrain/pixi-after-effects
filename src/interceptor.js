@@ -9,6 +9,11 @@ export default class AEDataInterceptor {
     }
 
     intercept(data) {
+        if (data.layers) {
+            data.layers.forEach((layer) => {
+                this.intercept(layer);
+            });
+        }
         const cfg = this.config[data.nm] || this.config[data.id];
         if (cfg) {
             if (cfg.text)      data.text      = cfg.text;
@@ -17,6 +22,7 @@ export default class AEDataInterceptor {
             if (cfg.events)    data.events    = cfg.events;
             if (cfg.inPoint)   data.ip        = cfg.inPoint;
             if (cfg.outPoint)  data.op        = cfg.outPoint;
+            if (cfg.blendMode) data.bmPIXI    = cfg.blendMode;
         }
         return data;
     }

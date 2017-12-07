@@ -15,7 +15,6 @@ export default class CompElement extends Element {
             // reassign scale value because overwritten scale by this.width's setter
             this.scale.x = this.scaleX;
         }
-        this.blendMode    = this.toPIXIBlendMode(data.bm);
         this.clonedLayers = [];
         this.autoOriented = data.ao;
     }
@@ -150,49 +149,11 @@ export default class CompElement extends Element {
         });
     }
 
-    toPIXIBlendMode(mode) {
-        switch(mode) {
-        case 0:
-            return PIXI.BLEND_MODES.NORMAL;
-        case 1:
-            return PIXI.BLEND_MODES.MULTIPLY;
-        case 2:
-            return PIXI.BLEND_MODES.SCREEN;
-        case 3:
-            return PIXI.BLEND_MODES.OVERLAY;
-        case 4:
-            return PIXI.BLEND_MODES.DARKEN;
-        case 5:
-            return PIXI.BLEND_MODES.LIGHTEN;
-        case 6:
-            return PIXI.BLEND_MODES.COLOR_DODGE;
-        case 7:
-            return PIXI.BLEND_MODES.COLOR_BURN;
-        case 8:
-            return PIXI.BLEND_MODES.HARD_LIGHT;
-        case 9:
-            return PIXI.BLEND_MODES.SOFT_LIGHT;
-        case 10:
-            return PIXI.BLEND_MODES.DIFFERENCE;
-        case 11:
-            return PIXI.BLEND_MODES.EXCLUSION;
-        case 12:
-            return PIXI.BLEND_MODES.HUE;
-        case 13:
-            return PIXI.BLEND_MODES.SATURATION;
-        case 14:
-            return PIXI.BLEND_MODES.COLOR;
-        case 15:
-            return PIXI.BLEND_MODES.LUMINOSITY;
-        }
-        return PIXI.BLEND_MODES.NORMAL;
-    }
-
     updateMask(frame) {
         this.masks.forEach((maskData) => {
             let maskLayer = maskData.maskLayer;
 
-            if (maskLayer.isTrackMatteData) {
+            if (maskLayer.isTrackMatteData && maskLayer.maskLayer) {
                 maskLayer = maskLayer.maskLayer;
             }
 

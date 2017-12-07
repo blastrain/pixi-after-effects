@@ -8,6 +8,9 @@ export default class ImageElement extends Element {
             this.image = data.image;
             this.addChild(this.image);
         }
+        if (data.bmPIXI) {
+            this.blendMode = data.bmPIXI;
+        }
     }
 
     setupImage(assets) {
@@ -23,7 +26,11 @@ export default class ImageElement extends Element {
         let asset = this.assetMap[this.referenceId];
         if (!asset) return;
 
+        if (asset.blendMode) {
+            this.blendMode = asset.blendMode;
+        }
         this.image = new PIXI.Sprite(asset.texture);
+        this.image.blendMode = this.blendMode;
         this.addChild(this.image);
     }
 }

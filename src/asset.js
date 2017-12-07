@@ -8,6 +8,9 @@ export default class Asset {
         } else if (data.p) {
             this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + '/' + data.p);
         }
+        if (data.bmPIXI) {
+            this.blendMode = data.bmPIXI;
+        }
         this.layers = data.layers || [];
     }
 

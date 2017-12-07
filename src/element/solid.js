@@ -15,7 +15,7 @@ export default class SolidElement extends Element {
     __updateWithFrame(frame) {
         super.__updateWithFrame(frame);
         this.clear();
-        this.beginFill(this.color);
+        this.beginFill(this.color, this.opacity);
         this.drawRect(0, 0, this.sw * this.scaleX, this.sh * this.scaleY);
         this.endFill();
     }

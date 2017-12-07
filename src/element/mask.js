@@ -33,6 +33,12 @@ export default class MaskElement extends ShapeElement {
 
     setBlendModeByMaskMode(mode) {
         switch (mode) {
+        case MASK_MODE.ADDITIVE:
+            this.blendMode = PIXI.BLEND_MODES.ADD;
+            break;
+        case MASK_MODE.SUBTRACT:
+            console.log("mask mode subtract");
+            break;
         case MASK_MODE.LIGHTEN:
             this.blendMode = PIXI.BLEND_MODES.LIGHTEN;
             break;
