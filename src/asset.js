@@ -6,7 +6,7 @@ export default class Asset {
         if (data.imagePath) {
             this.texture = new PIXI.Texture.fromImage(data.imagePath);
         } else if (data.p) {
-            this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + '/' + data.p);
+            this.texture = new PIXI.Texture.fromImage(jsonPath + '/' + data.u + data.p);
         }
         if (data.bmPIXI) {
             this.blendMode = data.bmPIXI;
