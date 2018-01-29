@@ -169,7 +169,7 @@ export default class Element extends PIXI.Graphics {
 
     updateAnimationFrameByBaseFrame(animBaseFrame) {
         if (this.hasAnimatedAnchorPoint) {
-            this.animatedScales.forEach((animData) => {
+            this.animatedAnchorPoints.forEach((animData) => {
                 animData.startFrame += animBaseFrame;
                 animData.endFrame   += animBaseFrame;
             });
@@ -232,7 +232,7 @@ export default class Element extends PIXI.Graphics {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
             const easing = (animData.i && animData.o) ?
-                  BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : null;
+                  BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : (x) => x;
             return {
                 name:            animData.n,
                 startFrame:      animData.t,
@@ -267,9 +267,9 @@ export default class Element extends PIXI.Graphics {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
             const easing = (animData.i && animData.o) ?
-                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
-            let fromOpacity = 0;
-            let toOpacity   = 0;
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
+            let fromOpacity;
+            let toOpacity;
             if (animData.s && animData.e) {
                 fromOpacity = animData.s[0];
                 toOpacity   = animData.e[0];
@@ -282,8 +282,8 @@ export default class Element extends PIXI.Graphics {
                 startFrame:  animData.t,
                 endFrame:    (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:      easing,
-                fromOpacity: fromOpacity / 100.0,
-                toOpacity:   toOpacity   / 100.0,
+                fromOpacity: fromOpacity !== undefined ? fromOpacity / 100.0 : undefined,
+                toOpacity:   toOpacity   !== undefined ? toOpacity   / 100.0 : undefined,
             };
         });
     }
@@ -303,6 +303,9 @@ export default class Element extends PIXI.Graphics {
 
     createPosition(data) {
         if (!data.k && data.x && data.y) {
+            if (typeof data.x.k === 'number') {
+                return new PIXI.Point(data.x.k, data.y.k);
+            }
             return {
                 x: this.createAnimatedSeparatedPosition(data.x.k),
                 y: this.createAnimatedSeparatedPosition(data.y.k),
@@ -320,14 +323,14 @@ export default class Element extends PIXI.Graphics {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
             const easing = (animData.i && animData.o) ?
-                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
             return {
                 name:         animData.n,
                 startFrame:   animData.t,
                 endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:       easing,
-                fromPosition: animData.s ? animData.s[0] : 0,
-                toPosition:   animData.e ? animData.e[0] : 0,
+                fromPosition: animData.s ? animData.s[0] : undefined,
+                toPosition:   animData.e ? animData.e[0] : undefined,
             };
         });
     }
@@ -335,7 +338,7 @@ export default class Element extends PIXI.Graphics {
     createAnimatedPosition(data) {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
-            let easing = null;
+            let easing = (x) => x;
             if (animData.i && animData.o) {
                 if (typeof animData.i.x === 'number') {
                     easing = BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y)
@@ -349,7 +352,7 @@ export default class Element extends PIXI.Graphics {
                 endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:       easing,
                 fromPosition: animData.s,
-                toPosition:   animData.e,
+                toPosition:   animData.e ? animData.e : animData.s,
             };
         });
     }
@@ -379,14 +382,14 @@ export default class Element extends PIXI.Graphics {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
             const easing = (animData.i && animData.o) ?
-                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : null;
+                  BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
             return {
                 name:         animData.n,
                 startFrame:   animData.t,
                 endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:       easing,
-                fromRotation: animData.s ? Math.PI * animData.s[0] / 180.0 : 0,
-                toRotation:   animData.e ? Math.PI * animData.e[0] / 180.0 : 0,
+                fromRotation: animData.s ? Math.PI * animData.s[0] / 180.0 : undefined,
+                toRotation:   animData.e ? Math.PI * animData.e[0] / 180.0 : undefined,
             };
         });
     }
@@ -418,14 +421,14 @@ export default class Element extends PIXI.Graphics {
         const lastIndex = data.length - 1;
         return data.map((animData, index) => {
             const easing = (animData.i && animData.o) ?
-                  BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]) : null;
+                  BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]) : (x) => x;
             return {
                 name:       animData.n,
                 startFrame: animData.t,
                 endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
                 easing:     easing,
-                fromScale:  animData.s ? animData.s : [0],
-                toScale:    animData.e ? animData.e : [0],
+                fromScale:  animData.s,
+                toScale:    animData.e ? animData.e : animData.s,
             };
         });
     }
@@ -438,7 +441,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedAnchorPoints.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromAnchorPoint === undefined) return;
                 const anchorPointDiffX = animData.toAnchorPoint[0] - animData.fromAnchorPoint[0];
                 const anchorPointDiffY = animData.toAnchorPoint[1] - animData.fromAnchorPoint[1];
                 const totalFrame       = animData.endFrame - animData.startFrame;
@@ -466,7 +469,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedOpacities.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromOpacity === undefined) return;
                 const opacityDiff = animData.toOpacity - animData.fromOpacity;
                 const totalFrame  = animData.endFrame - animData.startFrame;
                 const playFrame   = (frame - animData.startFrame) * 1.0;
@@ -492,7 +495,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedPositions.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromPosition === undefined) return;
                 const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                 const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
                 const totalFrame   = animData.endFrame - animData.startFrame;
@@ -524,7 +527,7 @@ export default class Element extends PIXI.Graphics {
         }
         animatedPositionX.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromPosition === undefined) return;
                 const posDiff    = animData.toPosition - animData.fromPosition;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
@@ -535,7 +538,7 @@ export default class Element extends PIXI.Graphics {
         });
         animatedPositionY.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromPosition === undefined) return;
                 const posDiff    = animData.toPosition - animData.fromPosition;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
@@ -559,7 +562,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedRotations.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromRotation === undefined) return;
                 const rotDiff    = animData.toRotation - animData.fromRotation;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
@@ -584,7 +587,7 @@ export default class Element extends PIXI.Graphics {
         }
         this.animatedScales.forEach((animData) => {
             if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.easing) return;
+                if (animData.fromScale === undefined) return;
                 const scaleDiffX = animData.toScale[0] - animData.fromScale[0];
                 const scaleDiffY = animData.toScale[1] - animData.fromScale[1];
                 const totalFrame = animData.endFrame - animData.startFrame;
@@ -611,7 +614,8 @@ export default class Element extends PIXI.Graphics {
                this.hasAnimatedOpacity     ||
                this.hasAnimatedPosition    ||
                this.hasAnimatedRotation    ||
-               this.hasAnimatedScale;
+               this.hasAnimatedScale       ||
+               this.hasAnimatedSeparatedPosition;
     }
 
     update(nowTime) {
