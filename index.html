@@ -59,7 +59,7 @@
           ae.scale = new PIXI.Point(0.5, 0.5);
           ae.on("completed", (o) => { console.log("completed!", o); });
           stage.addChild(ae);
-          panel.add(menu, "frame", 0, ae.totalFrame).onChange((v) => {
+          panel.add(menu, "frame", 0, ae.outFrame).onChange((v) => {
               ae.updateWithFrame(v);
           });
       }, (err) => {
