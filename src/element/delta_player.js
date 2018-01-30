@@ -1,7 +1,8 @@
 export default class ElementDeltaPlayer {
-    constructor(frameRate, totalFrame, updater, completed) {
+    constructor(frameRate, inFrame, outFrame, updater, completed) {
         this.frameRate   = frameRate;
-        this.totalFrame  = totalFrame;
+        this.inFrame     = inFrame;
+        this.outFrame    = outFrame;
         this.isLoop      = false;
         this.isCompleted = false;
         this.updater     = updater;
@@ -20,9 +21,9 @@ export default class ElementDeltaPlayer {
         }
         if (this.isCompleted) return;
         this.elapsedTime += deltaTime;
-        let currentFrame = this.elapsedTime * this.frameRate / 1000.0;
-        if (currentFrame > this.totalFrame) {
-            currentFrame = this.totalFrame - 0.01;
+        let currentFrame = this.inFrame + this.elapsedTime * this.frameRate / 1000.0;
+        if (currentFrame > this.outFrame) {
+            currentFrame = this.outFrame - 0.01;
             if (this.isLoop) {
                 this.elapsedTime = 0;
             } else {

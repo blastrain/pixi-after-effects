@@ -1,7 +1,8 @@
 export default class ElementPlayer {
-    constructor(frameRate, totalFrame, updater, completed) {
+    constructor(frameRate, inFrame, outFrame, updater, completed) {
         this.frameRate   = frameRate;
-        this.totalFrame  = totalFrame;
+        this.inFrame     = inFrame;
+        this.outFrame    = outFrame;
         this.isLoop      = false;
         this.isCompleted = false;
         this.updater     = updater;
@@ -22,9 +23,9 @@ export default class ElementPlayer {
 
         this.nowTime      = nowTime;
         const elapsedTime = nowTime - this.firstTime;
-        let currentFrame  = elapsedTime * this.frameRate / 1000.0;
-        if (currentFrame > this.totalFrame) {
-            currentFrame = this.totalFrame - 0.01;
+        let currentFrame  = this.inFrame + elapsedTime * this.frameRate / 1000.0;
+        if (currentFrame > this.outFrame) {
+            currentFrame = this.outFrame - 0.01;
             if (this.isLoop) {
                 this.firstTime = nowTime;
             } else {

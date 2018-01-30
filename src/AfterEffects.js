@@ -24,17 +24,18 @@ export default class AfterEffects extends PIXI.Container {
     setup(data) {
         this.width       = data.w;
         this.height      = data.h;
-        this.totalFrame  = data.op;
+        this.inFrame     = data.ip;
+        this.outFrame    = data.op;
         this.frameRate   = data.fr;
         this.version     = data.v;
         this.assets      = data.assets;
         this.layers      = data.layers;
-        this.player      = new element.ElementPlayer(this.frameRate, this.totalFrame, (frame) => {
+        this.player      = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
             this.updateWithFrame(frame);
         }, () => {
             this.emit('completed', this);
         });
-        this.deltaPlayer = new element.ElementDeltaPlayer(this.frameRate, this.totalFrame, (frame) => {
+        this.deltaPlayer = new element.ElementDeltaPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
           this.updateWithFrame(frame);
         }, () => {
           this.emit('completed', this);
