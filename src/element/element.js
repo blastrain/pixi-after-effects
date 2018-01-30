@@ -37,12 +37,12 @@ export default class Element extends PIXI.Graphics {
         } else if (data.td) {
             this.isTrackMatteData = true;
         }
-        this.player = new ElementPlayer(0, this.inFrame, this.outFrame, (frame) => {
+        this.player = new ElementPlayer(0, 0, this.outFrame, (frame) => {
             this.updateWithFrameBySelfPlayer(frame);
         }, () => {
             this.emit('completed', this);
         });
-        this.deltaPlayer = new ElementDeltaPlayer(0, this.inFrame, this.outFrame, (frame) => {
+        this.deltaPlayer = new ElementDeltaPlayer(0, 0, this.outFrame, (frame) => {
             this.updateWithFrameBySelfPlayer(frame);
         }, () => {
             this.emit('completed', this);
