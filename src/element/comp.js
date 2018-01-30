@@ -87,6 +87,11 @@ export default class CompElement extends Element {
             layer.startTime += this.startTime;
             layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
         });
+        if (this.blendMode !== PIXI.BLEND_MODES.NORMAL) {
+            this.layers.forEach((layer) => {
+                layer.blendMode = this.blendMode;
+            });
+        }
         this.resolveLayerReference(this.layers, asset);
         this.layers.forEach((layer, index) => {
             if (layer.hasParent) return;

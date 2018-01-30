@@ -31,6 +31,9 @@ export default class Element extends PIXI.Graphics {
         this.hasMask      = data.hasMask;
         this.setupProperties(data.ks);
         this.blendMode    = this.toPIXIBlendMode(data.bm);
+        if (data.bmPIXI) {
+            this.blendMode = data.bmPIXI;
+        }
         if (data.tt) {
             this.hasTrackMatteType = true;
             this.trackMatteType    = data.tt;
