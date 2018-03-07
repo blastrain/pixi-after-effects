@@ -12,6 +12,7 @@ const ELEMENT_TYPE = {
     NULL:   3,
     SHAPE:  4,
     TEXT:   5,
+    MOVIE:  9,
     CAMERA: 13,
 };
 
@@ -37,6 +38,9 @@ export default class ElementFactory {
         case ELEMENT_TYPE.CAMERA:
             break;
         case ELEMENT_TYPE.NULL:
+            elem = new CompElement(data);
+            break;
+        case ELEMENT_TYPE.MOVIE:
             elem = new CompElement(data);
             break;
         default:
