@@ -41,7 +41,7 @@ export default class ElementFactory {
             elem = new CompElement(data);
             break;
         case ELEMENT_TYPE.MOVIE:
-            elem = new CompElement(data);
+            elem = new Element(data);
             break;
         default:
             console.log(data);
