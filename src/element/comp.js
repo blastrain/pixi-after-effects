@@ -28,7 +28,9 @@ export default class CompElement extends Element {
         }
         if (!this.layers) {
             this.children.forEach((child) => {
-                child.frameRate = value;
+                if (child instanceof Element) {
+                    child.frameRate = value;
+                }
             });
         } else {
             this.layers.forEach((layer) => {
@@ -174,7 +176,9 @@ export default class CompElement extends Element {
         if (!this.layers) {
             this.alpha = 1;
             this.children.forEach((child) => {
-                child.__updateWithFrame(frame);
+                if (child instanceof Element) {
+                    child.__updateWithFrame(frame);
+                }
             });
         } else {
             this.layers.forEach((layer) => {
