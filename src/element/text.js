@@ -6,6 +6,10 @@ export default class TextElement extends Element {
         super(data);
         if (data.text) {
             this.text = data.text;
+            if (data.rawText) {
+                this.rawText   = data.rawText;
+                this.text.text = data.rawText;
+            }
             this.addChild(this.text);
             return;
         }
@@ -33,6 +37,8 @@ export default class TextElement extends Element {
     }
 
     setupText(data) {
+        if (this.text) return;
+
         this.fontFamily     = data.f;
         this.fontColor      = this.toFontColor(data.fc);
         this.fontSize       = data.s;
