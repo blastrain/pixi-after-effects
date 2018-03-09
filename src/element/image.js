@@ -4,12 +4,15 @@ import Element from './element';
 export default class ImageElement extends Element {
     constructor(data) {
         super(data);
-        if (data.image) {
-            this.image = data.image;
-            this.addChild(this.image);
-        }
         if (data.bmPIXI) {
             this.blendMode = data.bmPIXI;
+        }
+        if (data.image) {
+            this.image = data.image;
+            if (this.blendMode !== PIXI.BLEND_MODES.NORMAL) {
+                this.image.blendMode = this.blendMode;
+            }
+            this.addChild(this.image);
         }
     }
 

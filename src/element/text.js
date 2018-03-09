@@ -4,7 +4,16 @@ import Element from './element';
 export default class TextElement extends Element {
     constructor(data) {
         super(data);
-        this.setupText(data.t.d.k[0].s);
+        if (data.text) {
+            this.text = data.text;
+            this.addChild(this.text);
+            return;
+        }
+        const properties = data.t.d.k[0].s;
+        if (data.rawText) {
+            properties.t = data.rawText;
+        }
+        this.setupText(properties);
     }
 
     toHex(c) {

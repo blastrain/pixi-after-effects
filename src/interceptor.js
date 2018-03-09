@@ -17,6 +17,7 @@ export default class AEDataInterceptor {
         const cfg = this.config[data.nm] || this.config[data.id];
         if (cfg) {
             if (cfg.text)      data.text      = cfg.text;
+            if (cfg.rawText)   data.rawText   = cfg.rawText;
             if (cfg.image)     data.image     = cfg.image;
             if (cfg.imagePath) data.imagePath = cfg.imagePath;
             if (cfg.events)    data.events    = cfg.events;
