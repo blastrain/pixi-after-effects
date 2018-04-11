@@ -20,6 +20,7 @@ export default class AEDataInterceptor {
             if (cfg.rawText)   data.rawText   = cfg.rawText;
             if (cfg.image)     data.image     = cfg.image;
             if (cfg.imagePath) data.imagePath = cfg.imagePath;
+            if (cfg.texture)   data.texture   = cfg.texture;
             if (cfg.events)    data.events    = cfg.events;
             if (cfg.inPoint)   data.ip        = cfg.inPoint;
             if (cfg.outPoint)  data.op        = cfg.outPoint;

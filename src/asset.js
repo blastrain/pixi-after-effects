@@ -8,6 +8,8 @@ export default class Asset {
         } else if (data.p) {
             const contents = data.u.split('/').filter(content => content !== '');
             this.texture = new PIXI.Texture.fromImage([jsonPath, ...contents, data.p].join('/'));
+        } else if (data.texture) {
+            this.texture = data.texture;
         }
         if (data.bmPIXI) {
             this.blendMode = data.bmPIXI;
