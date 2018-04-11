@@ -1,6 +1,12 @@
 import * as PIXI from 'pixi.js';
 import Element from './element';
 
+const JUSTIFICATION_TYPE = {
+    LEFT:   0,
+    RIGHT:  1,
+    CENTER: 2,
+};
+
 const ALIGN_OF_JUSTIFICATION = {
     '0': 'left',
     '1': 'right',
@@ -60,9 +66,9 @@ export default class TextElement extends Element {
             align:      ALIGN_OF_JUSTIFICATION[this.justification],
         });
         let offsetX = this.text.width - this.tracking * this.baseLineShift;
-        if (this.justification === 1) {
+        if (this.justification === JUSTIFICATION_TYPE.RIGHT) {
             offsetX = 0;
-        } else if (this.justification === 2) {
+        } else if (this.justification === JUSTIFICATION_TYPE.CENTER) {
             offsetX /= 2;
         }
         const dh = this.baseLineHeight - this.fontSize;
