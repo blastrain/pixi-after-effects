@@ -7,11 +7,10 @@ const JUSTIFICATION_TYPE = {
     CENTER: 2,
 };
 
-const ALIGN_OF_JUSTIFICATION = {
-    '0': 'left',
-    '1': 'right',
-    '2': 'center',
-};
+const ALIGN_OF_JUSTIFICATION = {};
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.LEFT]   = 'left';
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.RIGHT]  = 'right';
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.CENTER] = 'center';
 
 export default class TextElement extends Element {
     constructor(data) {
