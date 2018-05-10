@@ -76,6 +76,18 @@ export default class MaskElement extends ShapeElement {
         return maskMode;
     }
 
+    updateAnimationFrameByBaseFrame(animBaseFrame) {
+        super.updateAnimationFrameByBaseFrame(animBaseFrame);
+        if (!this.maskShapePaths) return;
+        this.maskShapePaths.forEach((shapePath) => {
+            if (!shapePath.hasAnimatedPath) return;
+            shapePath.paths.forEach((animData) => {
+                animData.startFrame += animBaseFrame;
+                animData.endFrame   += animBaseFrame;
+            });
+        });
+    }
+
     drawMask(frame, shapePath) {
         let drawnMask   = false;
         if (shapePath.hasAnimatedPath) {

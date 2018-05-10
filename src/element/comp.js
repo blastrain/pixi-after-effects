@@ -48,6 +48,7 @@ export default class CompElement extends Element {
         if (!this.masks) this.masks = [];
 
         const maskLayer = new MaskElement(layer);
+        maskLayer.updateAnimationFrameByBaseFrame(this.startTime || 0);
         layer.addChild(maskLayer);
         layer.maskLayer = maskLayer;
         this.masks.push({
