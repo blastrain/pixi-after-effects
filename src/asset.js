@@ -3,20 +3,19 @@ import * as element from './element';
 export default class Asset {
     constructor(data, jsonPath) {
         this.id = data.id;
-        if (!data.isDisused) {
-            if (data.texture) {
-                this.texture = data.texture;
-            } else if (data.imagePath) {
-                this.texture = new PIXI.Texture.fromImage(data.imagePath);
-            } else if (data.p) {
-                const contents = data.u.split('/').filter(content => content !== '');
-                this.texture = new PIXI.Texture.fromImage([jsonPath, ...contents, data.p].join('/'));
-            }
-            if (data.bmPIXI) {
-                this.blendMode = data.bmPIXI;
-            }
-        }
         this.layers = data.layers || [];
+        if (data.isDisused) return;
+        if (data.texture) {
+            this.texture = data.texture;
+        } else if (data.imagePath) {
+            this.texture = new PIXI.Texture.fromImage(data.imagePath);
+        } else if (data.p) {
+            const contents = data.u.split('/').filter(content => content !== '');
+            this.texture = new PIXI.Texture.fromImage([jsonPath, ...contents, data.p].join('/'));
+        }
+        if (data.bmPIXI) {
+            this.blendMode = data.bmPIXI;
+        }
     }
 
     createLayers() {
