@@ -98,15 +98,16 @@ export default class MaskElement extends ShapeElement {
                 if (this.isInvertedMask) this.addHole();
                 drawnMask = true;
             }
-            shapePath.paths.forEach((animData) => {
-                if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                    if (!animData.fromPath) return;
+            shapePath.paths.some((animData) => {
+                if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                    if (!animData.fromPath) return false;
                     const animatePath = this.createAnimatePath(animData, frame);
                     this.drawPath(animatePath);
                     if (this.isInvertedMask) {
                         this.addHole();
                     }
                     drawnMask = true;
+                    return true;
                 }
             });
             let lastPath = paths[paths.length - 2];

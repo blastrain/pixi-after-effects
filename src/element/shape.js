@@ -515,13 +515,14 @@ export class ShapeElement extends Element {
             frame < this.trim.end[0].startFrame) return;
 
         let trimStartRatio = 0;
-        this.trim.start.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
+        this.trim.start.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
                 const ratioDiff  = animData.toRatio - animData.fromRatio;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = frame - animData.startFrame;
                 const perFrameRatio  = 1.0 * ratioDiff / totalFrame;
                 trimStartRatio = playFrame * perFrameRatio + animData.fromRatio;
+                return true;
             }
         });
         let last = this.trim.start[this.trim.start.length - 2];
@@ -530,14 +531,15 @@ export class ShapeElement extends Element {
         }
 
         let trimEndRatio = 0;
-        this.trim.end.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (!animData.fromRatio) return;
+        this.trim.end.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (!animData.fromRatio) return false;
                 const ratioDiff  = animData.toRatio - animData.fromRatio;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = frame - animData.startFrame;
                 const perFrameRatio  = 1.0 * ratioDiff / totalFrame;
                 trimEndRatio = playFrame * perFrameRatio + animData.fromRatio;
+                return true;
             }
         });
         last = this.trim.end[this.trim.end.length - 2];
@@ -579,14 +581,15 @@ export class ShapeElement extends Element {
                     this.addHole();
                 }
             }
-            shapePath.path.paths.forEach((animData) => {
-                if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                    if (!animData.fromPath) return;
+            shapePath.path.paths.some((animData) => {
+                if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                    if (!animData.fromPath) return false;
                     const animatePath = this.createAnimatePath(animData, frame);
                     this.drawPath(animatePath);
                     if (index !== 0 && this.graphicsData.length > 1) {
                         this.addHole();
                     }
+                    return true;
                 }
             });
             let lastPath = paths[paths.length - 2];

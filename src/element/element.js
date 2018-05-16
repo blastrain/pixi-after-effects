@@ -442,9 +442,9 @@ export default class Element extends PIXI.Graphics {
             const anchorPoint = this.animatedAnchorPoints[0].fromAnchorPoint;
             this.pivot = new PIXI.Point(anchorPoint[0], anchorPoint[1]);
         }
-        this.animatedAnchorPoints.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromAnchorPoint === undefined) return;
+        this.animatedAnchorPoints.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromAnchorPoint === undefined) return false;
                 const anchorPointDiffX = animData.toAnchorPoint[0] - animData.fromAnchorPoint[0];
                 const anchorPointDiffY = animData.toAnchorPoint[1] - animData.fromAnchorPoint[1];
                 const totalFrame       = animData.endFrame - animData.startFrame;
@@ -455,6 +455,7 @@ export default class Element extends PIXI.Graphics {
                 const anchorPointY = posRatio * anchorPointDiffY + animData.fromAnchorPoint[1];
                 this.pivot = new PIXI.Point(anchorPointX, anchorPointY);
                 isAnimated = true;
+                return true;
             }
         });
         if (!isAnimated && frame > this.animatedAnchorPoints[this.animatedAnchorPoints.length - 1].endFrame) {
@@ -470,9 +471,9 @@ export default class Element extends PIXI.Graphics {
             const opacity = this.animatedOpacities[0].fromOpacity;
             this.alpha    = opacity;
         }
-        this.animatedOpacities.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromOpacity === undefined) return;
+        this.animatedOpacities.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromOpacity === undefined) return false;
                 const opacityDiff = animData.toOpacity - animData.fromOpacity;
                 const totalFrame  = animData.endFrame - animData.startFrame;
                 const playFrame   = (frame - animData.startFrame) * 1.0;
@@ -481,6 +482,7 @@ export default class Element extends PIXI.Graphics {
                 const opacity = opacityDiff * opacityRatio + animData.fromOpacity;
                 this.alpha = opacity;
                 isAnimated = true;
+                return true;
             }
         });
         if (!isAnimated && frame > this.animatedOpacities[this.animatedOpacities.length - 1].endFrame) {
@@ -496,9 +498,9 @@ export default class Element extends PIXI.Graphics {
             const position = this.animatedPositions[0].fromPosition;
             this.position  = new PIXI.Point(position[0], position[1]);
         }
-        this.animatedPositions.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromPosition === undefined) return;
+        this.animatedPositions.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromPosition === undefined) return false;
                 const posDiffX     = animData.toPosition[0] - animData.fromPosition[0];
                 const posDiffY     = animData.toPosition[1] - animData.fromPosition[1];
                 const totalFrame   = animData.endFrame - animData.startFrame;
@@ -510,6 +512,7 @@ export default class Element extends PIXI.Graphics {
                 this.x             = animData.fromPosition[0] + posX;
                 this.y             = animData.fromPosition[1] + posY;
                 isAnimated         = true;
+                return true;
             }
         });
         if (!isAnimated && frame > this.animatedPositions[this.animatedPositions.length - 1].endFrame) {
@@ -528,26 +531,28 @@ export default class Element extends PIXI.Graphics {
         if (frame < animatedPositionY[0].startFrame) {
             this.y = animatedPositionY[0].fromPosition;
         }
-        animatedPositionX.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromPosition === undefined) return;
+        animatedPositionX.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromPosition === undefined) return false;
                 const posDiff    = animData.toPosition - animData.fromPosition;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
                 const playRatio  = playFrame / totalFrame;
                 const posRatio   = animData.easing(playRatio);
                 this.x           = posDiff * posRatio + animData.fromPosition;
+                return true;
             }
         });
-        animatedPositionY.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromPosition === undefined) return;
+        animatedPositionY.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromPosition === undefined) return false;
                 const posDiff    = animData.toPosition - animData.fromPosition;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
                 const playRatio  = playFrame / totalFrame;
                 const posRatio   = animData.easing(playRatio);
                 this.y           = posDiff * posRatio + animData.fromPosition;
+                return true;
             }
         });
         if (frame > animatedPositionX[animatedPositionX.length - 1].endFrame) {
@@ -563,9 +568,9 @@ export default class Element extends PIXI.Graphics {
             const rotation = this.animatedRotations[0].fromRotation;
             this.rotation  = rotation;
         }
-        this.animatedRotations.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromRotation === undefined) return;
+        this.animatedRotations.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromRotation === undefined) return false;
                 const rotDiff    = animData.toRotation - animData.fromRotation;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = (frame - animData.startFrame) * 1.0;
@@ -573,6 +578,7 @@ export default class Element extends PIXI.Graphics {
                 const rotRatio   = animData.easing(playRatio);
                 this.rotation    = rotDiff * rotRatio + animData.fromRotation;
                 isAnimated       = true;
+                return true;
             }
         });
         if (!isAnimated && frame > this.animatedRotations[this.animatedRotations.length - 1].endFrame) {
@@ -588,9 +594,9 @@ export default class Element extends PIXI.Graphics {
             const scale = this.animatedScales[0].fromScale;
             this.scale  = new PIXI.Point(scale[0] / 100.0, scale[1] / 100.0);
         }
-        this.animatedScales.forEach((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame) {
-                if (animData.fromScale === undefined) return;
+        this.animatedScales.some((animData) => {
+            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.fromScale === undefined) return false;
                 const scaleDiffX = animData.toScale[0] - animData.fromScale[0];
                 const scaleDiffY = animData.toScale[1] - animData.fromScale[1];
                 const totalFrame = animData.endFrame - animData.startFrame;
@@ -603,6 +609,7 @@ export default class Element extends PIXI.Graphics {
                 this.scaleY = scaleY / 100.0;
                 this.scale  = new PIXI.Point(this.scaleX, this.scaleY);
                 isAnimated  = true;
+                return true;
             }
         });
         if (!isAnimated && frame > this.animatedScales[this.animatedScales.length - 1].endFrame) {
