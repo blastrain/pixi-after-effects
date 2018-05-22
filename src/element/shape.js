@@ -516,7 +516,10 @@ export class ShapeElement extends Element {
 
         let trimStartRatio = 0;
         this.trim.start.some((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+            if (animData.startFrame === animData.endFrame) {
+                return false;
+            }
+            if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 const ratioDiff  = animData.toRatio - animData.fromRatio;
                 const totalFrame = animData.endFrame - animData.startFrame;
                 const playFrame  = frame - animData.startFrame;
@@ -524,6 +527,7 @@ export class ShapeElement extends Element {
                 trimStartRatio = playFrame * perFrameRatio + animData.fromRatio;
                 return true;
             }
+            return false;
         });
         let last = this.trim.start[this.trim.start.length - 2];
         if (last.endFrame <= frame) {
@@ -532,7 +536,10 @@ export class ShapeElement extends Element {
 
         let trimEndRatio = 0;
         this.trim.end.some((animData) => {
-            if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+            if (animData.startFrame === animData.endFrame) {
+                return false;
+            }
+            if (animData.startFrame <= frame && frame <= animData.endFrame) {
                 if (!animData.fromRatio) return false;
                 const ratioDiff  = animData.toRatio - animData.fromRatio;
                 const totalFrame = animData.endFrame - animData.startFrame;
@@ -541,6 +548,7 @@ export class ShapeElement extends Element {
                 trimEndRatio = playFrame * perFrameRatio + animData.fromRatio;
                 return true;
             }
+            return false;
         });
         last = this.trim.end[this.trim.end.length - 2];
         if (last.endFrame <= frame) {
@@ -582,7 +590,10 @@ export class ShapeElement extends Element {
                 }
             }
             shapePath.path.paths.some((animData) => {
-                if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.startFrame === animData.endFrame) {
+                    return false;
+                }
+                if (animData.startFrame <= frame && frame <= animData.endFrame) {
                     if (!animData.fromPath) return false;
                     const animatePath = this.createAnimatePath(animData, frame);
                     this.drawPath(animatePath);
@@ -591,6 +602,7 @@ export class ShapeElement extends Element {
                     }
                     return true;
                 }
+                return false;
             });
             let lastPath = paths[paths.length - 2];
             if (lastPath.endFrame <= frame) {

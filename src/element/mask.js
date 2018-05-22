@@ -99,7 +99,10 @@ export default class MaskElement extends ShapeElement {
                 drawnMask = true;
             }
             shapePath.paths.some((animData) => {
-                if (animData.startFrame <= frame && frame <= animData.endFrame && animData.startFrame !== animData.endFrame) {
+                if (animData.startFrame === animData.endFrame) {
+                    return false;
+                }
+                if (animData.startFrame <= frame && frame <= animData.endFrame) {
                     if (!animData.fromPath) return false;
                     const animatePath = this.createAnimatePath(animData, frame);
                     this.drawPath(animatePath);
@@ -109,6 +112,7 @@ export default class MaskElement extends ShapeElement {
                     drawnMask = true;
                     return true;
                 }
+                return false;
             });
             let lastPath = paths[paths.length - 2];
             if (lastPath.endFrame <= frame) {
