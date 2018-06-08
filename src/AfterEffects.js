@@ -75,7 +75,7 @@ export default class AfterEffects extends PIXI.Container {
 
     updateMask(frame) {
         this.masks.forEach((maskData) => {
-            let drawnMask = maskData.maskLayer.updateWithFrame(frame);
+            let drawnMask = maskData.maskLayer.__updateWithFrame(frame);
             if (drawnMask) {
                 maskData.maskTargetLayer.mask = maskData.maskLayer;
             } else {
