@@ -697,6 +697,13 @@ export default class ShapeContainerElement extends Element {
     });
   }
 
+  set opt(value) {
+    super.opt = value;
+    this.children.forEach((child) => {
+      child.opt = value;
+    });
+  }
+
   updateAnimationFrameByBaseFrame(animBaseFrame) {
     super.updateAnimationFrameByBaseFrame(animBaseFrame);
     this.shapes.forEach((shape) => {
@@ -719,8 +726,15 @@ export default class ShapeContainerElement extends Element {
 
   __updateWithFrame(frame) {
     super.__updateWithFrame(frame);
-    this.children.forEach((child) => {
-      child.__updateWithFrame(frame);
+    this.children.forEach((layer, index) => {
+      if (this.noreplay && layer.outFrame < frame) {
+        layer.destroy();
+        layer = null;
+        this.children.splice(index, 1);
+        return;
+      }
+
+      layer.__updateWithFrame(frame);
     });
   }
 }

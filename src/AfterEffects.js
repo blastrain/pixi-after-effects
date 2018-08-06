@@ -4,24 +4,24 @@ import Asset        from './asset';
 import AEDataLoader from './loader';
 
 export default class AfterEffects extends PIXI.Container {
-  constructor(jsonPath) {
+  constructor(jsonPath, opt) {
     super();
     this.finder = new element.ElementFinder();
     if (!jsonPath) return;
     AEDataLoader.loadJSON(jsonPath).then((data) => {
-      this.setup(data);
+      this.setup(data, opt || {});
     }, (err) => {
       console.log(err);
     });
   }
 
-  static fromData(data) {
+  static fromData(data, opt) {
     const ae = new AfterEffects();
-    ae.setup(data);
+    ae.setup(data, opt || {});
     return ae;
   }
 
-  setup(data) {
+  setup(data, opt) {
     this.width     = data.w;
     this.height    = data.h;
     this.inFrame   = data.ip;
@@ -39,6 +39,9 @@ export default class AfterEffects extends PIXI.Container {
     }, () => {
       this.emit('completed', this);
     });
+    Object.keys(opt).forEach((key) => {
+      this[key] = opt[key];
+    });
 
     let layerIndexMap = {};
     layers.forEach((layer) => {
@@ -47,9 +50,10 @@ export default class AfterEffects extends PIXI.Container {
 
     layers.reverse().forEach((layer) => {
       layer.frameRate = this.frameRate;
+      layer.opt       = opt;
       if (layer.hasMask) {
         if (!this.masks) this.masks = [];
-        
+
         const maskLayer = new element.MaskElement(layer);
         this.addChild(layer);
         layer.addChild(maskLayer);
@@ -103,7 +107,13 @@ export default class AfterEffects extends PIXI.Container {
     if (this.masks) {
       this.updateMask(frame);
     }
-    this.children.forEach((layer) => {
+    this.children.forEach((layer, index) => {
+      if (this.noreplay && layer.outFrame < frame) {
+        layer.destroy();
+        layer = null;
+        this.children.splice(index, 1);
+        return;
+      }
       layer.updateWithFrame(frame);
     });
   }

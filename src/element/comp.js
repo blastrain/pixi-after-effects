@@ -19,27 +19,35 @@ export default class CompElement extends Element {
     this.autoOriented = data.ao;
   }
 
-  set frameRate(value) {
-    super.frameRate = value;
+  allLayers() {
+    let layers = [];
     if (this.masks) {
-      this.masks.forEach((maskData) => {
-        maskData.maskLayer.frameRate = value;
-      });
+      layers.concat(this.masks.map((maskData) => {
+        return maskData.maskLayer;
+      }));
     }
     if (!this.layers) {
-      this.children.forEach((child) => {
+      layers.concat(this.children.map((child) => {
         if (child instanceof Element) {
-          child.frameRate = value;
+          return child;
         }
-      });
+        return null;
+      }).filter((layer) => layer !== null));
     } else {
-      this.layers.forEach((layer) => {
-        layer.frameRate = value;
-      });
+      layers.concat(this.layers);
     }
-    this.clonedLayers.forEach((layer) => {
-      layer.frameRate = value;
-    });
+    layers.concat(this.clonedLayers);
+    return layers;
+  }
+
+  set frameRate(value) {
+    super.frameRate = value;
+    this.allLayers().forEach((layer) => layer.frameRate = value);
+  }
+
+  set opt(value) {
+    super.opt = value;
+    this.allLayers().forEach((layer) => layer.opt = value);
   }
 
   addMaskLayer(layer) {
@@ -87,7 +95,7 @@ export default class CompElement extends Element {
         layer.blendMode = this.blendMode;
       });
     }
-    this.resolveLayerReference(this.layers, assetMap);
+    this.resolveLayerReference(this.layers, assetMap, asset);
     this.layers.forEach((layer, index) => {
       if (layer.hasParent) return;
 
@@ -133,14 +141,14 @@ export default class CompElement extends Element {
     return parentLayer;
   }
 
-  resolveLayerReference(layers, assetMap) {
+  resolveLayerReference(layers, assetMap, asset) {
     layers.sort((a, b) => {
       if (a.index < b.index) return -1;
       if (a.index > b.index) return 1;
       return 0;
     });
     layers.reverse().forEach((layer) => {
-      const parentLayer = this.createParentLayer(layer, assetMap);
+      const parentLayer = this.createParentLayer(layer, asset);
       if (parentLayer) this.clonedLayers.push(parentLayer);
     });
     layers.forEach((layer) => {
@@ -176,17 +184,37 @@ export default class CompElement extends Element {
     }
     if (!this.layers) {
       this.alpha = 1;
-      this.children.forEach((child) => {
-        if (child instanceof Element) {
-          child.__updateWithFrame(frame);
+      this.children.forEach((layer, index) => {
+        if (layer instanceof Element) {
+          if (this.noreplay && layer.outFrame < frame) {
+            layer.destroy();
+            layer = null;
+            this.children.splice(index, 1);
+            return;
+          }
+
+          layer.__updateWithFrame(frame);
         }
       });
     } else {
-      this.layers.forEach((layer) => {
+      this.layers.forEach((layer, index) => {
+        if (this.noreplay && layer.outFrame < frame) {
+          layer.destroy();
+          layer = null;
+          this.layers.splice(index, 1);
+          return;
+        }
         layer.__updateWithFrame(frame);
       });
     }
-    this.clonedLayers.forEach((layer) => {
+    this.clonedLayers.forEach((layer, index) => {
+      if (this.noreplay && layer.outFrame < frame) {
+        layer.destroy();
+        layer = null;
+        this.clonedLayers.splice(index, 1);
+        return;
+      }
+
       layer.__updateWithFrame(frame);
       layer.visible = true;
     });

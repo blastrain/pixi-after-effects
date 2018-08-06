@@ -130,6 +130,12 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  set opt(value) {
+    Object.keys(value).forEach((key) => {
+      this[key] = value[key];
+    });
+  }
+
   isInteractiveEvent(eventName) {
     if (!this.interactiveEventMap) {
       const interactiveEvents = [
