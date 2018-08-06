@@ -28,8 +28,8 @@ export default class AfterEffects extends PIXI.Container {
     this.outFrame    = data.op;
     this.frameRate   = data.fr;
     this.version     = data.v;
-    this.assets      = data.assets;
     this.layers      = data.layers;
+
     this.player      = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
       this.updateWithFrame(frame);
     }, () => {

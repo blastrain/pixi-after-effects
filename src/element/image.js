@@ -16,17 +16,11 @@ export default class ImageElement extends Element {
     }
   }
 
-  setupImage(assets) {
+  setupImage(assetMap) {
     if (this.image) return;
-
-    this.assets = assets;
-    this.assetMap = {};
-    assets.forEach((asset) => {
-      this.assetMap[asset.id] = asset;
-    });
     if (!this.referenceId) return;
 
-    let asset = this.assetMap[this.referenceId];
+    let asset = assetMap[this.referenceId];
     if (!asset) return;
 
     if (asset.blendMode) {

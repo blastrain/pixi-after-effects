@@ -42,11 +42,15 @@ export default class AEDataLoader {
   }
 
   static resolveReference(layers, assets) {
+    const assetMap = {};
+    assets.forEach((asset) => {
+      assetMap[asset.id] = asset;
+    });
     layers.forEach((layer) => {
       if (layer.isCompType()) {
-        layer.setupReference(assets);
+        layer.setupReference(assetMap);
       } else if (layer.isImageType()) {
-        layer.setupImage(assets);
+        layer.setupImage(assetMap);
       }
     });
   }

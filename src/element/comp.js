@@ -69,15 +69,10 @@ export default class CompElement extends Element {
     });
   }
 
-  setupReference(assets) {
-    this.assets   = assets;
-    this.assetMap = {};
-    assets.forEach((asset) => {
-      this.assetMap[asset.id] = asset;
-    });
+  setupReference(assetMap) {
     if (!this.referenceId) return;
 
-    let asset = this.assetMap[this.referenceId];
+    let asset = assetMap[this.referenceId];
     if (!asset) return;
 
     this.layers = asset.createLayers();
@@ -92,7 +87,7 @@ export default class CompElement extends Element {
         layer.blendMode = this.blendMode;
       });
     }
-    this.resolveLayerReference(this.layers, asset);
+    this.resolveLayerReference(this.layers, assetMap);
     this.layers.forEach((layer, index) => {
       if (layer.hasParent) return;
 
@@ -138,21 +133,21 @@ export default class CompElement extends Element {
     return parentLayer;
   }
 
-  resolveLayerReference(layers, asset) {
+  resolveLayerReference(layers, assetMap) {
     layers.sort((a, b) => {
       if (a.index < b.index) return -1;
       if (a.index > b.index) return 1;
       return 0;
     });
     layers.reverse().forEach((layer) => {
-      const parentLayer = this.createParentLayer(layer, asset);
+      const parentLayer = this.createParentLayer(layer, assetMap);
       if (parentLayer) this.clonedLayers.push(parentLayer);
     });
     layers.forEach((layer) => {
       if (layer.isCompType()) {
-        layer.setupReference(this.assets);
+        layer.setupReference(assetMap);
       } else if (layer.isImageType()) {
-        layer.setupImage(this.assets);
+        layer.setupImage(assetMap);
       }
     });
   }
