@@ -22,15 +22,14 @@ export default class AfterEffects extends PIXI.Container {
   }
 
   setup(data) {
-    this.width       = data.w;
-    this.height      = data.h;
-    this.inFrame     = data.ip;
-    this.outFrame    = data.op;
-    this.frameRate   = data.fr;
-    this.version     = data.v;
-    this.layers      = data.layers;
-
-    this.player      = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
+    this.width     = data.w;
+    this.height    = data.h;
+    this.inFrame   = data.ip;
+    this.outFrame  = data.op;
+    this.frameRate = data.fr;
+    this.version   = data.v;
+    const layers   = data.layers;
+    this.player    = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
       this.updateWithFrame(frame);
     }, () => {
       this.emit('completed', this);
@@ -42,11 +41,11 @@ export default class AfterEffects extends PIXI.Container {
     });
 
     let layerIndexMap = {};
-    this.layers.forEach((layer) => {
+    layers.forEach((layer) => {
       layerIndexMap[layer.index] = layer;
     });
 
-    this.layers.reverse().forEach((layer) => {
+    layers.reverse().forEach((layer) => {
       layer.frameRate = this.frameRate;
       if (layer.hasMask) {
         if (!this.masks) this.masks = [];
@@ -85,17 +84,17 @@ export default class AfterEffects extends PIXI.Container {
   }
 
   update(nowTime) {
-    if (!this.layers) return;
+    if (!this.children) return;
     this.player.update(nowTime);
-    this.layers.forEach((layer) => {
+    this.children.forEach((layer) => {
       layer.update(nowTime);
     });
   }
 
   updateByDelta(deltaTime) {
-    if (!this.layers) return;
+    if (!this.children) return;
     this.deltaPlayer.update(deltaTime);
-    this.layers.forEach((layer) => {
+    this.children.forEach((layer) => {
       layer.updateByDelta(deltaTime);
     });
   }
@@ -104,7 +103,7 @@ export default class AfterEffects extends PIXI.Container {
     if (this.masks) {
       this.updateMask(frame);
     }
-    this.layers.forEach((layer) => {
+    this.children.forEach((layer) => {
       layer.updateWithFrame(frame);
     });
   }
