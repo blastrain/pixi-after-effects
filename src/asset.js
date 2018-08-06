@@ -21,12 +21,12 @@ export default class Asset {
   createLayers() {
     return this.layers.map((layer) => {
       return element.ElementFactory.create(layer);
-    }).filter((layer) => { return layer !== null });
+    }).filter((layer) => { return layer !== null; });
   }
 
   createLayerByIndex(index) {
     const foundLayers = this.layers.filter((layer) => {
-      return layer.ind === index
+      return layer.ind === index;
     });
     if (foundLayers.length === 0) return null;
 

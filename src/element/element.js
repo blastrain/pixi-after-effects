@@ -9,7 +9,7 @@ const TRACK_MATTE_TYPE = {
   ALPHA:          1,
   ALPHA_INVERTED: 2,
   LUMA:           3,
-  LUMA_INVERTED:  4,
+  LUMA_INVERTED:  4
 };
 
 export default class Element extends PIXI.Graphics {
@@ -644,7 +644,7 @@ export default class Element extends PIXI.Graphics {
       const scale = this.animatedScales[this.animatedScales.length - 2].toScale;
       this.scale  = new PIXI.Point(scale[0] / 100.0, scale[1] / 100.0);
     }
-    return isAnimated
+    return isAnimated;
   }
 
   hasAnimateProperty() {

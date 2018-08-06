@@ -53,7 +53,7 @@ export default class CompElement extends Element {
     layer.maskLayer = maskLayer;
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: maskLayer,
+      maskLayer: maskLayer
     });
   }
 
@@ -65,7 +65,7 @@ export default class CompElement extends Element {
     if (!this.masks) this.masks = [];
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: trackMatteLayer,
+      maskLayer: trackMatteLayer
     });
   }
 

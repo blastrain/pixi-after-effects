@@ -8,7 +8,7 @@ export default class AEDataLoader {
     return new Promise((resolve, reject) => {
       request.get(jsonPath).end((err, res) => {
         if (err) return reject(err);
-        resolve(AEDataLoader.load(res.body, jsonPath, null));
+        return resolve(AEDataLoader.load(res.body, jsonPath, null));
       });
     });
   }
@@ -18,10 +18,10 @@ export default class AEDataLoader {
       if (!interceptor) {
         return reject(new Error("required interceptor parameter"));
       }
-      request.get(jsonPath).end((err, res) => {
+      return request.get(jsonPath).end((err, res) => {
         if (err) return reject(err);
         const data = res.body;
-        resolve(AEDataLoader.load(data, jsonPath, interceptor));
+        return resolve(AEDataLoader.load(data, jsonPath, interceptor));
       });
     });
   }
@@ -30,7 +30,7 @@ export default class AEDataLoader {
     return data.layers.map((layer) => {
       if (interceptor) interceptor.intercept(layer);
       return element.ElementFactory.create(layer);
-    }).filter((layer) => { return layer !== null });
+    }).filter((layer) => { return layer !== null; });
   }
 
   static loadAssets(data, jsonPath, interceptor) {
@@ -42,10 +42,6 @@ export default class AEDataLoader {
   }
 
   static resolveReference(layers, assets) {
-    let layerIndexMap = {};
-    layers.forEach((layer) => {
-      layerIndexMap[layer.index] = layer;
-    });
     layers.forEach((layer) => {
       if (layer.isCompType()) {
         layer.setupReference(assets);
