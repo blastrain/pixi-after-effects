@@ -70,14 +70,19 @@ export default class AEDataLoader {
     return new Promise((resolve, reject) => {
       const loader = this.createImageLoader(imageAssets);
       imageAssets.forEach((asset) => {
-        loader.add(asset.id, asset.imagePath);
+        if (loader.resources[asset.imagePath]) {
+          asset.texture = loader.resources[asset.imagePath].texture;
+          return;
+        }
+
+        loader.add(asset.imagePath, asset.imagePath);
       });
       loader.onError.add((error, loader, resource) => {
         reject(error, resource);
       });
       loader.load((loader, resources) => {
         imageAssets.forEach((asset) => {
-          asset.texture = resources[asset.id].texture;
+          asset.texture = resources[asset.imagePath].texture;
         });
         resolve();
       });
