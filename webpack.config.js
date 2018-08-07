@@ -36,9 +36,7 @@ module.exports = {
       type: 'var'
     }),
     new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        drop_console: true
-      }
+      sourceMap: false
     })
   ],
 
