@@ -8,7 +8,7 @@ module.exports = {
   output: {
     publicPath: '/',
     path: path.resolve(__dirname, 'dist'),
-    filename: 'pixi-ae.js',
+    filename: 'pixi-ae.js'
   },
   module: {
     rules: [

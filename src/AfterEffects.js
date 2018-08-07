@@ -29,6 +29,10 @@ export default class AfterEffects extends PIXI.Container {
     this.frameRate = data.fr;
     this.version   = data.v;
     this.layers    = data.layers;
+    this.textures  = data.assets.filter(asset => !!asset.texture).map(asset => asset.texture);
+    this.textureCacheIds = this.textures.
+      filter(texture => texture.textureCacheIds && texture.textureCacheIds.length > 0).
+      map(texture => texture.textureCacheIds[0]);
     this.player    = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
       this.updateWithFrame(frame);
     }, () => {

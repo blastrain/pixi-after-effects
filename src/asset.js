@@ -1,17 +1,24 @@
 import * as element from './element';
 
 export default class Asset {
-  constructor(data, jsonPath) {
+  constructor(loader, data, jsonPath) {
     this.id = data.id;
     this.layers = data.layers || [];
     if (data.isDisused) return;
     if (data.texture) {
       this.texture = data.texture;
     } else if (data.imagePath) {
-      this.texture = new PIXI.Texture.fromImage(data.imagePath);
+      this.imagePath = data.imagePath;
+      if (loader.imagePathProxy) {
+        this.imagePath = loader.imagePathProxy(data.imagePath);
+      }
     } else if (data.p) {
       const contents = data.u.split('/').filter(content => content !== '');
-      this.texture = new PIXI.Texture.fromImage([jsonPath, ...contents, data.p].join('/'));
+      let imagePath  = [jsonPath, ...contents, data.p].join('/');
+      if (loader.imagePathProxy) {
+        imagePath = loader.imagePathProxy(imagePath);
+      }
+      this.imagePath = imagePath;
     }
     if (data.bmPIXI) {
       this.blendMode = data.bmPIXI;

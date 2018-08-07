@@ -1,19 +1,32 @@
+import * as PIXI from 'pixi.js';
 import * as element from './element';
 import Asset from './asset';
 
 const request = require('superagent');
 
 export default class AEDataLoader {
-  static loadJSON(jsonPath) {
+  constructor() {
+
+  }
+
+  imagePathProxy(imagePath) {
+    return imagePath;
+  }
+
+  loadJSON(jsonPath) {
     return new Promise((resolve, reject) => {
       request.get(jsonPath).end((err, res) => {
         if (err) return reject(err);
-        return resolve(AEDataLoader.load(res.body, jsonPath, null));
+        return this.load(res.body, jsonPath, null).then(() => {
+          resolve(res.body);
+        }).catch((e) => {
+          reject(err);
+        });
       });
     });
   }
 
-  static loadJSONWithInterceptor(jsonPath, interceptor) {
+  loadJSONWithInterceptor(jsonPath, interceptor) {
     return new Promise((resolve, reject) => {
       if (!interceptor) {
         return reject(new Error("required interceptor parameter"));
@@ -21,27 +34,57 @@ export default class AEDataLoader {
       return request.get(jsonPath).end((err, res) => {
         if (err) return reject(err);
         const data = res.body;
-        return resolve(AEDataLoader.load(data, jsonPath, interceptor));
+        return this.load(data, jsonPath, interceptor).then(() => {
+          resolve(data);
+        }).catch((e) => {
+          reject(e);
+        });
       });
     });
   }
 
-  static loadLayers(data, interceptor) {
+  loadLayers(data, interceptor) {
     return data.layers.map((layer) => {
       if (interceptor) interceptor.intercept(layer);
       return element.ElementFactory.create(layer);
     }).filter((layer) => { return layer !== null; });
   }
 
-  static loadAssets(data, jsonPath, interceptor) {
+  loadAssets(data, jsonPath, interceptor) {
     const baseName = jsonPath.split('/').slice(0, -1).join('/');
-    return data.assets.map((asset) => {
+    const assets = data.assets.map((asset) => {
       if (interceptor) interceptor.intercept(asset);
-      return new Asset(asset, baseName);
+      return new Asset(this, asset, baseName);
+    });
+    const imageAssets = assets.filter((asset) => {
+      return !!asset.imagePath;
+    });
+    return this.loadImages(imageAssets).then(() => assets);
+  }
+
+  createImageLoader(imageAssets) {
+    return new PIXI.loaders.Loader('', imageAssets.length);
+  }
+
+  loadImages(imageAssets) {
+    return new Promise((resolve, reject) => {
+      const loader = this.createImageLoader(imageAssets);
+      imageAssets.forEach((asset) => {
+        loader.add(asset.id, asset.imagePath);
+      });
+      loader.onError.add((error, loader, resource) => {
+        reject(error, resource);
+      });
+      loader.load((loader, resources) => {
+        imageAssets.forEach((asset) => {
+          asset.texture = resources[asset.id].texture;
+        });
+        resolve();
+      });
     });
   }
 
-  static resolveReference(layers, assets) {
+  resolveReference(layers, assets) {
     const assetMap = {};
     assets.forEach((asset) => {
       assetMap[asset.id] = asset;
@@ -55,12 +98,13 @@ export default class AEDataLoader {
     });
   }
 
-  static load(data, jsonPath, interceptor) {
-    const assets = AEDataLoader.loadAssets(data, jsonPath, interceptor);
-    const layers = AEDataLoader.loadLayers(data, interceptor);
-    AEDataLoader.resolveReference(layers, assets);
-    data.assets  = assets;
-    data.layers  = layers;
-    return data;
+  load(data, jsonPath, interceptor) {
+    return this.loadAssets(data, jsonPath, interceptor).
+      then((assets) => {
+        const layers = this.loadLayers(data, interceptor);
+        this.resolveReference(layers, assets);
+        data.assets  = assets;
+        data.layers  = layers;
+      });
   }
 }
