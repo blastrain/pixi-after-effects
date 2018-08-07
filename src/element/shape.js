@@ -733,14 +733,20 @@ export default class ShapeContainerElement extends Element {
 
   __updateWithFrame(frame) {
     super.__updateWithFrame(frame);
-    this.children = this.children.filter((layer) => {
-      if (this.noreplay && layer.outFrame < frame) {
-        layer.destroy();
-        return false;
-      }
+    if (this.noreplay) {
+      this.children = this.children.filter((layer) => {
+        if (layer.outFrame < frame) {
+          layer.destroy();
+          return false;
+        }
 
-      layer.__updateWithFrame(frame);
-      return true;
-    });
+        layer.__updateWithFrame(frame);
+        return true;
+      });
+    } else {
+      this.children.forEach((layer) => {
+        layer.__updateWithFrame(frame);
+      });
+    }
   }
 }

@@ -183,35 +183,59 @@ export default class CompElement extends Element {
     }
     if (!this.layers) {
       this.alpha = 1;
-      this.children = this.children.filter((layer) => {
-        if (layer instanceof Element) {
-          if (this.noreplay && layer.outFrame < frame) {
+      if (this.noreplay) {
+        this.children = this.children.filter((layer) => {
+          if (layer instanceof Element) {
+            if (layer.outFrame < frame) {
+              layer.destroy({ children: true });
+              return false;
+            }
+            layer.__updateWithFrame(frame);
+          }
+          return true;
+        });
+      } else {
+        this.children.forEach((layer) => {
+          if (layer instanceof Element) {
+            layer.__updateWithFrame(frame);
+          }
+        });
+      }
+    } else {
+      if (this.noreplay) {
+        this.layers = this.layers.filter((layer) => {
+          if (layer.outFrame < frame) {
+            this.removeChild(layer);
             layer.destroy({ children: true });
             return false;
           }
           layer.__updateWithFrame(frame);
-        }
-        return true;
-      });
-    } else {
-      this.layers = this.layers.filter((layer) => {
-        if (this.noreplay && layer.outFrame < frame) {
+          return true;
+        });
+      } else {
+        this.layers.forEach((layer) => {
+          layer.__updateWithFrame(frame);
+        });
+      }
+    }
+
+    if (this.noreplay) {
+      this.clonedLayers = this.clonedLayers.filter((layer) => {
+        if (layer.outFrame < frame) {
+          this.removeChild(layer);
           layer.destroy({ children: true });
           return false;
         }
+
         layer.__updateWithFrame(frame);
+        layer.visible = true;
         return true;
       });
+    } else {
+      this.clonedLayers.forEach((layer) => {
+        layer.__updateWithFrame(frame);
+        layer.visible = true;
+      });
     }
-    this.clonedLayers = this.clonedLayers.filter((layer) => {
-      if (this.noreplay && layer.outFrame < frame) {
-        layer.destroy({ children: true });
-        return false;
-      }
-
-      layer.__updateWithFrame(frame);
-      layer.visible = true;
-      return true;
-    });
   }
 }
