@@ -691,7 +691,7 @@ export default class ShapeContainerElement extends Element {
   }
 
   destroy(opt) {
-    const children = this.children;
+    const children = this.children.concat();
     children.forEach((child) => {
       child.destroy(opt);
       this.removeChild(child);
@@ -735,7 +735,7 @@ export default class ShapeContainerElement extends Element {
   __updateWithFrame(frame) {
     super.__updateWithFrame(frame);
     if (this.noreplay) {
-      const children = this.children;
+      const children = this.children.concat();
       children.forEach((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);

@@ -184,7 +184,7 @@ export default class CompElement extends Element {
     if (!this.layers) {
       this.alpha = 1;
       if (this.noreplay) {
-        const children = this.children;
+        const children = this.children.concat();
         children.forEach((layer) => {
           if (layer instanceof Element) {
             if (layer.outFrame < frame) {
