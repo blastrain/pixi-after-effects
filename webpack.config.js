@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ExternalsPlugin   = require('webpack-externals-plugin');
 
 module.exports = {
   devtool: 'source-map',
@@ -31,10 +30,6 @@ module.exports = {
       { from: 'node_modules/dat.gui/build/dat.gui.min.js' },
       { from: 'examples', to: 'examples' }
     ]),
-    new ExternalsPlugin({
-      include: path.join(__dirname, 'node_modules', 'pixi.js'),
-      type: 'var'
-    }),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: false
     })
