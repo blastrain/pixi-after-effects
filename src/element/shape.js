@@ -691,10 +691,11 @@ export default class ShapeContainerElement extends Element {
   }
 
   destroy(opt) {
-    this.children.forEach((child) => {
+    const children = this.children;
+    children.forEach((child) => {
       child.destroy(opt);
+      this.removeChild(child);
     });
-    this.children = [];
   }
 
   set frameRate(value) {
@@ -734,8 +735,10 @@ export default class ShapeContainerElement extends Element {
   __updateWithFrame(frame) {
     super.__updateWithFrame(frame);
     if (this.noreplay) {
-      this.children = this.children.filter((layer) => {
+      const children = this.children;
+      children.forEach((layer) => {
         if (layer.outFrame < frame) {
+          this.removeChild(layer);
           layer.destroy();
           return false;
         }

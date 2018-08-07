@@ -111,7 +111,7 @@ export default class AfterEffects extends PIXI.Container {
       this.layers = this.layers.filter((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
-          layer.destroy({ children: true });
+          layer.destroy();
           return false;
         }
         layer.updateWithFrame(frame);

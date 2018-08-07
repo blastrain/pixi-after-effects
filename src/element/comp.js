@@ -184,15 +184,16 @@ export default class CompElement extends Element {
     if (!this.layers) {
       this.alpha = 1;
       if (this.noreplay) {
-        this.children = this.children.filter((layer) => {
+        const children = this.children;
+        children.forEach((layer) => {
           if (layer instanceof Element) {
             if (layer.outFrame < frame) {
-              layer.destroy({ children: true });
-              return false;
+              this.removeChild(layer);
+              layer.destroy();
+              return;
             }
             layer.__updateWithFrame(frame);
           }
-          return true;
         });
       } else {
         this.children.forEach((layer) => {
@@ -206,7 +207,7 @@ export default class CompElement extends Element {
         this.layers = this.layers.filter((layer) => {
           if (layer.outFrame < frame) {
             this.removeChild(layer);
-            layer.destroy({ children: true });
+            layer.destroy();
             return false;
           }
           layer.__updateWithFrame(frame);
@@ -223,7 +224,7 @@ export default class CompElement extends Element {
       this.clonedLayers = this.clonedLayers.filter((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
-          layer.destroy({ children: true });
+          layer.destroy();
           return false;
         }
 
