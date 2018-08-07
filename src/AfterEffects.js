@@ -107,11 +107,10 @@ export default class AfterEffects extends PIXI.Container {
     if (this.masks) {
       this.updateMask(frame);
     }
-    this.children.forEach((layer, index) => {
+    this.children.forEach((layer) => {
       if (this.noreplay && layer.outFrame < frame) {
-        layer.destroy();
-        layer = null;
-        this.children.splice(index, 1);
+        this.removeChild(layer);
+        layer.destroy({ children: true });
         return;
       }
       layer.updateWithFrame(frame);

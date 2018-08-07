@@ -690,6 +690,13 @@ export default class ShapeContainerElement extends Element {
     });
   }
 
+  destroy(opt) {
+    this.children.forEach((child) => {
+      this.removeChild(child);
+      child.destroy(opt);
+    });
+  }
+
   set frameRate(value) {
     super.frameRate = value;
     this.children.forEach((child) => {
@@ -729,7 +736,6 @@ export default class ShapeContainerElement extends Element {
     this.children.forEach((layer, index) => {
       if (this.noreplay && layer.outFrame < frame) {
         layer.destroy();
-        layer = null;
         this.children.splice(index, 1);
         return;
       }
