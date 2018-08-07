@@ -22,22 +22,21 @@ export default class CompElement extends Element {
   allLayers() {
     let layers = [];
     if (this.masks) {
-      layers.concat(this.masks.map((maskData) => {
+      layers = layers.concat(this.masks.map((maskData) => {
         return maskData.maskLayer;
       }));
     }
     if (!this.layers) {
-      layers.concat(this.children.map((child) => {
+      layers = layers.concat(this.children.map((child) => {
         if (child instanceof Element) {
           return child;
         }
         return null;
       }).filter((layer) => layer !== null));
     } else {
-      layers.concat(this.layers);
+      layers = layers.concat(this.layers);
     }
-    layers.concat(this.clonedLayers);
-    return layers;
+    return layers.concat(this.clonedLayers);
   }
 
   set frameRate(value) {
@@ -184,35 +183,35 @@ export default class CompElement extends Element {
     }
     if (!this.layers) {
       this.alpha = 1;
-      this.children.forEach((layer) => {
+      this.children = this.children.filter((layer) => {
         if (layer instanceof Element) {
           if (this.noreplay && layer.outFrame < frame) {
-            this.removeChild(layer);
             layer.destroy({ children: true });
-            return;
+            return false;
           }
           layer.__updateWithFrame(frame);
         }
+        return true;
       });
     } else {
-      this.layers.forEach((layer, index) => {
+      this.layers = this.layers.filter((layer) => {
         if (this.noreplay && layer.outFrame < frame) {
           layer.destroy({ children: true });
-          this.layers.splice(index, 1);
-          return;
+          return false;
         }
         layer.__updateWithFrame(frame);
+        return true;
       });
     }
-    this.clonedLayers.forEach((layer, index) => {
+    this.clonedLayers = this.clonedLayers.filter((layer) => {
       if (this.noreplay && layer.outFrame < frame) {
         layer.destroy({ children: true });
-        this.clonedLayers.splice(index, 1);
-        return;
+        return false;
       }
 
       layer.__updateWithFrame(frame);
       layer.visible = true;
+      return true;
     });
   }
 }

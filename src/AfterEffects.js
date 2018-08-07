@@ -28,7 +28,7 @@ export default class AfterEffects extends PIXI.Container {
     this.outFrame  = data.op;
     this.frameRate = data.fr;
     this.version   = data.v;
-    const layers   = data.layers;
+    this.layers    = data.layers;
     this.player    = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
       this.updateWithFrame(frame);
     }, () => {
@@ -44,11 +44,11 @@ export default class AfterEffects extends PIXI.Container {
     });
 
     let layerIndexMap = {};
-    layers.forEach((layer) => {
+    this.layers.forEach((layer) => {
       layerIndexMap[layer.index] = layer;
     });
 
-    layers.reverse().forEach((layer) => {
+    this.layers.reverse().forEach((layer) => {
       layer.frameRate = this.frameRate;
       layer.opt       = opt;
       if (layer.hasMask) {
@@ -88,17 +88,17 @@ export default class AfterEffects extends PIXI.Container {
   }
 
   update(nowTime) {
-    if (!this.children) return;
+    if (!this.layers) return;
     this.player.update(nowTime);
-    this.children.forEach((layer) => {
+    this.layers.forEach((layer) => {
       layer.update(nowTime);
     });
   }
 
   updateByDelta(deltaTime) {
-    if (!this.children) return;
+    if (!this.layers) return;
     this.deltaPlayer.update(deltaTime);
-    this.children.forEach((layer) => {
+    this.layers.forEach((layer) => {
       layer.updateByDelta(deltaTime);
     });
   }
@@ -107,13 +107,13 @@ export default class AfterEffects extends PIXI.Container {
     if (this.masks) {
       this.updateMask(frame);
     }
-    this.children.forEach((layer) => {
+    this.layers = this.layers.filter((layer) => {
       if (this.noreplay && layer.outFrame < frame) {
-        this.removeChild(layer);
         layer.destroy({ children: true });
-        return;
+        return false;
       }
       layer.updateWithFrame(frame);
+      return true;
     });
   }
 
