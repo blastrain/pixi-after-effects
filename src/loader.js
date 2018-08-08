@@ -59,6 +59,9 @@ export default class AEDataLoader {
     const imageAssets = assets.filter((asset) => {
       return !!asset.imagePath;
     });
+    if (imageAssets.length === 0) {
+      return new Promise(resolve => resolve(assets));
+    }
     return this.loadImages(imageAssets).then(() => assets);
   }
 
@@ -69,18 +72,23 @@ export default class AEDataLoader {
   loadImages(imageAssets) {
     return new Promise((resolve, reject) => {
       const loader = this.createImageLoader(imageAssets);
-      imageAssets.forEach((asset) => {
-        if (loader.resources[asset.imagePath]) {
-          asset.texture = loader.resources[asset.imagePath].texture;
-          return;
-        }
 
+      // if override createImageLoader and use shared PIXI.Loaders,
+      // possibly loader.resources has already loaded resource
+      const requiredLoadAssets = imageAssets.filter((asset) => !loader.resources[asset.imagePath]);
+      if (requiredLoadAssets.length === 0) {
+        imageAssets.forEach((asset) => {
+          asset.texture = loader.resources[asset.imagePath].texture;
+        });
+        return resolve();
+      }
+      requiredLoadAssets.forEach((asset) => {
         loader.add(asset.imagePath, asset.imagePath);
       });
       loader.onError.add((error, loader, resource) => {
         reject(error, resource);
       });
-      loader.load((loader, resources) => {
+      return loader.load((loader, resources) => {
         imageAssets.forEach((asset) => {
           asset.texture = resources[asset.imagePath].texture;
         });
