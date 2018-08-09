@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import {ShapeElement} from './shape';
+import { ShapeElement } from './shape';
 
 const MASK_MODE = {
   NONE:       0,
@@ -30,7 +30,7 @@ export default class MaskElement extends ShapeElement {
     this.fill = { enabled: true };
   }
 
-  setBlendModeByMaskMode(mode) {
+  static setBlendModeByMaskMode(mode) {
     switch (mode) {
     case MASK_MODE.ADDITIVE:
       this.blendMode = PIXI.BLEND_MODES.ADD;
@@ -47,10 +47,12 @@ export default class MaskElement extends ShapeElement {
     case MASK_MODE.DEFFERENCE:
       this.blendMode = PIXI.BLEND_MODES.DEFFERENCE;
       break;
+    default:
+      break;
     }
   }
 
-  toMaskMode(mode) {
+  static toMaskMode(mode) {
     let maskMode = MASK_MODE.ADDITIVE;
     switch (mode) {
     case 'n':
@@ -70,6 +72,8 @@ export default class MaskElement extends ShapeElement {
       break;
     case 'f':
       maskMode = MASK_MODE.DIFFERENCE;
+      break;
+    default:
       break;
     }
     return maskMode;
@@ -91,7 +95,7 @@ export default class MaskElement extends ShapeElement {
     let drawnMask   = false;
     if (shapePath.hasAnimatedPath) {
       this.isClosed = shapePath.isClosed;
-      let paths     = shapePath.paths;
+      const paths     = shapePath.paths;
       if (frame < shapePath.paths[0].startFrame) {
         this.drawPath(shapePath.paths[0].fromPath);
         if (this.isInvertedMask) this.addHole();
@@ -113,7 +117,7 @@ export default class MaskElement extends ShapeElement {
         }
         return false;
       });
-      let lastPath = paths[paths.length - 2];
+      const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
         this.drawPath(lastPath.toPath);
         if (this.isInvertedMask) this.addHole();
@@ -164,7 +168,7 @@ export default class MaskElement extends ShapeElement {
   }
 
   __updateWithFrame(frame) {
-    if (this.maskMode == MASK_MODE.NONE) return false;
+    if (this.maskMode === MASK_MODE.NONE) return false;
     this.clear();
     return this.drawAllMask(frame);
   }

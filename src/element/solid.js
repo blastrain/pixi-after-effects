@@ -7,7 +7,7 @@ export default class SolidElement extends Element {
     this.sw    = data.sw;
     this.sh    = data.sh;
     if (this.color.startsWith('#')) {
-      this.color = '0x' + this.color.substr(1);
+      this.color = `0x${this.color.substr(1)}`;
     }
   }
 

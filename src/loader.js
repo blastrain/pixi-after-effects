@@ -1,14 +1,10 @@
 import * as PIXI from 'pixi.js';
+import request from 'superagent';
 import * as element from './element';
 import Asset from './asset';
-import request from 'superagent';
 
 export default class AEDataLoader {
-  constructor() {
-
-  }
-
-  imagePathProxy(imagePath) {
+  static imagePathProxy(imagePath) {
     return imagePath;
   }
 
@@ -42,11 +38,11 @@ export default class AEDataLoader {
     });
   }
 
-  loadLayers(data, interceptor) {
+  static loadLayers(data, interceptor) {
     return data.layers.map((layer) => {
       if (interceptor) interceptor.intercept(layer);
       return element.ElementFactory.create(layer);
-    }).filter((layer) => { return layer !== null; });
+    }).filter(layer => layer !== null);
   }
 
   loadAssets(data, jsonPath, interceptor) {
@@ -64,7 +60,7 @@ export default class AEDataLoader {
     return this.loadImages(imageAssets).then(() => assets);
   }
 
-  createImageLoader(imageAssets) {
+  static createImageLoader(imageAssets) {
     return new PIXI.loaders.Loader('', imageAssets.length);
   }
 
@@ -74,7 +70,7 @@ export default class AEDataLoader {
 
       // if override createImageLoader and use shared PIXI.Loaders,
       // possibly loader.resources has already loaded resource
-      const requiredLoadAssets = imageAssets.filter((asset) => !loader.resources[asset.imagePath]);
+      const requiredLoadAssets = imageAssets.filter(asset => !loader.resources[asset.imagePath]);
       if (requiredLoadAssets.length === 0) {
         imageAssets.forEach((asset) => {
           asset.texture = loader.resources[asset.imagePath].texture;
@@ -84,19 +80,17 @@ export default class AEDataLoader {
       requiredLoadAssets.forEach((asset) => {
         loader.add(asset.imagePath, asset.imagePath);
       });
-      loader.onError.add((error, loader, resource) => {
+      loader.onError.add((error, _, resource) => {
         reject(error, resource);
       });
-      return loader.load((loader, resources) => {
-        imageAssets.forEach((asset) => {
-          asset.texture = resources[asset.imagePath].texture;
-        });
+      return loader.load((_, resources) => {
+        imageAssets.forEach(asset => asset.texture = resources[asset.imagePath].texture);
         resolve();
       });
     });
   }
 
-  resolveReference(layers, assets) {
+  static resolveReference(layers, assets) {
     const assetMap = {};
     assets.forEach((asset) => {
       assetMap[asset.id] = asset;
@@ -111,8 +105,8 @@ export default class AEDataLoader {
   }
 
   load(data, jsonPath, interceptor) {
-    return this.loadAssets(data, jsonPath, interceptor).
-      then((assets) => {
+    return this.loadAssets(data, jsonPath, interceptor)
+      .then((assets) => {
         const layers = this.loadLayers(data, interceptor);
         this.resolveReference(layers, assets);
         data.assets  = assets;

@@ -1,15 +1,15 @@
 import * as PIXI from 'pixi.js';
+import BezierEasing from 'bezier-easing';
 import AfterEffects  from '../AfterEffects';
 import ElementFinder from './finder';
 import ElementPlayer from './player';
 import ElementDeltaPlayer from './delta_player';
-import BezierEasing from 'bezier-easing';
 
 const TRACK_MATTE_TYPE = {
   ALPHA:          1,
   ALPHA_INVERTED: 2,
   LUMA:           3,
-  LUMA_INVERTED:  4
+  LUMA_INVERTED:  4,
 };
 
 export default class Element extends PIXI.Graphics {
@@ -22,7 +22,7 @@ export default class Element extends PIXI.Graphics {
     this.type         = data.ty;
     this.isCompleted  = data.completed;
     this.index        = data.ind;
-    this.hasParent    = data.hasOwnProperty('parent');
+    this.hasParent    = Object.prototype.hasOwnProperty.call(data, 'parent');
     this.parentIndex  = data.parent;
     this.inFrame      = data.ip;
     this.outFrame     = data.op;
@@ -61,8 +61,8 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
-  toPIXIBlendMode(mode) {
-    switch(mode) {
+  static toPIXIBlendMode(mode) {
+    switch (mode) {
     case 0:
       return PIXI.BLEND_MODES.NORMAL;
     case 1:
@@ -95,6 +95,8 @@ export default class Element extends PIXI.Graphics {
       return PIXI.BLEND_MODES.COLOR;
     case 15:
       return PIXI.BLEND_MODES.LUMINOSITY;
+    default:
+      break;
     }
     return PIXI.BLEND_MODES.NORMAL;
   }
@@ -117,8 +119,8 @@ export default class Element extends PIXI.Graphics {
   }
 
   isInvertTrackMatteType() {
-    return this.trackMatteType == TRACK_MATTE_TYPE.ALPHA_INVERTED ||
-      this.trackMatteType == TRACK_MATTE_TYPE.LUMA_INVERTED;
+    return this.trackMatteType === TRACK_MATTE_TYPE.ALPHA_INVERTED
+      || this.trackMatteType === TRACK_MATTE_TYPE.LUMA_INVERTED;
   }
 
   set frameRate(value) {
@@ -229,22 +231,21 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
-  createAnchorPoint(data) {
+  static createAnchorPoint(data) {
     if (typeof data.k[0] === 'number') {
       return new PIXI.Point(data.k[0], data.k[1]);
-    } else {
-      return this.createAnimatedAnchorPoint(data.k);
     }
+    return this.createAnimatedAnchorPoint(data.k);
   }
 
-  createAnchorPointEasing(animData) {
+  static createAnchorPointEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
     }
-    return (x) => x;
+    return x => x;
   }
 
-  createAnimatedAnchorPoint(data) {
+  static createAnimatedAnchorPoint(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
       return {
@@ -272,19 +273,18 @@ export default class Element extends PIXI.Graphics {
     const opacity = data.k;
     if (typeof opacity === 'number') {
       return opacity / 100.0;
-    } else {
-      return this.createAnimatedOpacity(data.k);
     }
+    return this.createAnimatedOpacity(data.k);
   }
 
-  createOpacityEasing(animData) {
+  static createOpacityEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
     }
-    return (x) => x;
+    return x => x;
   }
 
-  createAnimatedOpacity(data) {
+  static createAnimatedOpacity(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
       let fromOpacity;
@@ -333,16 +333,15 @@ export default class Element extends PIXI.Graphics {
     const pos = data.k;
     if (typeof pos[0] === 'number') {
       return new PIXI.Point(pos[0], pos[1]);
-    } else {
-      return this.createAnimatedPosition(data.k);
     }
+    return this.createAnimatedPosition(data.k);
   }
 
-  createSeparatedPositionEasing(animData) {
+  static createSeparatedPositionEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
     }
-    return (x) => x;
+    return x => x;
   }
 
   createAnimatedSeparatedPosition(data) {
@@ -359,9 +358,9 @@ export default class Element extends PIXI.Graphics {
     });
   }
 
-  createPositionEasing(animData) {
+  static createPositionEasing(animData) {
     if (!animData.i || !animData.o) {
-      return (x) => x;
+      return x => x;
     }
     if (typeof animData.i.x === 'number') {
       return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
@@ -399,16 +398,15 @@ export default class Element extends PIXI.Graphics {
     const rotation = data.k;
     if (typeof rotation === 'number') {
       return Math.PI * rotation / 180.0;
-    } else {
-      return this.createAnimatedRotation(data.k);
     }
+    return this.createAnimatedRotation(data.k);
   }
 
-  createRotationEasing(animData) {
+  static createRotationEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
     }
-    return (x) => x;
+    return x => x;
   }
 
   createAnimatedRotation(data) {
@@ -443,19 +441,18 @@ export default class Element extends PIXI.Graphics {
       const scaleX = scale[0] / 100.0;
       const scaleY = scale[1] / 100.0;
       return new PIXI.Point(scaleX, scaleY);
-    } else {
-      return this.createAnimatedScale(data.k);
     }
+    return this.createAnimatedScale(data.k);
   }
 
-  createScaleEasing(animData) {
+  static createScaleEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]);
     }
-    return (x) => x;
+    return x => x;
   }
 
-  createAnimatedScale(data) {
+  static createAnimatedScale(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
       return {
@@ -681,12 +678,12 @@ export default class Element extends PIXI.Graphics {
   }
 
   hasAnimateProperty() {
-    return this.hasAnimatedAnchorPoint ||
-      this.hasAnimatedOpacity     ||
-      this.hasAnimatedPosition    ||
-      this.hasAnimatedRotation    ||
-      this.hasAnimatedScale       ||
-      this.hasAnimatedSeparatedPosition;
+    return this.hasAnimatedAnchorPoint
+    || this.hasAnimatedOpacity
+    || this.hasAnimatedPosition
+    || this.hasAnimatedRotation
+    || this.hasAnimatedScale
+    || this.hasAnimatedSeparatedPosition;
   }
 
   update(nowTime) {

@@ -20,7 +20,7 @@ export default class ImageElement extends Element {
     if (this.image) return;
     if (!this.referenceId) return;
 
-    let asset = assetMap[this.referenceId];
+    const asset = assetMap[this.referenceId];
     if (!asset) return;
 
     if (asset.blendMode) {

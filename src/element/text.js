@@ -31,18 +31,18 @@ export default class TextElement extends Element {
     this.setupText(properties);
   }
 
-  toHex(c) {
+  static toHex(c) {
     if (c <= 1) {
       c *= 255;
       c  = Math.floor(c);
     }
-    var hex = c.toString(16);
-    return hex.length == 1 ? '0' + hex : hex;
+    const hex = c.toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
   }
 
   toFontColor(data) {
     if (data.length > 0) {
-      return '0x' + this.toHex(data[0]) + this.toHex(data[1]) + this.toHex(data[2]);
+      return `0x${this.toHex(data[0])}${this.toHex(data[1])}${this.toHex(data[2])}`;
     }
     return 0xFFFFFF;
   }

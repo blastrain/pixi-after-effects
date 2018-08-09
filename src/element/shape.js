@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
-import Element from './element';
 import BezierEasing from 'bezier-easing';
+import Element from './element';
 
 export class ShapeElement extends Element {
   constructor(data, inFrame, outFrame, startTime) {
@@ -56,7 +56,7 @@ export class ShapeElement extends Element {
 
   setupPath(data) {
     if (!this.shapePaths) this.shapePaths = [];
-    let shapePath = {};
+    const shapePath = {};
     shapePath.isClosed = data.closed;
     shapePath.name     = data.nm;
     shapePath.path     = this.createPath(data.ks.k);
@@ -64,7 +64,7 @@ export class ShapeElement extends Element {
   }
 
   setupStroke(data) {
-    let stroke  = {};
+    const stroke  = {};
     stroke.lineCap     = data.lc;
     stroke.lineJoin    = data.lj;
     stroke.miterLimit  = data.ml;
@@ -76,7 +76,7 @@ export class ShapeElement extends Element {
   }
 
   setupTrim(data) {
-    let trim = {};
+    const trim = {};
     trim.m     = data.m;
     trim.o     = data.o;
     trim.name  = data.nm;
@@ -95,11 +95,11 @@ export class ShapeElement extends Element {
     return this.createTrimAnimation(data);
   }
 
-  createTrimEasing(animData) {
+  static createTrimEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
     }
-    return (x) => x;
+    return x => x;
   }
 
   createTrimAnimation(data) {
@@ -118,7 +118,7 @@ export class ShapeElement extends Element {
 
   setupRect(data) {
     if (!this.rects) this.rects = [];
-    let rect = {};
+    const rect = {};
     rect.name      = data.nm;
     rect.direction = data.d;
     rect.position  = this.createPosition(data.p);
@@ -128,10 +128,10 @@ export class ShapeElement extends Element {
     }
     this.rects.push(rect);
   }
-  
+
   setupEllipse(data) {
     if (!this.ellipses) this.ellipses = [];
-    let ellipse = {};
+    const ellipse = {};
     ellipse.direction = data.d;
     ellipse.position  = this.createPosition(data.p);
     ellipse.size      = this.createSize(data.s);
@@ -148,16 +148,15 @@ export class ShapeElement extends Element {
   createColor(data) {
     if (typeof data.k[0] === 'number') {
       return this.rgbArrayToHex(data.k);
-    } else {
-      return this.createAnimatedColor(data.k);
     }
+    return this.createAnimatedColor(data.k);
   }
 
-  createColorEasing(animData) {
+  static createColorEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
     }
-    return (x) => x;
+    return x => x;
   }
 
   createAnimatedColor(data) {
@@ -174,11 +173,11 @@ export class ShapeElement extends Element {
     });
   }
 
-  createPathEasing(animData) {
+  static createPathEasing(animData) {
     if (animData.i && animData.o) {
       return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
     }
-    return (x) => x;
+    return x => x;
   }
 
   createPathByAnimation(data) {
@@ -194,43 +193,46 @@ export class ShapeElement extends Element {
           fromPath:   animData.s ? this.createPath(animData.s[0]) : null,
           toPath:     animData.e ? this.createPath(animData.e[0]) : null,
         };
-      })
+      }),
     };
   }
 
   createPath(data) {
     if (!data.v) return this.createPathByAnimation(data);
-    data = JSON.parse(JSON.stringify(data)); //TODO: more smartly clone data
-    let path = {};
+
+    // TODO: more smartly clone data
+    data = JSON.parse(JSON.stringify(data));
+
+    const path = {};
     data.v.forEach((_v, index) => {
       data.i[index][0] += data.v[index][0];
       data.i[index][1] += data.v[index][1];
       data.o[index][0] += data.v[index][0];
       data.o[index][1] += data.v[index][1];
-      if (index == 0) return;
+      if (index === 0) return;
       const cp  = data.o[index - 1];
       const cp2 = data.i[index];
       const to  = data.v[index];
-      if (index == 1) {
+      if (index === 1) {
         path.moveTo = new PIXI.Point(data.v[0][0], data.v[0][1]);
       }
       if (!path.bezierCurveToPaths) path.bezierCurveToPaths = [];
       path.bezierCurveToPaths.push({
         cp:  new PIXI.Point(cp[0], cp[1]),
         cp2: new PIXI.Point(cp2[0], cp2[1]),
-        to:  new PIXI.Point(to[0], to[1])
+        to:  new PIXI.Point(to[0], to[1]),
       });
     });
     path.bezierCurveToPaths.push({
       cp:  new PIXI.Point(data.o[data.v.length - 1][0], data.o[data.v.length - 1][1]),
       cp2: new PIXI.Point(data.i[0][0], data.i[0][1]),
-      to:  new PIXI.Point(data.v[0][0], data.v[0][1])
+      to:  new PIXI.Point(data.v[0][0], data.v[0][1]),
     });
     return path;
   }
 
   setupFill(data) {
-    let fill     = {};
+    const fill     = {};
     fill.color   = this.createColor(data.c);
     fill.enabled = true;
     fill.name    = data.nm;
@@ -243,16 +245,16 @@ export class ShapeElement extends Element {
   }
 
   rgbToHex(r, g, b) {
-    return '0x' + this.toHex(r) + this.toHex(g) + this.toHex(b);
+    return `0x${this.toHex(r)}${this.toHex(g)}${this.toHex(b)}`;
   }
 
-  toHex(c) {
+  static toHex(c) {
     if (c <= 1) {
       c *= 255;
       c  = Math.floor(c);
     }
-    var hex = c.toString(16);
-    return hex.length == 1 ? '0' + hex : hex;
+    const hex = c.toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
   }
 
   updateAnimationFrameByBaseFrame(animBaseFrame) {
@@ -320,7 +322,7 @@ export class ShapeElement extends Element {
         this.beginFill(this.fillColorHex);
       }
       this.lineStyle(this.stroke.width, this.strokeColorHex);
-      //TODO: ignore miterLimit and lineCap and lineJoin
+      // TODO: ignore miterLimit and lineCap and lineJoin
     } else if (this.fill) {
       if (this.fill.enabled) {
         this.beginFill(this.fillColorHex);
@@ -361,7 +363,7 @@ export class ShapeElement extends Element {
     this.afterDraw();
   }
 
-  createAnimatePos(animData, frame, fromPos, toPos) {
+  static createAnimatePos(animData, frame, fromPos, toPos) {
     const totalFrame = animData.endFrame - animData.startFrame;
     const playFrame  = (frame - animData.startFrame) * 1.0;
     const posDiffX   = toPos.x - fromPos.x;
@@ -384,8 +386,8 @@ export class ShapeElement extends Element {
         const cp  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp, toBezierCurveToPath.cp);
         const cp2 = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp2, toBezierCurveToPath.cp2);
         const to  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.to, toBezierCurveToPath.to);
-        return { cp: cp, cp2: cp2, to: to };
-      })
+        return { cp, cp2, to };
+      }),
     };
   }
 
@@ -435,7 +437,7 @@ export class ShapeElement extends Element {
     }
   }
 
-  createShapePosition(frame, shape) {
+  static createShapePosition(frame, shape) {
     if (shape.position.length > 0) {
       let pos = null;
       shape.position.forEach((animData) => {
@@ -460,7 +462,7 @@ export class ShapeElement extends Element {
     return shape.position;
   }
 
-  createShapeSize(frame, shape) {
+  static createShapeSize(frame, shape) {
     if (shape.size.length > 0) {
       let size = null;
       shape.size.forEach((animData) => {
@@ -523,8 +525,7 @@ export class ShapeElement extends Element {
       return;
     }
 
-    if (frame < this.trim.start[0].startFrame &&
-        frame < this.trim.end[0].startFrame) return;
+    if (frame < this.trim.start[0].startFrame && frame < this.trim.end[0].startFrame) return;
 
     let trimStartRatio = 0;
     this.trim.start.some((animData) => {
@@ -594,7 +595,7 @@ export class ShapeElement extends Element {
   drawShapePath(frame, shapePath, index) {
     if (shapePath.path.hasAnimatedPath) {
       this.isClosed = shapePath.isClosed;
-      let paths     = shapePath.path.paths;
+      const paths = shapePath.path.paths;
       if (frame < paths[0].startFrame) {
         this.drawPath(paths[0].fromPath);
         if (index !== 0 && this.graphicsData.length > 1) {
@@ -616,7 +617,7 @@ export class ShapeElement extends Element {
         }
         return false;
       });
-      let lastPath = paths[paths.length - 2];
+      const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
         this.drawPath(lastPath.toPath);
         if (index !== 0 && this.graphicsData.length > 1) {
@@ -734,7 +735,7 @@ export default class ShapeContainerElement extends Element {
   }
 
   setupBounds(data) {
-    let bounds = {};
+    const bounds = {};
     bounds.top    = data.t;
     bounds.bottom = data.b;
     bounds.left   = data.l;

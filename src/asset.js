@@ -26,15 +26,13 @@ export default class Asset {
   }
 
   createLayers() {
-    return this.layers.map((layer) => {
-      return element.ElementFactory.create(layer);
-    }).filter((layer) => { return layer !== null; });
+    return this.layers
+      .map(layer => element.ElementFactory.create(layer))
+      .filter(layer => layer !== null);
   }
 
   createLayerByIndex(index) {
-    const foundLayers = this.layers.filter((layer) => {
-      return layer.ind === index;
-    });
+    const foundLayers = this.layers.filter(layer => layer.ind === index);
     if (foundLayers.length === 0) return null;
 
     return element.ElementFactory.create(foundLayers[0]);

@@ -22,9 +22,7 @@ export default class CompElement extends Element {
   allLayers() {
     let layers = [];
     if (this.masks) {
-      layers = layers.concat(this.masks.map((maskData) => {
-        return maskData.maskLayer;
-      }));
+      layers = layers.concat(this.masks.map(maskData => maskData.maskLayer));
     }
     if (!this.layers) {
       layers = layers.concat(this.children.map((child) => {
@@ -32,7 +30,7 @@ export default class CompElement extends Element {
           return child;
         }
         return null;
-      }).filter((layer) => layer !== null));
+      }).filter(layer => layer !== null));
     } else {
       layers = layers.concat(this.layers);
     }
@@ -41,12 +39,12 @@ export default class CompElement extends Element {
 
   set frameRate(value) {
     super.frameRate = value;
-    this.allLayers().forEach((layer) => layer.frameRate = value);
+    this.allLayers().forEach(layer => layer.frameRate = value);
   }
 
   set opt(value) {
     super.opt = value;
-    this.allLayers().forEach((layer) => layer.opt = value);
+    this.allLayers().forEach(layer => layer.opt = value);
   }
 
   addMaskLayer(layer) {
@@ -60,7 +58,7 @@ export default class CompElement extends Element {
     layer.maskLayer = maskLayer;
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: maskLayer
+      maskLayer,
     });
   }
 
@@ -72,14 +70,14 @@ export default class CompElement extends Element {
     if (!this.masks) this.masks = [];
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: trackMatteLayer
+      maskLayer: trackMatteLayer,
     });
   }
 
   setupReference(assetMap) {
     if (!this.referenceId) return;
 
-    let asset = assetMap[this.referenceId];
+    const asset = assetMap[this.referenceId];
     if (!asset) return;
 
     this.layers = asset.createLayers();
@@ -167,7 +165,7 @@ export default class CompElement extends Element {
         maskLayer = maskLayer.maskLayer;
       }
 
-      let drawnMask = maskLayer.__updateWithFrame(frame);
+      const drawnMask = maskLayer.__updateWithFrame(frame);
       if (drawnMask) {
         maskData.maskTargetLayer.mask = maskLayer;
       } else {
@@ -176,50 +174,48 @@ export default class CompElement extends Element {
     });
   }
 
-  __updateWithFrame(frame) {
-    super.__updateWithFrame(frame);
-    if (this.masks) {
-      this.updateMask(frame);
-    }
-    if (!this.layers) {
-      this.alpha = 1;
-      if (this.noreplay) {
-        const children = this.children.concat();
-        children.forEach((layer) => {
-          if (layer instanceof Element) {
-            if (layer.outFrame < frame) {
-              this.removeChild(layer);
-              layer.destroy();
-              return;
-            }
-            layer.__updateWithFrame(frame);
-          }
-        });
-      } else {
-        this.children.forEach((layer) => {
-          if (layer instanceof Element) {
-            layer.__updateWithFrame(frame);
-          }
-        });
-      }
-    } else {
-      if (this.noreplay) {
-        this.layers = this.layers.filter((layer) => {
+  updateNotLayers(frame) {
+    this.alpha = 1;
+    if (this.noreplay) {
+      const children = this.children.concat();
+      children.forEach((layer) => {
+        if (layer instanceof Element) {
           if (layer.outFrame < frame) {
             this.removeChild(layer);
             layer.destroy();
-            return false;
+            return;
           }
           layer.__updateWithFrame(frame);
-          return true;
-        });
-      } else {
-        this.layers.forEach((layer) => {
-          layer.__updateWithFrame(frame);
-        });
-      }
+        }
+      });
+      return;
     }
+    this.children.forEach((layer) => {
+      if (layer instanceof Element) {
+        layer.__updateWithFrame(frame);
+      }
+    });
+  }
 
+  updateLayers(frame) {
+    if (this.noreplay) {
+      this.layers = this.layers.filter((layer) => {
+        if (layer.outFrame < frame) {
+          this.removeChild(layer);
+          layer.destroy();
+          return false;
+        }
+        layer.__updateWithFrame(frame);
+        return true;
+      });
+      return;
+    }
+    this.layers.forEach((layer) => {
+      layer.__updateWithFrame(frame);
+    });
+  }
+
+  updateClonedLayers(frame) {
     if (this.noreplay) {
       this.clonedLayers = this.clonedLayers.filter((layer) => {
         if (layer.outFrame < frame) {
@@ -232,11 +228,25 @@ export default class CompElement extends Element {
         layer.visible = true;
         return true;
       });
-    } else {
-      this.clonedLayers.forEach((layer) => {
-        layer.__updateWithFrame(frame);
-        layer.visible = true;
-      });
+      return;
     }
+    this.clonedLayers.forEach((layer) => {
+      layer.__updateWithFrame(frame);
+      layer.visible = true;
+    });
+  }
+
+  __updateWithFrame(frame) {
+    super.__updateWithFrame(frame);
+    if (this.masks) {
+      this.updateMask(frame);
+    }
+    if (!this.layers) {
+      this.updateNotLayers(frame);
+    } else {
+      this.updateLayers(frame);
+    }
+
+    this.updateClonedLayers(frame);
   }
 }

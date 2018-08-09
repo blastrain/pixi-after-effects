@@ -3,7 +3,6 @@ import * as element from './element';
 import AEDataLoader from './loader';
 
 export default class AfterEffects extends PIXI.Container {
-
   constructor() {
     super();
     this.finder = new element.ElementFinder();
@@ -23,18 +22,18 @@ export default class AfterEffects extends PIXI.Container {
   }
 
   setup(data, opt) {
-    this.width     = data.w;
-    this.height    = data.h;
-    this.inFrame   = data.ip;
-    this.outFrame  = data.op;
+    this.width = data.w;
+    this.height = data.h;
+    this.inFrame = data.ip;
+    this.outFrame = data.op;
     this.frameRate = data.fr;
-    this.version   = data.v;
-    this.layers    = data.layers;
-    this.textures  = data.assets.filter(asset => !!asset.texture).map(asset => asset.texture);
-    this.textureCacheIds = this.textures.
-      filter(texture => texture.textureCacheIds && texture.textureCacheIds.length > 0).
-      map(texture => texture.textureCacheIds[0]);
-    this.player    = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
+    this.version = data.v;
+    this.layers = data.layers;
+    this.textures = data.assets.filter(asset => !!asset.texture).map(asset => asset.texture);
+    this.textureCacheIds = this.textures
+      .filter(texture => texture.textureCacheIds && texture.textureCacheIds.length > 0)
+      .map(texture => texture.textureCacheIds[0]);
+    this.player = new element.ElementPlayer(this.frameRate, this.inFrame, this.outFrame, (frame) => {
       this.updateWithFrame(frame);
     }, () => {
       this.emit('completed', this);
@@ -48,7 +47,7 @@ export default class AfterEffects extends PIXI.Container {
       this[key] = opt[key];
     });
 
-    let layerIndexMap = {};
+    const layerIndexMap = {};
     this.layers.forEach((layer) => {
       layerIndexMap[layer.index] = layer;
     });
@@ -64,7 +63,7 @@ export default class AfterEffects extends PIXI.Container {
         layer.addChild(maskLayer);
         this.masks.push({
           maskTargetLayer: layer,
-          maskLayer: maskLayer,
+          maskLayer,
         });
       } else if (layer.hasParent) {
         const parentLayer = layerIndexMap[layer.parentIndex];
@@ -83,7 +82,7 @@ export default class AfterEffects extends PIXI.Container {
 
   updateMask(frame) {
     this.masks.forEach((maskData) => {
-      let drawnMask = maskData.maskLayer.__updateWithFrame(frame);
+      const drawnMask = maskData.maskLayer.__updateWithFrame(frame);
       if (drawnMask) {
         maskData.maskTargetLayer.mask = maskData.maskLayer;
       } else {
