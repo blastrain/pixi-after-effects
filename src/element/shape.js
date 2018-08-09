@@ -70,7 +70,7 @@ export class ShapeElement extends Element {
     stroke.miterLimit  = data.ml;
     stroke.opacity     = data.o.k;
     stroke.width       = data.w.k;
-    stroke.color       = this.createColor(data.c);
+    stroke.color       = ShapeElement.createColor(data.c);
     stroke.enabledFill = data.fillEnabled;
     this.stroke        = stroke;
   }
@@ -80,19 +80,19 @@ export class ShapeElement extends Element {
     trim.m     = data.m;
     trim.o     = data.o;
     trim.name  = data.nm;
-    trim.start = this.createTrim(data.s.k);
-    trim.end   = this.createTrim(data.e.k);
+    trim.start = ShapeElement.createTrim(data.s.k);
+    trim.end   = ShapeElement.createTrim(data.e.k);
     if (trim.start.length > 0) {
       trim.enabledAnimation = true;
     }
     this.trim  = trim;
   }
 
-  createTrim(data) {
+  static createTrim(data) {
     if (typeof data === 'number') {
       return data;
     }
-    return this.createTrimAnimation(data);
+    return ShapeElement.createTrimAnimation(data);
   }
 
   static createTrimEasing(animData) {
@@ -102,14 +102,14 @@ export class ShapeElement extends Element {
     return x => x;
   }
 
-  createTrimAnimation(data) {
+  static createTrimAnimation(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
       return {
         name:       animData.n,
         startFrame: animData.t,
         endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:     this.createTrimEasing(animData),
+        easing:     ShapeElement.createTrimEasing(animData),
         fromRatio:  animData.s ? animData.s[0] : null,
         toRatio:    animData.e ? animData.e[0] : null,
       };
@@ -121,8 +121,8 @@ export class ShapeElement extends Element {
     const rect = {};
     rect.name      = data.nm;
     rect.direction = data.d;
-    rect.position  = this.createPosition(data.p);
-    rect.size      = this.createSize(data.s);
+    rect.position  = ShapeElement.createPosition(data.p);
+    rect.size      = ShapeElement.createSize(data.s);
     if (rect.position.length > 0 || rect.size.length > 0) {
       rect.enabledAnimation = true;
     }
@@ -133,23 +133,23 @@ export class ShapeElement extends Element {
     if (!this.ellipses) this.ellipses = [];
     const ellipse = {};
     ellipse.direction = data.d;
-    ellipse.position  = this.createPosition(data.p);
-    ellipse.size      = this.createSize(data.s);
+    ellipse.position  = ShapeElement.createPosition(data.p);
+    ellipse.size      = ShapeElement.createSize(data.s);
     if (ellipse.position.length > 0 || ellipse.size.length > 0) {
       ellipse.enabledAnimation = true;
     }
     this.ellipses.push(ellipse);
   }
 
-  createSize(data) {
-    return this.createPosition(data);
+  static createSize(data) {
+    return ShapeElement.createPosition(data);
   }
 
-  createColor(data) {
+  static createColor(data) {
     if (typeof data.k[0] === 'number') {
-      return this.rgbArrayToHex(data.k);
+      return ShapeElement.rgbArrayToHex(data.k);
     }
-    return this.createAnimatedColor(data.k);
+    return ShapeElement.createAnimatedColor(data.k);
   }
 
   static createColorEasing(animData) {
@@ -159,16 +159,16 @@ export class ShapeElement extends Element {
     return x => x;
   }
 
-  createAnimatedColor(data) {
+  static createAnimatedColor(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
       return {
         name:       animData.n,
         startFrame: animData.t,
         endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:     this.createColorEasing(animData),
-        fromColor:  animData.s ? this.rgbArrayToHex(animData.s) : '0x000000',
-        toColor:    animData.e ? this.rgbArrayToHex(animData.e) : '0x000000',
+        easing:     ShapeElement.createColorEasing(animData),
+        fromColor:  animData.s ? ShapeElement.rgbArrayToHex(animData.s) : '0x000000',
+        toColor:    animData.e ? ShapeElement.rgbArrayToHex(animData.e) : '0x000000',
       };
     });
   }
@@ -189,7 +189,7 @@ export class ShapeElement extends Element {
           name:       animData.n,
           startFrame: animData.t,
           endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
-          easing:     this.createPathEasing(animData),
+          easing:     ShapeElement.createPathEasing(animData),
           fromPath:   animData.s ? this.createPath(animData.s[0]) : null,
           toPath:     animData.e ? this.createPath(animData.e[0]) : null,
         };
@@ -233,19 +233,20 @@ export class ShapeElement extends Element {
 
   setupFill(data) {
     const fill     = {};
-    fill.color   = this.createColor(data.c);
+    fill.color   = ShapeElement.createColor(data.c);
     fill.enabled = true;
     fill.name    = data.nm;
-    fill.opacity = this.createOpacity(data.o);
+    fill.opacity = ShapeElement.createOpacity(data.o);
     this.fill    = fill;
   }
 
-  rgbArrayToHex(arr) {
-    return this.rgbToHex(arr[0], arr[1], arr[2]);
+  static rgbArrayToHex(arr) {
+    return ShapeElement.rgbToHex(arr[0], arr[1], arr[2]);
   }
 
-  rgbToHex(r, g, b) {
-    return `0x${this.toHex(r)}${this.toHex(g)}${this.toHex(b)}`;
+  static rgbToHex(r, g, b) {
+    const toHex = ShapeElement.toHex;
+    return `0x${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
 
   static toHex(c) {
@@ -375,17 +376,17 @@ export class ShapeElement extends Element {
     return new PIXI.Point(posX, posY);
   }
 
-  createAnimatePath(animData, frame) {
+  static createAnimatePath(animData, frame) {
     const fromPath   = animData.fromPath;
     const toPath     = animData.toPath;
     return {
-      moveTo: this.createAnimatePos(animData, frame, fromPath.moveTo, toPath.moveTo),
+      moveTo: ShapeElement.createAnimatePos(animData, frame, fromPath.moveTo, toPath.moveTo),
       bezierCurveToPaths: fromPath.bezierCurveToPaths.map((path, index) => {
         const fromBezierCurveToPath = fromPath.bezierCurveToPaths[index];
         const toBezierCurveToPath   = toPath.bezierCurveToPaths[index];
-        const cp  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp, toBezierCurveToPath.cp);
-        const cp2 = this.createAnimatePos(animData, frame, fromBezierCurveToPath.cp2, toBezierCurveToPath.cp2);
-        const to  = this.createAnimatePos(animData, frame, fromBezierCurveToPath.to, toBezierCurveToPath.to);
+        const cp  = ShapeElement.createAnimatePos(animData, frame, fromBezierCurveToPath.cp, toBezierCurveToPath.cp);
+        const cp2 = ShapeElement.createAnimatePos(animData, frame, fromBezierCurveToPath.cp2, toBezierCurveToPath.cp2);
+        const to  = ShapeElement.createAnimatePos(animData, frame, fromBezierCurveToPath.to, toBezierCurveToPath.to);
         return { cp, cp2, to };
       }),
     };
@@ -488,16 +489,16 @@ export class ShapeElement extends Element {
   }
 
   drawEllipseAnimation(frame, ellipse) {
-    const pos  = this.createShapePosition(frame, ellipse);
-    const size = this.createShapeSize(frame, ellipse);
+    const pos  = ShapeElement.createShapePosition(frame, ellipse);
+    const size = ShapeElement.createShapeSize(frame, ellipse);
     if (!pos || !size) return;
 
     this.drawEllipse(pos.x, pos.y, size.x / 2.0, size.y / 2.0);
   }
 
   drawRectAnimation(frame, rect) {
-    const pos  = this.createShapePosition(frame, rect);
-    const size = this.createShapeSize(frame, rect);
+    const pos  = ShapeElement.createShapePosition(frame, rect);
+    const size = ShapeElement.createShapeSize(frame, rect);
     if (!pos || !size) return;
 
     this.drawRect(pos.x, pos.y, size.x, size.y);
@@ -608,7 +609,7 @@ export class ShapeElement extends Element {
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           if (!animData.fromPath) return false;
-          const animatePath = this.createAnimatePath(animData, frame);
+          const animatePath = ShapeElement.createAnimatePath(animData, frame);
           this.drawPath(animatePath);
           if (index !== 0 && this.graphicsData.length > 1) {
             this.addHole();

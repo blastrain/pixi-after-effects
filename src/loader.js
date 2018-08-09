@@ -57,16 +57,16 @@ export default class AEDataLoader {
     if (imageAssets.length === 0) {
       return new Promise(resolve => resolve(assets));
     }
-    return this.loadImages(imageAssets).then(() => assets);
+    return AEDataLoader.loadImages(imageAssets).then(() => assets);
   }
 
   static createImageLoader(imageAssets) {
     return new PIXI.loaders.Loader('', imageAssets.length);
   }
 
-  loadImages(imageAssets) {
+  static loadImages(imageAssets) {
     return new Promise((resolve, reject) => {
-      const loader = this.createImageLoader(imageAssets);
+      const loader = AEDataLoader.createImageLoader(imageAssets);
 
       // if override createImageLoader and use shared PIXI.Loaders,
       // possibly loader.resources has already loaded resource
@@ -107,8 +107,8 @@ export default class AEDataLoader {
   load(data, jsonPath, interceptor) {
     return this.loadAssets(data, jsonPath, interceptor)
       .then((assets) => {
-        const layers = this.loadLayers(data, interceptor);
-        this.resolveReference(layers, assets);
+        const layers = AEDataLoader.loadLayers(data, interceptor);
+        AEDataLoader.resolveReference(layers, assets);
         data.assets  = assets;
         data.layers  = layers;
       });

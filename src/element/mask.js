@@ -21,7 +21,7 @@ export default class MaskElement extends ShapeElement {
     this.maskTargetLayer = maskTargetLayer;
     this.isClosed   = data.cl;
     this.isInvertedMask = data.inv;
-    this.maskMode   = this.toMaskMode(data.mode);
+    this.maskMode   = MaskElement.toMaskMode(data.mode);
     this.setBlendModeByMaskMode(this.maskMode);
     this.inFrame    = maskTargetLayer.inFrame;
     this.outFrame   = maskTargetLayer.outFrame;
@@ -30,7 +30,7 @@ export default class MaskElement extends ShapeElement {
     this.fill = { enabled: true };
   }
 
-  static setBlendModeByMaskMode(mode) {
+  setBlendModeByMaskMode(mode) {
     switch (mode) {
     case MASK_MODE.ADDITIVE:
       this.blendMode = PIXI.BLEND_MODES.ADD;
@@ -107,7 +107,7 @@ export default class MaskElement extends ShapeElement {
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           if (!animData.fromPath) return false;
-          const animatePath = this.createAnimatePath(animData, frame);
+          const animatePath = MaskElement.createAnimatePath(animData, frame);
           this.drawPath(animatePath);
           if (this.isInvertedMask) {
             this.addHole();
