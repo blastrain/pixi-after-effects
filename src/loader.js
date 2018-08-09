@@ -4,8 +4,9 @@ import * as element from './element';
 import Asset from './asset';
 
 export default class AEDataLoader {
-  static imagePathProxy(imagePath) {
-    return imagePath;
+  constructor() {
+    this.imagePathProxy = path => path;
+    this.createImageLoader = imageAssets => new PIXI.loaders.Loader('', imageAssets.length);
   }
 
   loadJSON(jsonPath) {
@@ -57,16 +58,12 @@ export default class AEDataLoader {
     if (imageAssets.length === 0) {
       return new Promise(resolve => resolve(assets));
     }
-    return AEDataLoader.loadImages(imageAssets).then(() => assets);
+    return this.loadImages(imageAssets).then(() => assets);
   }
 
-  static createImageLoader(imageAssets) {
-    return new PIXI.loaders.Loader('', imageAssets.length);
-  }
-
-  static loadImages(imageAssets) {
+  loadImages(imageAssets) {
     return new Promise((resolve, reject) => {
-      const loader = AEDataLoader.createImageLoader(imageAssets);
+      const loader = this.createImageLoader(imageAssets);
 
       // if override createImageLoader and use shared PIXI.Loaders,
       // possibly loader.resources has already loaded resource
