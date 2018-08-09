@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
-import Element from './element';
-import {ShapeElement,ShapeContainerElement} from './shape';
+import {ShapeElement} from './shape';
 
 const MASK_MODE = {
   NONE:       0,
@@ -27,7 +26,7 @@ export default class MaskElement extends ShapeElement {
     this.inFrame    = maskTargetLayer.inFrame;
     this.outFrame   = maskTargetLayer.outFrame;
     this.setupOpacity(data.o);
-    this.fillColorHex = "0x000000";
+    this.fillColorHex = '0x000000';
     this.fill = { enabled: true };
   }
 
@@ -37,7 +36,7 @@ export default class MaskElement extends ShapeElement {
       this.blendMode = PIXI.BLEND_MODES.ADD;
       break;
     case MASK_MODE.SUBTRACT:
-      console.log("mask mode subtract");
+      // no match into PIXI.BLEND_MODES
       break;
     case MASK_MODE.LIGHTEN:
       this.blendMode = PIXI.BLEND_MODES.LIGHTEN;
@@ -54,22 +53,22 @@ export default class MaskElement extends ShapeElement {
   toMaskMode(mode) {
     let maskMode = MASK_MODE.ADDITIVE;
     switch (mode) {
-    case "n":
+    case 'n':
       maskMode = MASK_MODE.NONE;
       break;
-    case "a":
+    case 'a':
       maskMode = MASK_MODE.ADDITIVE;
       break;
-    case "s":
+    case 's':
       maskMode = MASK_MODE.SUBTRACT;
       break;
-    case "l":
+    case 'l':
       maskMode = MASK_MODE.LIGHTEN;
       break;
-    case "d":
+    case 'd':
       maskMode = MASK_MODE.DARKEN;
       break;
-    case "f":
+    case 'f':
       maskMode = MASK_MODE.DIFFERENCE;
       break;
     }

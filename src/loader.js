@@ -1,8 +1,7 @@
 import * as PIXI from 'pixi.js';
 import * as element from './element';
 import Asset from './asset';
-
-const request = require('superagent');
+import request from 'superagent';
 
 export default class AEDataLoader {
   constructor() {
@@ -20,7 +19,7 @@ export default class AEDataLoader {
         return this.load(res.body, jsonPath, null).then(() => {
           resolve(res.body);
         }).catch((e) => {
-          reject(err);
+          reject(e);
         });
       });
     });
@@ -29,7 +28,7 @@ export default class AEDataLoader {
   loadJSONWithInterceptor(jsonPath, interceptor) {
     return new Promise((resolve, reject) => {
       if (!interceptor) {
-        return reject(new Error("required interceptor parameter"));
+        return reject(new Error('required interceptor parameter'));
       }
       return request.get(jsonPath).end((err, res) => {
         if (err) return reject(err);

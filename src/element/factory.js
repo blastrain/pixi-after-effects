@@ -44,7 +44,6 @@ export default class ElementFactory {
       elem = new Element(data);
       break;
     default:
-      console.log(data);
       break;
     }
     return elem;

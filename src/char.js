@@ -1,5 +1,3 @@
-import * as element from './element';
-
 export default class Char {
   constructor(data) {
     this.ch         = data.ch;

@@ -1,17 +1,18 @@
 import * as PIXI from 'pixi.js';
 import * as element from './element';
-import Asset        from './asset';
 import AEDataLoader from './loader';
 
 export default class AfterEffects extends PIXI.Container {
-  constructor(jsonPath, opt) {
+
+  constructor() {
     super();
     this.finder = new element.ElementFinder();
-    if (!jsonPath) return;
-    AEDataLoader.loadJSON(jsonPath).then((data) => {
-      this.setup(data, opt || {});
-    }, (err) => {
-      console.log(err);
+  }
+  static fromJSONPath(jsonPath, opt) {
+    return AEDataLoader.loadJSON(jsonPath).then((data) => {
+      const ae = new AfterEffects();
+      ae.setup(data, opt || {});
+      return ae;
     });
   }
 

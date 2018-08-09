@@ -1,4 +1,3 @@
-import * as PIXI from 'pixi.js';
 import Element from './element';
 
 export default class SolidElement extends Element {
@@ -7,7 +6,7 @@ export default class SolidElement extends Element {
     this.color = data.sc;
     this.sw    = data.sw;
     this.sh    = data.sh;
-    if (this.color.startsWith("#")) {
+    if (this.color.startsWith('#')) {
       this.color = '0x' + this.color.substr(1);
     }
   }

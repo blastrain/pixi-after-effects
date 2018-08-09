@@ -22,7 +22,7 @@ export default class Element extends PIXI.Graphics {
     this.type         = data.ty;
     this.isCompleted  = data.completed;
     this.index        = data.ind;
-    this.hasParent    = data.hasOwnProperty("parent");
+    this.hasParent    = data.hasOwnProperty('parent');
     this.parentIndex  = data.parent;
     this.inFrame      = data.ip;
     this.outFrame     = data.op;
@@ -237,16 +237,21 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  createAnchorPointEasing(animData) {
+    if (animData.i && animData.o) {
+      return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
+    }
+    return (x) => x;
+  }
+
   createAnimatedAnchorPoint(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      const easing = (animData.i && animData.o) ?
-            BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y) : (x) => x;
       return {
         name:            animData.n,
         startFrame:      animData.t,
         endFrame:        (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:          easing,
+        easing:          this.createAnchorPointEasing(animData),
         fromAnchorPoint: animData.s,
         toAnchorPoint:   animData.e,
       };
@@ -272,11 +277,16 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  createOpacityEasing(animData) {
+    if (animData.i && animData.o) {
+      return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
+    }
+    return (x) => x;
+  }
+
   createAnimatedOpacity(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      const easing = (animData.i && animData.o) ?
-            BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
       let fromOpacity;
       let toOpacity;
       if (animData.s && animData.e) {
@@ -290,7 +300,7 @@ export default class Element extends PIXI.Graphics {
         name:        animData.n,
         startFrame:  animData.t,
         endFrame:    (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:      easing,
+        easing:      this.createOpacityEasing(animData),
         fromOpacity: fromOpacity !== undefined ? fromOpacity / 100.0 : undefined,
         toOpacity:   toOpacity   !== undefined ? toOpacity   / 100.0 : undefined,
       };
@@ -328,38 +338,45 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  createSeparatedPositionEasing(animData) {
+    if (animData.i && animData.o) {
+      return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
+    }
+    return (x) => x;
+  }
+
   createAnimatedSeparatedPosition(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      const easing = (animData.i && animData.o) ?
-            BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
       return {
         name:         animData.n,
         startFrame:   animData.t,
         endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:       easing,
+        easing:       this.createSeparatedPositionEasing(animData),
         fromPosition: animData.s ? animData.s[0] : undefined,
         toPosition:   animData.e ? animData.e[0] : undefined,
       };
     });
   }
 
+  createPositionEasing(animData) {
+    if (!animData.i || !animData.o) {
+      return (x) => x;
+    }
+    if (typeof animData.i.x === 'number') {
+      return BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y);
+    }
+    return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
+  }
+
   createAnimatedPosition(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      let easing = (x) => x;
-      if (animData.i && animData.o) {
-        if (typeof animData.i.x === 'number') {
-          easing = BezierEasing(animData.o.x, animData.o.y, animData.i.x, animData.i.y)
-        } else {
-          easing = BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0])
-        }
-      }
       return {
         name:         animData.n,
         startFrame:   animData.t,
         endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:       easing,
+        easing:       this.createPositionEasing(animData),
         fromPosition: animData.s,
         toPosition:   animData.e ? animData.e : animData.s,
       };
@@ -387,16 +404,21 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  createRotationEasing(animData) {
+    if (animData.i && animData.o) {
+      return BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]);
+    }
+    return (x) => x;
+  }
+
   createAnimatedRotation(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      const easing = (animData.i && animData.o) ?
-            BezierEasing(animData.o.x[0], animData.o.y[0], animData.i.x[0], animData.i.y[0]) : (x) => x;
       return {
         name:         animData.n,
         startFrame:   animData.t,
         endFrame:     (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:       easing,
+        easing:       this.createRotationEasing(animData),
         fromRotation: animData.s ? Math.PI * animData.s[0] / 180.0 : undefined,
         toRotation:   animData.e ? Math.PI * animData.e[0] / 180.0 : undefined,
       };
@@ -426,16 +448,21 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
+  createScaleEasing(animData) {
+    if (animData.i && animData.o) {
+      return BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]);
+    }
+    return (x) => x;
+  }
+
   createAnimatedScale(data) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
-      const easing = (animData.i && animData.o) ?
-            BezierEasing(animData.o.x[0], animData.o.y[1], animData.i.x[0], animData.i.y[1]) : (x) => x;
       return {
         name:       animData.n,
         startFrame: animData.t,
         endFrame:   (lastIndex > index) ? data[index + 1].t : animData.t,
-        easing:     easing,
+        easing:     this.createScaleEasing(animData),
         fromScale:  animData.s,
         toScale:    animData.e ? animData.e : animData.s,
       };
