@@ -3,12 +3,27 @@ import request from 'superagent';
 import * as element from './element';
 import Asset from './asset';
 
+/**
+ * Create assets and layers, also load all images includes AfterEffects animation.
+ *
+ * @class AEDataLoader
+ * @memberof PIXI
+ * @prop {function} imagePathProxy - Callback with image path before load image. If modify image path before load image, override this member and return newly path
+ * @prop {function} createImageLoader - Create PIXI.loader.Loader for loading image. If create PIXI.loader.Loader for you want, override this member and can return another loader
+ */
 export default class AEDataLoader {
   constructor() {
     this.imagePathProxy = path => path;
     this.createImageLoader = imageAssets => new PIXI.loaders.Loader('', imageAssets.length);
   }
 
+  /**
+   * Load JSON data by url
+   *
+   * @memberof PIXI.AEDataLoader#
+   * @param {string} - The JSON url
+   * @return {Promise}
+   */
   loadJSON(jsonPath) {
     return new Promise((resolve, reject) => {
       request.get(jsonPath).end((err, res) => {
@@ -22,6 +37,14 @@ export default class AEDataLoader {
     });
   }
 
+  /**
+   * Load JSON data by url with PIXI.AEDataInterceptor
+   *
+   * @memberof PIXI.AEDataLoader#
+   * @param {string} - The JSON url
+   * @param {PIXI.AEDataInterceptor} - The AEDataInterceptor instance
+   * @return {Promise}
+   */
   loadJSONWithInterceptor(jsonPath, interceptor) {
     return new Promise((resolve, reject) => {
       if (!interceptor) {

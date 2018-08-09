@@ -1,3 +1,7 @@
+/**
+ * @namespace PIXI
+ */
+
 import * as PIXI from 'pixi.js';
 import AfterEffects from './AfterEffects';
 import AEDataLoader from './loader';

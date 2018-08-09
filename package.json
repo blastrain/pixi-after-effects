@@ -6,16 +6,18 @@
   "scripts": {
     "build": "webpack",
     "server": "webpack-dev-server --host 0.0.0.0 --progress --port 5000",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "doc": "jsdoc -c .jsdoc.json -R README.md"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pixi.js": "^4.5.6",
     "bezier-easing": "^2.0.3",
+    "pixi.js": "^4.5.6",
     "superagent": "^3.7.0"
   },
   "devDependencies": {
+    "@pixi/jsdoc-template": "^2.4.2",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.1.2",
     "babel-loader": "^7.1.2",
@@ -30,6 +32,7 @@
     "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.10.0",
+    "jsdoc": "^3.5.5",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
   }

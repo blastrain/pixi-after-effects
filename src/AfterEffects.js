@@ -2,11 +2,38 @@ import * as PIXI from 'pixi.js';
 import * as element from './element';
 import AEDataLoader from './loader';
 
+/**
+ * @example
+ * // create base container object
+ * const stage = new PIXI.Container();
+ * // create the AfterEffects instance from json path
+ * PIXI.AfterEffects.fromJSONPath('bodymovin.json').then((ae) => {
+ *   // add AfterEffects to stage
+ *   stage.addChild(ae);
+ *   // start AfterEffects animation
+ *   ae.play();
+ * });
+ *
+ * @class AfterEffects
+ * @extends PIXI.Container
+ * @memberof PIXI
+ */
 export default class AfterEffects extends PIXI.Container {
   constructor() {
     super();
     this.finder = new element.ElementFinder();
   }
+
+  /**
+   * Create PIXI.AfterEffects instance from JSON url
+   *
+   * @memberof PIXI.AfterEffects
+   * @static
+   * @param {string} - The JSON url
+   * @param {object} [opt] - The animation option parameters
+   * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
+   * @return {Promise}
+   */
   static fromJSONPath(jsonPath, opt) {
     return AEDataLoader.loadJSON(jsonPath).then((data) => {
       const ae = new AfterEffects();
@@ -15,12 +42,28 @@ export default class AfterEffects extends PIXI.Container {
     });
   }
 
+  /**
+   * Create PIXI.AfterEffects instance from object created by AEDataLoader
+   *
+   * @memberof PIXI.AfterEffects
+   * @static
+   * @param {object} - The Object loaded by AEDataLoader
+   * @param {object} [opt] - The animation option parameters
+   * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
+   * @return {PIXI.AfterEffects} The newly created AfterEffects
+   */
   static fromData(data, opt) {
     const ae = new AfterEffects();
     ae.setup(data, opt || {});
     return ae;
   }
 
+  /**
+   * @memberof PIXI.AfterEffects#
+   * @private
+   * @param {object} - The Object loaded by AEDataLoader
+   * @param {object} - The option ( `noreplay` ) for AfterEffects
+   */
   setup(data, opt) {
     this.width = data.w;
     this.height = data.h;
@@ -76,10 +119,24 @@ export default class AfterEffects extends PIXI.Container {
     this.deltaPlayer.showFirstFrame();
   }
 
+  /**
+   * Find element by name
+   *
+   * @memberof PIXI.AfterEffects#
+   * @param {string} - The name of element
+   * @return {Element} - The found Element
+   */
   find(name) {
     return this.finder.findByName(name, this);
   }
 
+  /**
+   * Update mask element by frame
+   *
+   * @private
+   * @memberof PIXI.AfterEffects#
+   * @param {number} - The current frame number
+   */
   updateMask(frame) {
     this.masks.forEach((maskData) => {
       const drawnMask = maskData.maskLayer.__updateWithFrame(frame);
@@ -91,6 +148,12 @@ export default class AfterEffects extends PIXI.Container {
     });
   }
 
+  /**
+   * Update by current time
+   *
+   * @memberof PIXI.AfterEffects#
+   * @param {number} - The current time
+   */
   update(nowTime) {
     if (!this.layers) return;
     this.player.update(nowTime);
@@ -99,6 +162,12 @@ export default class AfterEffects extends PIXI.Container {
     });
   }
 
+  /**
+   * Update by delta time
+   *
+   * @memberof PIXI.AfterEffects#
+   * @param {number} - The delta time
+   */
   updateByDelta(deltaTime) {
     if (!this.layers) return;
     this.deltaPlayer.update(deltaTime);
@@ -107,6 +176,12 @@ export default class AfterEffects extends PIXI.Container {
     });
   }
 
+  /**
+   * Update by frame
+   *
+   * @memberof PIXI.AfterEffects#
+   * @param {number} - The current frame number
+   */
   updateWithFrame(frame) {
     if (this.masks) {
       this.updateMask(frame);
@@ -128,21 +203,42 @@ export default class AfterEffects extends PIXI.Container {
     }
   }
 
+  /**
+   * Start AfterEffects animation
+   *
+   * @memberof PIXI.AfterEffects#
+   * @param {boolean} - Enable Loop playing
+   */
   play(isLoop) {
     this.player.play(isLoop);
     this.deltaPlayer.play(isLoop);
   }
 
+  /**
+   * Pause AfterEffects animation
+   *
+   * @memberof PIXI.AfterEffects#
+   */
   pause() {
     this.player.pause();
     this.deltaPlayer.pause();
   }
 
+  /**
+   * Resume AfterEffects animation
+   *
+   * @memberof PIXI.AfterEffects#
+   */
   resume() {
     this.player.resume();
     this.deltaPlayer.resume();
   }
 
+  /**
+   * Stop AfterEffects animation
+   *
+   * @memberof PIXI.AfterEffects#
+   */
   stop() {
     this.player.stop();
     this.deltaPlayer.stop();

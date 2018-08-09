@@ -1,5 +1,8 @@
 import * as element from './element';
 
+/**
+ * @class Asset
+ */
 export default class Asset {
   constructor(loader, data, jsonPath) {
     this.id = data.id;
@@ -25,12 +28,25 @@ export default class Asset {
     }
   }
 
+  /**
+   * Create All Elements
+   *
+   * @memberof Asset#
+   * @return {Array} - The Element collection
+   */
   createLayers() {
     return this.layers
       .map(layer => element.ElementFactory.create(layer))
       .filter(layer => layer !== null);
   }
 
+  /**
+   * Create Element collection
+   *
+   * @memberof Asset#
+   * @param {number}   - The index of layer
+   * @return {Element} - The newly Element instance
+   */
   createLayerByIndex(index) {
     const foundLayers = this.layers.filter(layer => layer.ind === index);
     if (foundLayers.length === 0) return null;
