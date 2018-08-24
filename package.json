@@ -1,7 +1,7 @@
 {
   "name": "pixi-after-effects",
   "version": "1.0.0",
-  "description": "",
+  "description": "play AfterEffects animation by pixi.js",
   "main": "src/index.js",
   "scripts": {
     "build": "webpack",
@@ -9,6 +9,21 @@
     "lint": "eslint src",
     "doc": "jsdoc -c .jsdoc.json -R README.md"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "dist/pixi-ae.js",
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/knocknote/pixi-after-effects"
+  },
+  "bugs": {
+    "url": "https://github.com/knocknote/pixi-after-effects/issues"
+  },
+  "homepage": "https://github.com/knocknote/pixi-after-effects",
   "author": "",
   "license": "MIT",
   "dependencies": {
