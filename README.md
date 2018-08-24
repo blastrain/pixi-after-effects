@@ -8,6 +8,10 @@ play AfterEffects animation by pixi.js
 - support images in AfterEffects as PIXI.Sprite
 - can play independent each animation in AfterEffects
 
+# DOCUMENTATION
+
+see https://knocknote.github.io/pixi-after-effects/docs
+
 # INSTALL
 
 ```
@@ -17,6 +21,10 @@ npm install knocknote/pixi-after-effects
 install minified file to `node_modules/pixi-after-effects/dist/pixi-ae.js` 
 
 # DEMO
+
+see https://knocknote.github.io/pixi-after-effects/dist  
+
+or run your machine the following step
 
 ```
 yarn install # install dependencies
