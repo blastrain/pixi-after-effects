@@ -4,7 +4,7 @@ play AfterEffects animation by pixi.js
 # FEATURES
 
 - play AfterEffects animation from JSON
-- support AfterEffects component as PIXI.Container
+- support AfterEffects composition as PIXI.Container
 - support images in AfterEffects as PIXI.Sprite
 - can play independent each animation in AfterEffects
 
@@ -15,7 +15,7 @@ see https://knocknote.github.io/pixi-after-effects/docs
 # INSTALL
 
 ```
-npm install knocknote/pixi-after-effects
+npm install pixi-after-effects
 ```
 
 install minified file to `node_modules/pixi-after-effects/dist/pixi-ae.js` 
