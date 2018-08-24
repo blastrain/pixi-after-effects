@@ -9,6 +9,13 @@
     "lint": "eslint src",
     "doc": "jsdoc -c .jsdoc.json -R README.md"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "dist/pixi-ae.js",
+    "src"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
