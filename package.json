@@ -10,7 +10,7 @@
     "doc": "jsdoc -c .jsdoc.json -R README.md"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bezier-easing": "^2.0.3",
     "pixi.js": "^4.5.6",
