@@ -40,7 +40,7 @@ export default class TextElement extends Element {
     return hex.length === 1 ? `0${hex}` : hex;
   }
 
-  toFontColor(data) {
+  static toFontColor(data) {
     if (data.length > 0) {
       return `0x${this.toHex(data[0])}${this.toHex(data[1])}${this.toHex(data[2])}`;
     }
@@ -51,7 +51,7 @@ export default class TextElement extends Element {
     if (this.text) return;
 
     this.fontFamily     = data.f;
-    this.fontColor      = this.toFontColor(data.fc);
+    this.fontColor      = TextElement.toFontColor(data.fc);
     this.fontSize       = data.s;
     this.rawText        = data.t;
     this.baseLineHeight = data.lh;
