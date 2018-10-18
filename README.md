@@ -1,6 +1,8 @@
 # pixi-after-effects
 play AfterEffects animation by pixi.js
 
+[![CircleCI](https://circleci.com/gh/knocknote/pixi-after-effects.svg?style=svg)](https://circleci.com/gh/knocknote/pixi-after-effects)
+
 # FEATURES
 
 - play AfterEffects animation from JSON
