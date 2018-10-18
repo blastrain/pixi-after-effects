@@ -20,6 +20,7 @@ rules:
   max-len:
     - 2
     - code: 150
+      ignoreComments: true
   no-multi-spaces: 0
   no-param-reassign: 0
   no-underscore-dangle: 0
