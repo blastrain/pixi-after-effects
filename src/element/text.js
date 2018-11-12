@@ -59,23 +59,20 @@ export default class TextElement extends Element {
     this.tracking       = data.tr;
     this.justification  = data.j;
     this.text           = new PIXI.Text(this.rawText, {
-      fontFamily:     this.fontFamily,
-      fontSize:       this.fontSize,
-      fill:           this.fontColor,
-      letterSpacing:  this.tracking/10,
+      fontFamily: this.fontFamily,
+      fontSize:   this.fontSize,
+      fill:       this.fontColor,
       align:      ALIGN_OF_JUSTIFICATION[this.justification],
     });
-
-    if (this.justification === JUSTIFICATION_TYPE.LEFT) {
-        this.text.anchor.x = 0;
-    } else if (this.justification === JUSTIFICATION_TYPE.RIGHT) {
-        this.text.anchor.x = 1;
+    let offsetX = this.text.width - this.tracking * this.baseLineShift;
+    if (this.justification === JUSTIFICATION_TYPE.RIGHT) {
+      offsetX = 0;
     } else if (this.justification === JUSTIFICATION_TYPE.CENTER) {
-        this.text.anchor.x = 0.5;
+      offsetX /= 2;
     }
     const dh = this.baseLineHeight - this.fontSize;
+    this.text.x -= offsetX;
     this.text.y -= this.text.height - dh;
     this.addChild(this.text);
   }
 }
- 
