@@ -1,12 +1,17 @@
 <html>
   <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.0.3/pixi.js"></script>
     <script src="dat.gui.min.js"></script>
     <script src="pixi-ae.js"></script>
   </head>
   <body>
     <script>
-      var renderer = new PIXI.WebGLRenderer(2000, 600, { antialias: true, backgroundColor: 0xffffff });
+      var renderer = new PIXI.Renderer({
+        antialias: true,
+        backgroundColor: 0xff0000,
+        width: 2000,
+        height:2000,
+        transparent: true });
       document.body.appendChild(renderer.view);
       var stage = new PIXI.Container();
       var ae = null;
@@ -59,8 +64,9 @@
         return path;
       };
       loader.loadJSONWithInterceptor('./examples/bodymovin.json', interceptor).then((data) => {
-          ae = PIXI.AfterEffects.fromData(data);
-          ae.scale = new PIXI.Point(0.5, 0.5);
+        console.log(data);
+        ae = PIXI.AfterEffects.fromData(data);
+          ae.scale = new PIXI.Point(1, 1);
           ae.on("completed", (o) => { console.log("completed!", o); });
           stage.addChild(ae);
           panel.add(menu, "frame", 0, ae.outFrame).onChange((v) => {

@@ -27,7 +27,7 @@ export default class MaskElement extends ShapeElement {
     this.outFrame   = maskTargetLayer.outFrame;
     this.setupOpacity(data.o);
     this.fillColorHex = '0x000000';
-    this.fill = { enabled: true };
+    this.fillRGBA = { enabled: true };
   }
 
   setBlendModeByMaskMode(mode) {

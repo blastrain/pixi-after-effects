@@ -14,7 +14,7 @@ import Asset from './asset';
 export default class AEDataLoader {
   constructor() {
     this.imagePathProxy = path => path;
-    this.createImageLoader = imageAssets => new PIXI.loaders.Loader('', imageAssets.length);
+    this.createImageLoader = imageAssets => new PIXI.Loader('', imageAssets.length);
   }
 
   /**
