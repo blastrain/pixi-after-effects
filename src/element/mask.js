@@ -90,6 +90,7 @@ export default class MaskElement extends ShapeElement {
       });
     });
   }
+  // TODO: Check addhole() with new paradigma v5 beginHole() and endhole()
 
   drawMask(frame, shapePath) {
     let drawnMask   = false;

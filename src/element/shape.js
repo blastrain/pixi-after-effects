@@ -598,10 +598,10 @@ export class ShapeElement extends Element {
       this.isClosed = shapePath.isClosed;
       const paths = shapePath.path.paths;
       if (frame < paths[0].startFrame) {
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.beginHole(); }
         this.drawPath(paths[0].fromPath);
-        if (index !== 0) {
-          this.endHole();
-        }
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.endHole(); }
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 4) { this.addHole(); }
       }
       shapePath.path.paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
@@ -609,28 +609,29 @@ export class ShapeElement extends Element {
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           if (!animData.fromPath) return false;
+          if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.beginHole(); }
           const animatePath = ShapeElement.createAnimatePath(animData, frame);
           this.drawPath(animatePath);
-          if (index !== 0) {
-            this.endHole();
-          }
+          
+          if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.endHole(); }
+          if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 4) { this.addHole(); }
           return true;
         }
         return false;
       });
       const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.beginHole(); }
         this.drawPath(lastPath.toPath);
-        if (index !== 0) {
-          this.endHole();
-        }
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.endHole(); }
+        if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 4) { this.addHole(); }
       }
     } else if (this.inFrame <= frame && frame <= this.outFrame) {
+      if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.beginHole(); }
       this.isClosed = shapePath.isClosed;
       this.drawPath(shapePath.path);
-      if (index !== 0) {
-        this.endHole();
-      }
+      if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 5) { this.endHole(); }
+      if (index !== 0 && Number(PIXI.VERSION.charAt(0)) === 4) { this.addHole(); }
     }
   }
 
