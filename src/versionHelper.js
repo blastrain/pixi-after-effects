@@ -16,7 +16,7 @@ const pixiVersionHelper = {
   minor() { return this.semanticVersion()[1]; },
   patch() { return this.semanticVersion()[2]; },
   isV4()  { return this.major() === 4; },
-  isV5()  { return this.mojor() === 5; },
+  isV5()  { return this.major() === 5; },
   select(v4func, v5func) {
     if (this.isV4() && v4func !== undefined) { return v4func; }
     if (this.isV5() && v5func !== undefined) { return v5func; }
