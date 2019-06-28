@@ -4,7 +4,6 @@ import Element from './element';
 import pixiVersionHelper from '../versionHelper';
 
 export class ShapeElement extends Element {
-
   constructor(data, inFrame, outFrame, startTime) {
     super();
     if (!data) return;
@@ -13,6 +12,13 @@ export class ShapeElement extends Element {
     this.inFrame   = inFrame;
     this.outFrame  = outFrame;
     this.startTime = startTime;
+    this.beginProcess = pixiVersionHelper.select(() => {} /* for v4 API */, () => { this.beginHole(); } /* for v5 API */);
+    this.endProcess = pixiVersionHelper.select(() => { // for v4 API
+      if (this.graphicsData.length <= 1) { return; }
+      this.addHole();
+    }, () => { // for v5 API
+      this.endHole();
+    });
     if (!data.it) {
       this.setupShapeByType(data);
     } else {
@@ -596,15 +602,13 @@ export class ShapeElement extends Element {
   }
 
   drawShapePath(frame, shapePath, index) {
-    const beginProcess = pixiVersionHelper.select(() => {} /* for v4 API */, () => { this.beginHole(); } /* for v5 API */);
-    const endProcess = pixiVersionHelper.select(() => { this.addHole(); } /* for v4 API */, () => { this.endHole(); } /* for v5 API */);
     if (shapePath.path.hasAnimatedPath) {
       this.isClosed = shapePath.isClosed;
       const paths = shapePath.path.paths;
       if (frame < paths[0].startFrame) {
-        if (index !== 0) { beginProcess(); }
+        if (index !== 0) { this.beginProcess(); }
         this.drawPath(paths[0].fromPath);
-        if (index !== 0) { endProcess(); }
+        if (index !== 0) { this.endProcess(); }
       }
       shapePath.path.paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
@@ -612,25 +616,25 @@ export class ShapeElement extends Element {
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           if (!animData.fromPath) return false;
-          if (index !== 0) { beginProcess(); }
+          if (index !== 0) { this.beginProcess(); }
           const animatePath = ShapeElement.createAnimatePath(animData, frame);
           this.drawPath(animatePath);
-          if (index !== 0) { endProcess(); }
+          if (index !== 0) { this.endProcess(); }
           return true;
         }
         return false;
       });
       const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
-        if (index !== 0) { beginProcess(); }
+        if (index !== 0) { this.beginProcess(); }
         this.drawPath(lastPath.toPath);
-        if (index !== 0) { endProcess(); }
+        if (index !== 0) { this.endProcess(); }
       }
     } else if (this.inFrame <= frame && frame <= this.outFrame) {
-      if (index !== 0) { beginProcess(); }
+      if (index !== 0) { this.beginProcess(); }
       this.isClosed = shapePath.isClosed;
       this.drawPath(shapePath.path);
-      if (index !== 0) { endProcess(); }
+      if (index !== 0) { this.endProcess(); }
     }
   }
 
