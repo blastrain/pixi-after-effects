@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import request from 'superagent';
 import * as element from './element';
 import Asset from './asset';
+import pixiVersionHelper from './versionHelper';
 
 /**
  * Create assets and layers, also load all images includes AfterEffects animation.
@@ -14,7 +15,10 @@ import Asset from './asset';
 export default class AEDataLoader {
   constructor() {
     this.imagePathProxy = path => path;
-    this.createImageLoader = imageAssets => new PIXI.loaders.Loader('', imageAssets.length);
+    this.createImageLoader = pixiVersionHelper.select(
+      imageAssets => new PIXI.loaders.Loader('', imageAssets.length) /* for v4 API */,
+      imageAssets => new PIXI.Loader('', imageAssets.length), /* for v5 API */
+    );
   }
 
   /**
