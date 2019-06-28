@@ -32,7 +32,11 @@ module.exports = {
     ]),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: false
-    })
+    }),
+    new webpack.ProvidePlugin({
+      PIXI: 'pixi.js',
+    }),
+
   ],
 
   devServer: {

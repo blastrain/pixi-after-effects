@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import BezierEasing from 'bezier-easing';
 import Element from './element';
+import pixiVersionHelper from '../versionHelper';
 
 export class ShapeElement extends Element {
   constructor(data, inFrame, outFrame, startTime) {
@@ -11,6 +12,13 @@ export class ShapeElement extends Element {
     this.inFrame   = inFrame;
     this.outFrame  = outFrame;
     this.startTime = startTime;
+    this.beginProcess = pixiVersionHelper.select(() => {} /* for v4 API */, () => { this.beginHole(); } /* for v5 API */);
+    this.endProcess = pixiVersionHelper.select(() => { // for v4 API
+      if (this.graphicsData.length <= 1) { return; }
+      this.addHole();
+    }, () => { // for v5 API
+      this.endHole();
+    });
     if (!data.it) {
       this.setupShapeByType(data);
     } else {
@@ -237,7 +245,7 @@ export class ShapeElement extends Element {
     fill.enabled = true;
     fill.name    = data.nm;
     fill.opacity = ShapeElement.createOpacity(data.o);
-    this.fill    = fill;
+    this.fillRGBA    = fill;
   }
 
   static rgbArrayToHex(arr) {
@@ -319,13 +327,13 @@ export class ShapeElement extends Element {
     if (this.stroke) {
       if (this.stroke.enabledFill) {
         this.beginFill(this.strokeColorHex);
-      } else if (this.fill) {
+      } else if (this.fillRGBA) {
         this.beginFill(this.fillColorHex);
       }
       this.lineStyle(this.stroke.width, this.strokeColorHex);
       // TODO: ignore miterLimit and lineCap and lineJoin
-    } else if (this.fill) {
-      if (this.fill.enabled) {
+    } else if (this.fillRGBA) {
+      if (this.fillRGBA.enabled) {
         this.beginFill(this.fillColorHex);
       } else {
         this.lineStyle(2, this.fillColorHex);
@@ -339,13 +347,13 @@ export class ShapeElement extends Element {
     if (this.stroke) {
       if (this.stroke.enabledFill) {
         this.endFill();
-      } else if (this.fill) {
+      } else if (this.fillRGBA) {
         this.endFill();
       } else {
         this.closePath();
       }
-    } else if (this.fill) {
-      if (this.fill.enabled) {
+    } else if (this.fillRGBA) {
+      if (this.fillRGBA.enabled) {
         this.endFill();
       } else {
         this.closePath();
@@ -416,25 +424,25 @@ export class ShapeElement extends Element {
   }
 
   setupFillColor(frame) {
-    if (!this.fill) return;
+    if (!this.fillRGBA) return;
 
-    if (typeof this.fill.color !== 'string') {
-      const firstColor = this.fill.color[0];
+    if (typeof this.fillRGBA.color !== 'string') {
+      const firstColor = this.fillRGBA.color[0];
       if (frame < firstColor.startFrame) {
         this.fillColorHex = firstColor.fromColor;
         return;
       }
-      this.fill.color.forEach((animData) => {
+      this.fillRGBA.color.forEach((animData) => {
         if (animData.startFrame <= frame  && frame <= animData.endFrame) {
           this.fillColorHex = animData.fromColor;
         }
       });
-      const lastColor = this.fill.color[this.fill.color.length - 2];
+      const lastColor = this.fillRGBA.color[this.fillRGBA.color.length - 2];
       if (frame > lastColor.endFrame) {
         this.fillColorHex = lastColor.toColor;
       }
     } else {
-      this.fillColorHex = this.fill.color;
+      this.fillColorHex = this.fillRGBA.color;
     }
   }
 
@@ -598,10 +606,9 @@ export class ShapeElement extends Element {
       this.isClosed = shapePath.isClosed;
       const paths = shapePath.path.paths;
       if (frame < paths[0].startFrame) {
+        if (index !== 0) { this.beginProcess(); }
         this.drawPath(paths[0].fromPath);
-        if (index !== 0 && this.graphicsData.length > 1) {
-          this.addHole();
-        }
+        if (index !== 0) { this.endProcess(); }
       }
       shapePath.path.paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
@@ -609,28 +616,25 @@ export class ShapeElement extends Element {
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           if (!animData.fromPath) return false;
+          if (index !== 0) { this.beginProcess(); }
           const animatePath = ShapeElement.createAnimatePath(animData, frame);
           this.drawPath(animatePath);
-          if (index !== 0 && this.graphicsData.length > 1) {
-            this.addHole();
-          }
+          if (index !== 0) { this.endProcess(); }
           return true;
         }
         return false;
       });
       const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
+        if (index !== 0) { this.beginProcess(); }
         this.drawPath(lastPath.toPath);
-        if (index !== 0 && this.graphicsData.length > 1) {
-          this.addHole();
-        }
+        if (index !== 0) { this.endProcess(); }
       }
     } else if (this.inFrame <= frame && frame <= this.outFrame) {
+      if (index !== 0) { this.beginProcess(); }
       this.isClosed = shapePath.isClosed;
       this.drawPath(shapePath.path);
-      if (index !== 0 && this.graphicsData.length > 1) {
-        this.addHole();
-      }
+      if (index !== 0) { this.endProcess(); }
     }
   }
 
