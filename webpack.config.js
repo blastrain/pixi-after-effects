@@ -30,9 +30,6 @@ module.exports = {
       { from: 'node_modules/dat.gui/build/dat.gui.min.js' },
       { from: 'examples', to: 'examples' }
     ]),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: false
-    }),
     new webpack.ProvidePlugin({
       PIXI: 'pixi.js',
     }),
