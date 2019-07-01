@@ -32,6 +32,7 @@
     "superagent": "^5.1.0"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.4.5",
     "@pixi/jsdoc-template": "^2.4.2",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.2",
