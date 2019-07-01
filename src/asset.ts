@@ -1,10 +1,27 @@
-import * as element from './element';
+import { Element, ElementData } as element from './element';
+
+export interface AssetData {
+  id : string;
+  layers : any;
+  isDisused : boolean;
+  texture : any;
+  imagePath : string;
+  p : string;
+  u : string;
+  bmPIXI : PIXI.BLEND_MODES;
+};
 
 /**
  * @class Asset
  */
-export default class Asset {
-  constructor(loader, data, jsonPath) {
+export class Asset {
+  id: string;
+  layers: ElementData[];
+  texture: any;
+  imagePath: string;
+  blendMode: number;
+
+  constructor(loader : any, data : AssetData, jsonPath : string) {
     this.id = data.id;
     this.layers = data.layers || [];
     if (data.isDisused) return;
@@ -16,7 +33,7 @@ export default class Asset {
         this.imagePath = loader.imagePathProxy(data.imagePath);
       }
     } else if (data.p) {
-      const contents = data.u.split('/').filter(content => content !== '');
+      const contents = data.u.split('/').filter((content : string) => content !== '');
       let imagePath  = [jsonPath, ...contents, data.p].join('/');
       if (loader.imagePathProxy) {
         imagePath = loader.imagePathProxy(imagePath);
@@ -47,7 +64,7 @@ export default class Asset {
    * @param {number}   - The index of layer
    * @return {Element} - The newly Element instance
    */
-  createLayerByIndex(index) {
+  createLayerByIndex(index : number) {
     const foundLayers = this.layers.filter(layer => layer.ind === index);
     if (foundLayers.length === 0) return null;
 

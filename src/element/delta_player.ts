@@ -1,5 +1,17 @@
 export default class ElementDeltaPlayer {
-  constructor(frameRate, inFrame, outFrame, updater, completed) {
+  frameRate: number;
+  inFrame: number;
+  outFrame: number;
+  isLoop: boolean;
+  isCompleted: boolean;
+  updater: ((value: number) => void);
+  completed: () => void;
+  isPlaying: boolean;
+  firstTime: (number | null);
+  nowTime: number;
+  elapsedTime: number;
+
+  constructor(frameRate : number, inFrame : number, outFrame : number,  updater : ((value : number) => void), completed : () => void) {
     this.frameRate   = frameRate;
     this.inFrame     = inFrame;
     this.outFrame    = outFrame;
@@ -13,7 +25,7 @@ export default class ElementDeltaPlayer {
     this.updater(0);
   }
 
-  update(deltaTime) {
+  update(deltaTime : number) {
     if (this.frameRate === 0) return;
     if (!this.isPlaying) return;
     if (!this.elapsedTime) {
@@ -35,7 +47,7 @@ export default class ElementDeltaPlayer {
     this.updater(currentFrame);
   }
 
-  play(isLoop) {
+  play(isLoop : boolean) {
     this.isLoop      = isLoop || false;
     this.isCompleted = false;
     this.isPlaying   = true;

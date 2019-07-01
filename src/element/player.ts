@@ -1,5 +1,16 @@
 export default class ElementPlayer {
-  constructor(frameRate, inFrame, outFrame, updater, completed) {
+  frameRate: number;
+  inFrame: number;
+  outFrame: number;
+  isLoop: boolean;
+  isCompleted: boolean;
+  updater: ((value: number) => void);
+  completed: () => void;
+  isPlaying: boolean;
+  firstTime: (number | null);
+  nowTime: number;
+
+  constructor(frameRate : number, inFrame : number, outFrame : number, updater : ((value : number) => void), completed : () => void) {
     this.frameRate   = frameRate;
     this.inFrame     = inFrame;
     this.outFrame    = outFrame;
@@ -13,7 +24,7 @@ export default class ElementPlayer {
     this.updater(0);
   }
 
-  update(nowTime) {
+  update(nowTime : number) {
     if (this.frameRate === 0) return;
     if (!this.isPlaying) return;
     if (!this.firstTime) {
@@ -37,7 +48,7 @@ export default class ElementPlayer {
     this.updater(currentFrame);
   }
 
-  play(isLoop) {
+  play(isLoop : boolean) {
     this.isLoop      = isLoop || false;
     this.firstTime   = null;
     this.isCompleted = false;
@@ -49,7 +60,7 @@ export default class ElementPlayer {
   }
 
   resume() {
-    const elapsedTime = this.nowTime - this.firstTime;
+    const elapsedTime = this.nowTime - (this.firstTime || 0);
     const nowTime     = performance.now();
     this.firstTime    = nowTime - elapsedTime;
     this.isPlaying    = true;

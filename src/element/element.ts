@@ -12,7 +12,88 @@ const TRACK_MATTE_TYPE = {
   LUMA_INVERTED:  4,
 };
 
-export default class Element extends PIXI.Graphics {
+export interface ElementData {
+  ao: number;
+  w: number;
+  h: number;
+  nm: string;
+  p?: string;
+  id?: string;
+  refId: string;
+  ty: number | string;
+  completed: any;
+  ind: number;
+  parent: number;
+  ip: number;
+  op: number;
+  sr: number;
+  st: number;
+  hasMask: boolean;
+  bm: number;
+  bmPIXI: number;
+  tt: any;
+  td: any;
+  masksProperties: any;
+  events: {
+      [x: string]: Function;
+  };
+  bounds: {
+      t: number;
+      b: number;
+      l: number;
+      r: number;
+  };
+  image?: PIXI.Sprite;
+  sc?: string | number;
+  sw?: number;
+  sh?: number;
+  text?: PIXI.Text;
+  rawText?: string;
+  t?: {
+      d: {
+          k: {
+          }[];
+      };
+  };
+  imagePath?: string;
+  texture?: any;
+  isDisused?: boolean;
+  layers?: ElementData[];
+  u?: string;
+};
+
+export class Element extends PIXI.Graphics {
+  name: string;
+  referenceId: string;
+  type: number;
+  finder: ElementFinder;
+  isCompleted: boolean;
+  index: number;
+  hasParent: boolean;
+  parentIndex: number;
+  inFrame: number;
+  outFrame: number;
+  stretch: number;
+  hasMask: boolean;
+  startTime: number;
+  hasTrackMatteType: boolean;
+  trackMatteType: number;
+  isTrackMatteData: boolean;
+  player: ElementPlayer;
+  deltaPlayer: ElementDeltaPlayer;
+  masksProperties: any;
+  isInvertedMask: boolean;
+  interactiveEventMap : { [key: string]: boolean; };
+  hasAnimatedAnchorPoint: boolean;
+  hasAnimatedOpacity: boolean;
+  hasAnimatedPosition: boolean;
+  hasAnimatedSeparatedPosition: boolean;
+  hasAnimatedRotation: boolean;
+  hasAnimatedScale: boolean;
+  scaleX: number;
+  scaleY: number;
+  [key: string]: any;
+
   constructor(data) {
     super();
     this.finder = new ElementFinder();
@@ -40,12 +121,12 @@ export default class Element extends PIXI.Graphics {
     } else if (data.td) {
       this.isTrackMatteData = true;
     }
-    this.player = new ElementPlayer(0, 0, this.outFrame, (frame) => {
+    this.player = new ElementPlayer(0, 0, this.outFrame, (frame : number) => {
       this.updateWithFrameBySelfPlayer(frame);
     }, () => {
       this.emit('completed', this);
     });
-    this.deltaPlayer = new ElementDeltaPlayer(0, 0, this.outFrame, (frame) => {
+    this.deltaPlayer = new ElementDeltaPlayer(0, 0, this.outFrame, (frame : number) => {
       this.updateWithFrameBySelfPlayer(frame);
     }, () => {
       this.emit('completed', this);
@@ -61,7 +142,7 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
-  static toPIXIBlendMode(mode) {
+  static toPIXIBlendMode(mode : number) {
     switch (mode) {
     case 0:
       return PIXI.BLEND_MODES.NORMAL;
@@ -101,7 +182,7 @@ export default class Element extends PIXI.Graphics {
     return PIXI.BLEND_MODES.NORMAL;
   }
 
-  __root(node) {
+  __root(node : (Element | AfterEffects)) {
     if (node instanceof AfterEffects) return node;
     if (node.parent) return this.__root(node.parent);
     return null;
@@ -111,7 +192,7 @@ export default class Element extends PIXI.Graphics {
     return this.__root(this);
   }
 
-  addChild(child) {
+  addChild(child : PIXI.Container) {
     super.addChild(child);
     if (this.isInvertedMask) {
       child.isInvertedMask = true;
@@ -123,7 +204,7 @@ export default class Element extends PIXI.Graphics {
       || this.trackMatteType === TRACK_MATTE_TYPE.LUMA_INVERTED;
   }
 
-  set frameRate(value) {
+  set frameRate(value : number) {
     if (this.player) {
       this.player.frameRate = value;
     }
@@ -132,13 +213,13 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
-  set opt(value) {
+  set opt(value : any) {
     Object.keys(value).forEach((key) => {
       this[key] = value[key];
     });
   }
 
-  isInteractiveEvent(eventName) {
+  isInteractiveEvent(eventName : string) {
     if (!this.interactiveEventMap) {
       const interactiveEvents = [
         'click',       'mousedown',   'mousemove',        'mouseout',
@@ -466,7 +547,7 @@ export default class Element extends PIXI.Graphics {
     });
   }
 
-  animateAnchorPoint(frame) {
+  animateAnchorPoint(frame : number) {
     let isAnimated = false;
     if (frame < this.animatedAnchorPoints[0].startFrame) {
       const anchorPoint = this.animatedAnchorPoints[0].fromAnchorPoint;
@@ -499,7 +580,7 @@ export default class Element extends PIXI.Graphics {
     return isAnimated;
   }
 
-  animateOpacity(frame) {
+  animateOpacity(frame : number) {
     let isAnimated = false;
     if (frame < this.animatedOpacities[0].startFrame) {
       const opacity = this.animatedOpacities[0].fromOpacity;
@@ -530,7 +611,7 @@ export default class Element extends PIXI.Graphics {
     return isAnimated;
   }
 
-  animatePosition(frame) {
+  animatePosition(frame : number) {
     let isAnimated = false;
     if (frame < this.animatedPositions[0].startFrame) {
       const position = this.animatedPositions[0].fromPosition;
@@ -564,7 +645,7 @@ export default class Element extends PIXI.Graphics {
     return isAnimated;
   }
 
-  animateSeparatedPosition(frame) {
+  animateSeparatedPosition(frame : number) {
     const animatedPositionX = this.animatedPositions.x;
     const animatedPositionY = this.animatedPositions.y;
     if (frame < animatedPositionX[0].startFrame) {
@@ -612,7 +693,7 @@ export default class Element extends PIXI.Graphics {
     }
   }
 
-  animateRotation(frame) {
+  animateRotation(frame : number) {
     let isAnimated = false;
     if (frame < this.animatedRotations[0].startFrame) {
       const rotation = this.animatedRotations[0].fromRotation;
@@ -642,7 +723,7 @@ export default class Element extends PIXI.Graphics {
     return isAnimated;
   }
 
-  animateScale(frame) {
+  animateScale(frame : number) {
     let isAnimated = false;
     if (frame < this.animatedScales[0].startFrame) {
       const scale = this.animatedScales[0].fromScale;
@@ -686,23 +767,23 @@ export default class Element extends PIXI.Graphics {
     || this.hasAnimatedSeparatedPosition;
   }
 
-  update(nowTime) {
+  update(nowTime : number) {
     if (!this.player) return;
     this.player.update(nowTime);
   }
 
-  updateByDelta(deltaTime) {
+  updateByDelta(deltaTime : number) {
     if (!this.deltaPlayer) return;
     this.deltaPlayer.update(deltaTime);
   }
 
   // called from self player
-  updateWithFrameBySelfPlayer(frame) {
+  updateWithFrameBySelfPlayer(frame : number) {
     this.__updateWithFrame(frame);
   }
 
   // called from parent layer. if self player is playing, stop it.
-  updateWithFrame(frame) {
+  updateWithFrame(frame : number) {
     if (this.player && this.player.isPlaying) {
       this.player.stop();
     }
@@ -712,7 +793,7 @@ export default class Element extends PIXI.Graphics {
     this.__updateWithFrame(frame);
   }
 
-  __updateWithFrame(frame) {
+  __updateWithFrame(frame : number) {
     if (this.inFrame <= frame && frame <= this.outFrame) {
       this.visible = true;
     } else {
@@ -731,7 +812,7 @@ export default class Element extends PIXI.Graphics {
     return true;
   }
 
-  play(isLoop) {
+  play(isLoop : boolean) {
     if (this.player) {
       this.player.play(isLoop);
     }

@@ -1,8 +1,9 @@
 import * as PIXI from 'pixi.js';
-import request from 'superagent';
 import * as element from './element';
-import Asset from './asset';
+import AEDataInterceptor from './interceptor';
+import { AssetData, Asset } from './asset';
 import pixiVersionHelper from './versionHelper';
+import { AEData } from './AfterEffects';
 
 /**
  * Create assets and layers, also load all images includes AfterEffects animation.
@@ -13,11 +14,14 @@ import pixiVersionHelper from './versionHelper';
  * @prop {function} createImageLoader - Create PIXI.loader.Loader for loading image. If create PIXI.loader.Loader for you want, override this member and can return another loader
  */
 export default class AEDataLoader {
+  imagePathProxy: (path: string) => string;
+  createImageLoader: (imageAssets: Asset[]) => PIXI.loaders.Loader;
+
   constructor() {
     this.imagePathProxy = path => path;
     this.createImageLoader = pixiVersionHelper.select(
-      imageAssets => new PIXI.loaders.Loader('', imageAssets.length) /* for v4 API */,
-      imageAssets => new PIXI.Loader('', imageAssets.length), /* for v5 API */
+      (imageAssets : Asset[]) => new PIXI.loaders.Loader('', imageAssets.length) /* for v4 API */,
+      (imageAssets : Asset[]) => new PIXI.Loader('', imageAssets.length), /* for v5 API */
     );
   }
 
@@ -28,13 +32,17 @@ export default class AEDataLoader {
    * @param {string} - The JSON url
    * @return {Promise}
    */
-  loadJSON(jsonPath) {
-    return new Promise((resolve, reject) => {
-      request.get(jsonPath).end((err, res) => {
-        if (err) return reject(err);
-        return this.load(res.body, jsonPath, null).then(() => {
-          resolve(res.body);
-        }).catch((e) => {
+  loadJSON(jsonPath : string) {
+    return new Promise((resolve : (value?: AEData) => void, reject) => {
+      fetch(jsonPath)
+      .then((res : Response) => { return res.json() })
+      .then((json : object) => {
+        if (!json) { return reject(); };
+
+        const data = json as AEData;
+        return this.load(data, jsonPath, null).then(() => {
+          resolve(data);
+        }).catch((e : Error) => {
           reject(e);
         });
       });
@@ -49,33 +57,34 @@ export default class AEDataLoader {
    * @param {PIXI.AEDataInterceptor} - The AEDataInterceptor instance
    * @return {Promise}
    */
-  loadJSONWithInterceptor(jsonPath, interceptor) {
-    return new Promise((resolve, reject) => {
+  loadJSONWithInterceptor(jsonPath : string, interceptor : AEDataInterceptor) {
+    return new Promise((resolve : (value?: AEData | null) => void, reject) => {
       if (!interceptor) {
         return reject(new Error('required interceptor parameter'));
       }
-      return request.get(jsonPath).end((err, res) => {
-        if (err) return reject(err);
-        const data = res.body;
+      return fetch(jsonPath)
+      .then((res : Response) => { return res.json(); })
+      .then((json : object) => {
+        const data = json as AEData;
         return this.load(data, jsonPath, interceptor).then(() => {
           resolve(data);
-        }).catch((e) => {
+        }).catch((e : Error) => {
           reject(e);
         });
       });
     });
   }
 
-  static loadLayers(data, interceptor) {
-    return data.layers.map((layer) => {
+  static loadLayers(data : any, interceptor : (AEDataInterceptor | null)) {
+    return data.layers.map((layer : any) => {
       if (interceptor) interceptor.intercept(layer);
       return element.ElementFactory.create(layer);
-    }).filter(layer => layer !== null);
+    }).filter((layer : any) => layer !== null);
   }
 
-  loadAssets(data, jsonPath, interceptor) {
+  loadAssets(data : AEData, jsonPath : string, interceptor : (AEDataInterceptor | null)) {
     const baseName = jsonPath.split('/').slice(0, -1).join('/');
-    const assets = data.assets.map((asset) => {
+    const assets = data.assets.map((asset : AssetData) => {
       if (interceptor) interceptor.intercept(asset);
       return new Asset(this, asset, baseName);
     });
@@ -83,12 +92,12 @@ export default class AEDataLoader {
       return !!asset.imagePath;
     });
     if (imageAssets.length === 0) {
-      return new Promise(resolve => resolve(assets));
+      return new Promise((resolve : (value? : Asset[]) => void) => resolve(assets));
     }
     return this.loadImages(imageAssets).then(() => assets);
   }
 
-  loadImages(imageAssets) {
+  loadImages(imageAssets : Asset[]) {
     return new Promise((resolve, reject) => {
       const loader = this.createImageLoader(imageAssets);
 
@@ -104,8 +113,8 @@ export default class AEDataLoader {
       requiredLoadAssets.forEach((asset) => {
         loader.add(asset.imagePath, asset.imagePath);
       });
-      loader.onError.add((error, _, resource) => {
-        reject(error, resource);
+      loader.onError.add((error : Error, _ : any, resource : any) => {
+        reject(error);
       });
       return loader.load((_, resources) => {
         imageAssets.forEach(asset => asset.texture = resources[asset.imagePath].texture);
@@ -114,12 +123,12 @@ export default class AEDataLoader {
     });
   }
 
-  static resolveReference(layers, assets) {
-    const assetMap = {};
+  static resolveReference(layers : any, assets : Asset[]) {
+    const assetMap : any = {};
     assets.forEach((asset) => {
       assetMap[asset.id] = asset;
     });
-    layers.forEach((layer) => {
+    layers.forEach((layer : any) => {
       if (layer.isCompType()) {
         layer.setupReference(assetMap);
       } else if (layer.isImageType()) {
@@ -128,9 +137,9 @@ export default class AEDataLoader {
     });
   }
 
-  load(data, jsonPath, interceptor) {
+  load(data : AEData, jsonPath : string, interceptor : (AEDataInterceptor | null)) {
     return this.loadAssets(data, jsonPath, interceptor)
-      .then((assets) => {
+      .then((assets : Asset[]) => {
         const layers = AEDataLoader.loadLayers(data, interceptor);
         AEDataLoader.resolveReference(layers, assets);
         data.assets  = assets;

@@ -3,6 +3,18 @@ import Element from './element';
 import MaskElement from './mask';
 
 export default class CompElement extends Element {
+  originWidth: number;
+  originHeight: number;
+  clonedLayers: Element[];
+  autoOriented: number;
+  masks: any[];
+  layers: Element[];
+  noreplay: boolean;
+  scaleX: number;
+  scaleY: number;
+  startTime: number;
+  referenceId: string;
+
   constructor(data) {
     super(data);
     if (data.w > 0 && data.h > 0) {
@@ -81,7 +93,7 @@ export default class CompElement extends Element {
     if (!asset) return;
 
     this.layers = asset.createLayers();
-    this.layers.forEach((layer) => {
+    this.layers.forEach((layer : Element) => {
       layer.inFrame   += this.startTime;
       layer.outFrame  += this.startTime;
       layer.startTime += this.startTime;

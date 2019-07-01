@@ -2,6 +2,21 @@ import * as PIXI from 'pixi.js';
 import * as element from './element';
 import AEDataLoader from './loader';
 
+export interface AEData {
+    h: number;
+    w: number;
+    op: number;
+    ip: number;
+    layers: Element[];
+    assets: any[];
+    fr: number;
+    v: string;
+};
+
+export interface AEOption {
+
+};
+
 /**
  * @example
  * // create base container object
@@ -19,6 +34,23 @@ import AEDataLoader from './loader';
  * @memberof PIXI
  */
 export default class AfterEffects extends PIXI.Container {
+  finder: element.ElementFinder;
+  inFrame: number;
+  outFrame: number;
+  frameRate: number;
+  version: string;
+  layers: Element[];
+  textures: any[];
+  textureCacheIds: any;
+  player: element.ElementPlayer;
+  deltaPlayer: element.ElementDeltaPlayer;
+  masks: {
+    maskLayer: Element;
+    maskTargetLayer: Element;
+  }[];
+  noreplay: boolean;
+  [key: string]: any;
+
   constructor() {
     super();
     this.finder = new element.ElementFinder();
@@ -34,8 +66,8 @@ export default class AfterEffects extends PIXI.Container {
    * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
    * @return {Promise}
    */
-  static fromJSONPath(jsonPath, opt) {
-    return AEDataLoader.loadJSON(jsonPath).then((data) => {
+  static fromJSONPath(jsonPath : string, opt : object) {
+    return new AEDataLoader().loadJSON(jsonPath).then((data : AEData) => {
       const ae = new AfterEffects();
       ae.setup(data, opt || {});
       return ae;
@@ -52,7 +84,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
    * @return {PIXI.AfterEffects} The newly created AfterEffects
    */
-  static fromData(data, opt) {
+  static fromData(data : AEData, opt : object) {
     const ae = new AfterEffects();
     ae.setup(data, opt || {});
     return ae;
@@ -64,7 +96,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {object} - The Object loaded by AEDataLoader
    * @param {object} - The option ( `noreplay` ) for AfterEffects
    */
-  setup(data, opt) {
+  setup(data : AEData, opt : AEOption) {
     this.width = data.w;
     this.height = data.h;
     this.inFrame = data.ip;
@@ -126,7 +158,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {string} - The name of element
    * @return {Element} - The found Element
    */
-  find(name) {
+  find(name : string) {
     return this.finder.findByName(name, this);
   }
 
@@ -137,7 +169,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current frame number
    */
-  updateMask(frame) {
+  updateMask(frame : number) {
     this.masks.forEach((maskData) => {
       const drawnMask = maskData.maskLayer.__updateWithFrame(frame);
       if (drawnMask) {
@@ -154,7 +186,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current time
    */
-  update(nowTime) {
+  update(nowTime : number) {
     if (!this.layers) return;
     this.player.update(nowTime);
     this.layers.forEach((layer) => {
@@ -168,7 +200,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The delta time
    */
-  updateByDelta(deltaTime) {
+  updateByDelta(deltaTime : number) {
     if (!this.layers) return;
     this.deltaPlayer.update(deltaTime);
     this.layers.forEach((layer) => {
@@ -182,7 +214,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current frame number
    */
-  updateWithFrame(frame) {
+  updateWithFrame(frame : number) {
     if (this.masks) {
       this.updateMask(frame);
     }
@@ -209,7 +241,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {boolean} - Enable Loop playing
    */
-  play(isLoop) {
+  play(isLoop : boolean) {
     this.player.play(isLoop);
     this.deltaPlayer.play(isLoop);
   }
