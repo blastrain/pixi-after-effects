@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import Element from './element';
+import { Element, ElementData } from './element';
 import MaskElement from './mask';
 
 export default class CompElement extends Element {
@@ -7,7 +7,10 @@ export default class CompElement extends Element {
   originHeight: number;
   clonedLayers: Element[];
   autoOriented: number;
-  masks: any[];
+  masks: {
+    maskLayer: Element;
+    maskTargetLayer: MaskElement;
+  }[];
   layers: Element[];
   noreplay: boolean;
   scaleX: number;
@@ -15,12 +18,12 @@ export default class CompElement extends Element {
   startTime: number;
   referenceId: string;
 
-  constructor(data) {
+  constructor(data: ElementData) {
     super(data);
     if (data.w > 0 && data.h > 0) {
-      this.originWidth  = data.w;
+      this.originWidth = data.w;
       this.originHeight = data.h;
-      this.scale        = new PIXI.Point(this.scaleX, this.scaleY);
+      this.scale = new PIXI.Point(this.scaleX, this.scaleY);
     }
     if (this.scaleX < 0) {
       // flip mode.
@@ -32,34 +35,35 @@ export default class CompElement extends Element {
   }
 
   allLayers() {
-    let layers = [];
+    let layers: Element[] = [];
     if (this.masks) {
       layers = layers.concat(this.masks.map(maskData => maskData.maskLayer));
     }
     if (!this.layers) {
-      layers = layers.concat(this.children.map((child) => {
+      const subLayers = this.children.map((child) => {
         if (child instanceof Element) {
           return child;
         }
         return null;
-      }).filter(layer => layer !== null));
+      }).filter(layer => layer !== null) as Element[];
+      layers = layers.concat(subLayers);
     } else {
       layers = layers.concat(this.layers);
     }
     return layers.concat(this.clonedLayers);
   }
 
-  set frameRate(value) {
-    super.frameRate = value;
+  set frameRate(value: number) {
+    this.frameRate = value;
     this.allLayers().forEach(layer => layer.frameRate = value);
   }
 
-  set opt(value) {
-    super.opt = value;
+  set opt(value: any) {
+    this.opt = value;
     this.allLayers().forEach(layer => layer.opt = value);
   }
 
-  addMaskLayer(layer) {
+  addMaskLayer(layer: Element) {
     if (!layer.hasMask) return;
 
     if (!this.masks) this.masks = [];
@@ -76,8 +80,8 @@ export default class CompElement extends Element {
 
   setupTrackMatteLayer(layer, trackMatteLayer) {
     trackMatteLayer.isInvertedMask = layer.isInvertTrackMatteType();
-    trackMatteLayer.alpha          = 0; // none visible
-    layer.maskLayer                = trackMatteLayer;
+    trackMatteLayer.alpha = 0; // none visible
+    layer.maskLayer = trackMatteLayer;
     layer.addChild(trackMatteLayer);
     if (!this.masks) this.masks = [];
     this.masks.push({
@@ -93,9 +97,9 @@ export default class CompElement extends Element {
     if (!asset) return;
 
     this.layers = asset.createLayers();
-    this.layers.forEach((layer : Element) => {
-      layer.inFrame   += this.startTime;
-      layer.outFrame  += this.startTime;
+    this.layers.forEach((layer: Element) => {
+      layer.inFrame += this.startTime;
+      layer.outFrame += this.startTime;
       layer.startTime += this.startTime;
       layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
     });
@@ -119,8 +123,8 @@ export default class CompElement extends Element {
       this.addChild(layer);
     });
     this.clonedLayers.forEach((layer) => {
-      layer.inFrame   += this.startTime;
-      layer.outFrame  += this.startTime;
+      layer.inFrame += this.startTime;
+      layer.outFrame += this.startTime;
       layer.startTime += this.startTime;
       layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
       this.addChild(layer);
@@ -137,7 +141,7 @@ export default class CompElement extends Element {
         if (parent) parent.removeChild(shape);
       });
       parentLayer.shapes = [];
-      parentLayer.inFrame  = layer.inFrame;
+      parentLayer.inFrame = layer.inFrame;
       parentLayer.outFrame = layer.outFrame;
     }
     this.addMaskLayer(layer);

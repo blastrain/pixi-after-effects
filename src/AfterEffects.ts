@@ -1,20 +1,22 @@
 import * as PIXI from 'pixi.js';
 import * as element from './element';
+import { Element } from './element/element';
+import { MaskElement } from './element/mask';
 import AEDataLoader from './loader';
 
 export interface AEData {
-    h: number;
-    w: number;
-    op: number;
-    ip: number;
-    layers: Element[];
-    assets: any[];
-    fr: number;
-    v: string;
+  h: number;
+  w: number;
+  op: number;
+  ip: number;
+  layers: Element[];
+  assets: any[];
+  fr: number;
+  v: string;
 };
 
 export interface AEOption {
-
+  [key: string]: any;
 };
 
 /**
@@ -46,7 +48,7 @@ export default class AfterEffects extends PIXI.Container {
   deltaPlayer: element.ElementDeltaPlayer;
   masks: {
     maskLayer: Element;
-    maskTargetLayer: Element;
+    maskTargetLayer: MaskElement;
   }[];
   noreplay: boolean;
   [key: string]: any;
@@ -66,8 +68,8 @@ export default class AfterEffects extends PIXI.Container {
    * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
    * @return {Promise}
    */
-  static fromJSONPath(jsonPath : string, opt : object) {
-    return new AEDataLoader().loadJSON(jsonPath).then((data : AEData) => {
+  static fromJSONPath(jsonPath: string, opt: object) {
+    return new AEDataLoader().loadJSON(jsonPath).then((data: AEData) => {
       const ae = new AfterEffects();
       ae.setup(data, opt || {});
       return ae;
@@ -84,7 +86,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {boolean} [opt.noreplay] - enables no repeat mode. if enabled this option, instantly destroy already played component.
    * @return {PIXI.AfterEffects} The newly created AfterEffects
    */
-  static fromData(data : AEData, opt : object) {
+  static fromData(data: AEData, opt: object) {
     const ae = new AfterEffects();
     ae.setup(data, opt || {});
     return ae;
@@ -96,7 +98,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {object} - The Object loaded by AEDataLoader
    * @param {object} - The option ( `noreplay` ) for AfterEffects
    */
-  setup(data : AEData, opt : AEOption) {
+  setup(data: AEData, opt: AEOption) {
     this.width = data.w;
     this.height = data.h;
     this.inFrame = data.ip;
@@ -122,14 +124,14 @@ export default class AfterEffects extends PIXI.Container {
       this[key] = opt[key];
     });
 
-    const layerIndexMap = {};
+    const layerIndexMap: any = {};
     this.layers.forEach((layer) => {
       layerIndexMap[layer.index] = layer;
     });
 
     this.layers.reverse().forEach((layer) => {
       layer.frameRate = this.frameRate;
-      layer.opt       = opt;
+      layer.opt = opt;
       if (layer.hasMask) {
         if (!this.masks) this.masks = [];
 
@@ -158,7 +160,7 @@ export default class AfterEffects extends PIXI.Container {
    * @param {string} - The name of element
    * @return {Element} - The found Element
    */
-  find(name : string) {
+  find(name: string) {
     return this.finder.findByName(name, this);
   }
 
@@ -169,7 +171,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current frame number
    */
-  updateMask(frame : number) {
+  updateMask(frame: number) {
     this.masks.forEach((maskData) => {
       const drawnMask = maskData.maskLayer.__updateWithFrame(frame);
       if (drawnMask) {
@@ -186,7 +188,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current time
    */
-  update(nowTime : number) {
+  update(nowTime: number) {
     if (!this.layers) return;
     this.player.update(nowTime);
     this.layers.forEach((layer) => {
@@ -200,7 +202,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The delta time
    */
-  updateByDelta(deltaTime : number) {
+  updateByDelta(deltaTime: number) {
     if (!this.layers) return;
     this.deltaPlayer.update(deltaTime);
     this.layers.forEach((layer) => {
@@ -214,7 +216,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {number} - The current frame number
    */
-  updateWithFrame(frame : number) {
+  updateWithFrame(frame: number) {
     if (this.masks) {
       this.updateMask(frame);
     }
@@ -241,7 +243,7 @@ export default class AfterEffects extends PIXI.Container {
    * @memberof PIXI.AfterEffects#
    * @param {boolean} - Enable Loop playing
    */
-  play(isLoop : boolean) {
+  play(isLoop: boolean) {
     this.player.play(isLoop);
     this.deltaPlayer.play(isLoop);
   }
