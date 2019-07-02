@@ -1,18 +1,15 @@
+import * as PIXI from 'pixi.js';
 export default class ElementFinder {
-  findByName(name, node) {
-    const nodeMap = {};
-    this.__findByName(name, node).forEach((subnode) => {
-      nodeMap[subnode] = subnode;
-    });
-    return Object.values(nodeMap) || [];
+  findByName(name: string, node: PIXI.Container) {
+    return this.__findByName(name, node);
   }
 
-  __findByName(name, node) {
-    const foundNodes = [];
+  __findByName(name: string, node: PIXI.Container): PIXI.DisplayObject[] {
+    const foundNodes: PIXI.DisplayObject[] = [];
     if (node.name === name) foundNodes.push(node);
     node.children.forEach((child) => {
       if (child.name === name) foundNodes.push(child);
-      this.__findByName(name, child).forEach((subnode) => {
+      this.__findByName(name, child as PIXI.Container).forEach((subnode) => {
         foundNodes.push(subnode);
       });
     });
