@@ -25,7 +25,7 @@ export interface ElementData {
   p?: string;
   id?: string;
   refId: string;
-  ty: number;
+  ty: number | string;
   completed: any;
   ind: number;
   parent: number;
@@ -66,6 +66,8 @@ export interface ElementData {
   isDisused?: boolean;
   layers?: ElementData[];
   u?: string;
+  it?: TransformData[];
+  shapes: any[];
 };
 
 export interface TransformData {
@@ -232,7 +234,7 @@ export interface ScaleAnimation extends Animation {
 export class Element extends PIXI.Graphics {
   name: string;
   referenceId: string;
-  type: number;
+  type: number | string;
   finder: ElementFinder;
   isCompleted: boolean;
   index: number;
@@ -260,6 +262,7 @@ export class Element extends PIXI.Graphics {
   scaleX: number;
   scaleY: number;
   parent: Container;
+  blendMode: number;
   [key: string]: any;
 
   constructor(data?: ElementData) {
