@@ -249,8 +249,8 @@ export class ShapeElement extends Element {
   fillColorHex: string | undefined;
   isClosed: boolean;
   paths: PathAnimation[];
-  beginProcess: () => void;
-  endProcess: () => void;
+  beginProcess: Function;
+  endProcess: Function;
 
   constructor(
     data: ElementData | null,

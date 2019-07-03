@@ -15,15 +15,21 @@ import { AEData } from "./AfterEffects";
  */
 export default class AEDataLoader {
   imagePathProxy: (path: string) => string;
-  createImageLoader: (imageAssets: Asset[]) => PIXI.loaders.Loader;
+  createImageLoader: Function;
 
   constructor() {
     this.imagePathProxy = path => path;
     this.createImageLoader = pixiVersionHelper.select(
-      (imageAssets: Asset[]) =>
-        new PIXI.loaders.Loader("", imageAssets.length) /* for v4 API */,
-      (imageAssets: Asset[]) =>
-        new PIXI.Loader("", imageAssets.length) /* for v5 API */
+      (imageAssets: Asset[]) => {
+        const loader = new PIXI.loaders.Loader();
+        return (loader as ((s: string, n: number) => any))(
+          "",
+          imageAssets.length
+        ); /* for v4 API */
+      },
+      (imageAssets: Asset[]) => {
+        new PIXI.Loader("", imageAssets.length); /* for v5 API */
+      }
     );
   }
 
@@ -141,7 +147,7 @@ export default class AEDataLoader {
       loader.onError.add((error: Error, _: any, resource: any) => {
         reject(error);
       });
-      return loader.load((_, resources) => {
+      return loader.load((_: any, resources: { [k: string]: any }) => {
         imageAssets.forEach(
           asset => (asset.texture = resources[asset.imagePath].texture)
         );
