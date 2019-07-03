@@ -11,7 +11,7 @@ const MASK_MODE = {
   DIFFERENCE: 5
 };
 
-export default class MaskElement extends ShapeElement {
+export class MaskElement extends ShapeElement {
   maskShapePaths: Path[];
   isMaskLayer: boolean;
   maskTargetLayer: Element;

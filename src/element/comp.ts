@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Asset } from "../asset";
 import { Element, ElementData } from "./element";
-import MaskElement from "./mask";
+import { MaskElement } from "./mask";
 
 interface MaskContainer {
   mask: PIXI.Sprite | PIXI.Graphics | null;

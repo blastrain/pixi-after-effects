@@ -2,9 +2,9 @@
  * @namespace PIXI
  */
 
-import AfterEffects from "./AfterEffects";
-import AEDataLoader from "./loader";
-import AEDataInterceptor from "./interceptor";
+import { AfterEffects } from "./AfterEffects";
+import { AEDataLoader } from "./loader";
+import { AEDataInterceptor } from "./interceptor";
 
 interface Window {
   PIXI: any;

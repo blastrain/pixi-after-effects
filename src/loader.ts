@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import * as element from "./element";
-import AEDataInterceptor from "./interceptor";
+import { AEDataInterceptor } from "./interceptor";
 import { AssetData, Asset } from "./asset";
 import pixiVersionHelper from "./versionHelper";
 import { AEData } from "./AfterEffects";
@@ -13,7 +13,7 @@ import { AEData } from "./AfterEffects";
  * @prop {function} imagePathProxy - Callback with image path before load image. If modify image path before load image, override this member and return newly path
  * @prop {function} createImageLoader - Create PIXI.loader.Loader for loading image. If create PIXI.loader.Loader for you want, override this member and can return another loader
  */
-export default class AEDataLoader {
+export class AEDataLoader {
   imagePathProxy: (path: string) => string;
   createImageLoader: Function;
 

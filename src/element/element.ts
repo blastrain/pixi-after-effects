@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
 import BezierEasing from "bezier-easing";
-import AfterEffects from "../AfterEffects";
+import { AfterEffects } from "../AfterEffects";
 import ElementFinder from "./finder";
 import ElementPlayer from "./player";
 import ElementDeltaPlayer from "./delta_player";
 import { ShapeElement, PathParamData } from "./shape";
-import { MaskElement } from ".";
+import { MaskElement } from "./mask";
 
 const TRACK_MATTE_TYPE = {
   ALPHA: 1,
