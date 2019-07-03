@@ -1,6 +1,11 @@
-import * as PIXI from 'pixi.js';
-import { Element, ElementData } from './element';
-import MaskElement from './mask';
+import * as PIXI from "pixi.js";
+import { Asset } from "../asset";
+import { Element, ElementData } from "./element";
+import MaskElement from "./mask";
+
+interface MaskContainer {
+  mask: PIXI.Sprite | PIXI.Graphics | null;
+}
 
 export default class CompElement extends Element {
   originWidth: number;
@@ -9,7 +14,7 @@ export default class CompElement extends Element {
   autoOriented: number;
   masks: {
     maskLayer: Element;
-    maskTargetLayer: MaskElement;
+    maskTargetLayer: Element;
   }[];
   layers: Element[];
   noreplay: boolean;
@@ -40,12 +45,14 @@ export default class CompElement extends Element {
       layers = layers.concat(this.masks.map(maskData => maskData.maskLayer));
     }
     if (!this.layers) {
-      const subLayers = this.children.map((child) => {
-        if (child instanceof Element) {
-          return child;
-        }
-        return null;
-      }).filter(layer => layer !== null) as Element[];
+      const subLayers = this.children
+        .map(child => {
+          if (child instanceof Element) {
+            return child;
+          }
+          return null;
+        })
+        .filter(layer => layer !== null) as Element[];
       layers = layers.concat(subLayers);
     } else {
       layers = layers.concat(this.layers);
@@ -55,12 +62,12 @@ export default class CompElement extends Element {
 
   set frameRate(value: number) {
     this.frameRate = value;
-    this.allLayers().forEach(layer => layer.frameRate = value);
+    this.allLayers().forEach(layer => (layer.frameRate = value));
   }
 
   set opt(value: any) {
     this.opt = value;
-    this.allLayers().forEach(layer => layer.opt = value);
+    this.allLayers().forEach(layer => (layer.opt = value));
   }
 
   addMaskLayer(layer: Element) {
@@ -74,11 +81,11 @@ export default class CompElement extends Element {
     layer.maskLayer = maskLayer;
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer,
+      maskLayer
     });
   }
 
-  setupTrackMatteLayer(layer, trackMatteLayer) {
+  setupTrackMatteLayer(layer: Element, trackMatteLayer: MaskElement) {
     trackMatteLayer.isInvertedMask = layer.isInvertTrackMatteType();
     trackMatteLayer.alpha = 0; // none visible
     layer.maskLayer = trackMatteLayer;
@@ -86,11 +93,11 @@ export default class CompElement extends Element {
     if (!this.masks) this.masks = [];
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: trackMatteLayer,
+      maskLayer: trackMatteLayer
     });
   }
 
-  setupReference(assetMap) {
+  setupReference(assetMap: { [key: string]: Asset }) {
     if (!this.referenceId) return;
 
     const asset = assetMap[this.referenceId];
@@ -104,7 +111,7 @@ export default class CompElement extends Element {
       layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
     });
     if (this.blendMode !== PIXI.BLEND_MODES.NORMAL) {
-      this.layers.forEach((layer) => {
+      this.layers.forEach(layer => {
         layer.blendMode = this.blendMode;
       });
     }
@@ -114,7 +121,7 @@ export default class CompElement extends Element {
 
       if (layer.hasTrackMatteType) {
         const trackMatteLayer = this.layers[index + 1];
-        this.setupTrackMatteLayer(layer, trackMatteLayer);
+        this.setupTrackMatteLayer(layer, trackMatteLayer as MaskElement);
       } else {
         this.addMaskLayer(layer);
       }
@@ -122,7 +129,7 @@ export default class CompElement extends Element {
       if (layer.isTrackMatteData) return;
       this.addChild(layer);
     });
-    this.clonedLayers.forEach((layer) => {
+    this.clonedLayers.forEach(layer => {
       layer.inFrame += this.startTime;
       layer.outFrame += this.startTime;
       layer.startTime += this.startTime;
@@ -131,12 +138,14 @@ export default class CompElement extends Element {
     });
   }
 
-  createParentLayer(layer, asset) {
+  createParentLayer(layer: Element, asset: Asset): Element | null {
     if (!layer.hasParent) return null;
 
     const parentLayer = asset.createLayerByIndex(layer.parentIndex);
+    if (!parentLayer) return null;
+
     if (parentLayer.shapes) {
-      parentLayer.shapes.forEach((shape) => {
+      parentLayer.shapes.forEach(shape => {
         const parent = shape.parent;
         if (parent) parent.removeChild(shape);
       });
@@ -146,25 +155,32 @@ export default class CompElement extends Element {
     }
     this.addMaskLayer(layer);
     parentLayer.addChild(layer);
-    const nextParentLayer = this.createParentLayer(parentLayer, asset);
+    const nextParentLayer = this.createParentLayer(
+      parentLayer as Element,
+      asset
+    );
     if (nextParentLayer) {
       nextParentLayer.addChild(parentLayer);
       return nextParentLayer;
     }
-    return parentLayer;
+    return parentLayer as Element;
   }
 
-  resolveLayerReference(layers, assetMap, asset) {
+  resolveLayerReference(
+    layers: Element[],
+    assetMap: { [key: string]: Asset },
+    asset: Asset
+  ) {
     layers.sort((a, b) => {
       if (a.index < b.index) return -1;
       if (a.index > b.index) return 1;
       return 0;
     });
-    layers.reverse().forEach((layer) => {
+    layers.reverse().forEach(layer => {
       const parentLayer = this.createParentLayer(layer, asset);
       if (parentLayer) this.clonedLayers.push(parentLayer);
     });
-    layers.forEach((layer) => {
+    layers.forEach(layer => {
       if (layer.isCompType()) {
         layer.setupReference(assetMap);
       } else if (layer.isImageType()) {
@@ -173,8 +189,8 @@ export default class CompElement extends Element {
     });
   }
 
-  updateMask(frame) {
-    this.masks.forEach((maskData) => {
+  updateMask(frame: number) {
+    this.masks.forEach(maskData => {
       let maskLayer = maskData.maskLayer;
 
       if (maskLayer.isTrackMatteData && maskLayer.maskLayer) {
@@ -185,16 +201,16 @@ export default class CompElement extends Element {
       if (drawnMask) {
         maskData.maskTargetLayer.mask = maskLayer;
       } else {
-        maskData.maskTargetLayer.mask = null;
+        (maskData.maskTargetLayer as MaskContainer).mask = null;
       }
     });
   }
 
-  updateNotLayers(frame) {
+  updateNotLayers(frame: number) {
     this.alpha = 1;
     if (this.noreplay) {
       const children = this.children.concat();
-      children.forEach((layer) => {
+      children.forEach(layer => {
         if (layer instanceof Element) {
           if (layer.outFrame < frame) {
             this.removeChild(layer);
@@ -206,16 +222,16 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.children.forEach((layer) => {
+    this.children.forEach(layer => {
       if (layer instanceof Element) {
         layer.__updateWithFrame(frame);
       }
     });
   }
 
-  updateLayers(frame) {
+  updateLayers(frame: number) {
     if (this.noreplay) {
-      this.layers = this.layers.filter((layer) => {
+      this.layers = this.layers.filter(layer => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
           layer.destroy();
@@ -226,14 +242,14 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.layers.forEach((layer) => {
+    this.layers.forEach(layer => {
       layer.__updateWithFrame(frame);
     });
   }
 
-  updateClonedLayers(frame) {
+  updateClonedLayers(frame: number) {
     if (this.noreplay) {
-      this.clonedLayers = this.clonedLayers.filter((layer) => {
+      this.clonedLayers = this.clonedLayers.filter(layer => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
           layer.destroy();
@@ -246,13 +262,13 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.clonedLayers.forEach((layer) => {
+    this.clonedLayers.forEach(layer => {
       layer.__updateWithFrame(frame);
       layer.visible = true;
     });
   }
 
-  __updateWithFrame(frame) {
+  __updateWithFrame(frame: number) {
     super.__updateWithFrame(frame);
     if (this.masks) {
       this.updateMask(frame);
@@ -264,5 +280,6 @@ export default class CompElement extends Element {
     }
 
     this.updateClonedLayers(frame);
+    return true;
   }
 }

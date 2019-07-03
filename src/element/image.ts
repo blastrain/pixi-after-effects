@@ -1,8 +1,13 @@
-import * as PIXI from 'pixi.js';
-import Element from './element';
+import * as PIXI from "pixi.js";
+import { Asset } from "../asset";
+import { Element, ElementData } from "./element";
 
 export default class ImageElement extends Element {
-  constructor(data) {
+  image: PIXI.Sprite;
+  blendMode: number;
+  referenceId: string;
+
+  constructor(data: ElementData) {
     super(data);
     if (data.bmPIXI) {
       this.blendMode = data.bmPIXI;
@@ -16,7 +21,7 @@ export default class ImageElement extends Element {
     }
   }
 
-  setupImage(assetMap) {
+  setupImage(assetMap: { [key: string]: Asset }) {
     if (this.image) return;
     if (!this.referenceId) return;
 

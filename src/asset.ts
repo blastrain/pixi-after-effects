@@ -1,27 +1,27 @@
-import { Element, ElementData } as element from './element';
+import * as element from "./element";
 
 export interface AssetData {
-  id : string;
-  layers : any;
-  isDisused : boolean;
-  texture : any;
-  imagePath : string;
-  p : string;
-  u : string;
-  bmPIXI : PIXI.BLEND_MODES;
-};
+  id: string;
+  layers: any;
+  isDisused: boolean;
+  texture: any;
+  imagePath: string;
+  p: string;
+  u: string;
+  bmPIXI: PIXI.BLEND_MODES;
+}
 
 /**
  * @class Asset
  */
 export class Asset {
   id: string;
-  layers: ElementData[];
+  layers: element.ElementData[];
   texture: any;
   imagePath: string;
   blendMode: number;
 
-  constructor(loader : any, data : AssetData, jsonPath : string) {
+  constructor(loader: any, data: AssetData, jsonPath: string) {
     this.id = data.id;
     this.layers = data.layers || [];
     if (data.isDisused) return;
@@ -33,8 +33,10 @@ export class Asset {
         this.imagePath = loader.imagePathProxy(data.imagePath);
       }
     } else if (data.p) {
-      const contents = data.u.split('/').filter((content : string) => content !== '');
-      let imagePath  = [jsonPath, ...contents, data.p].join('/');
+      const contents = data.u
+        .split("/")
+        .filter((content: string) => content !== "");
+      let imagePath = [jsonPath, ...contents, data.p].join("/");
       if (loader.imagePathProxy) {
         imagePath = loader.imagePathProxy(imagePath);
       }
@@ -54,7 +56,7 @@ export class Asset {
   createLayers() {
     return this.layers
       .map(layer => element.ElementFactory.create(layer))
-      .filter(layer => layer !== null);
+      .filter(layer => layer !== null) as element.Element[];
   }
 
   /**
@@ -64,7 +66,7 @@ export class Asset {
    * @param {number}   - The index of layer
    * @return {Element} - The newly Element instance
    */
-  createLayerByIndex(index : number) {
+  createLayerByIndex(index: number) {
     const foundLayers = this.layers.filter(layer => layer.ind === index);
     if (foundLayers.length === 0) return null;
 
