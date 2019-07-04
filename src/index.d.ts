@@ -1,0 +1,4 @@
+/**
+ * @namespace PIXI
+ */
+export {};

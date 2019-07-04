@@ -23,6 +23,7 @@
   "bugs": {
     "url": "https://github.com/knocknote/pixi-after-effects/issues"
   },
+  "types": "src",
   "homepage": "https://github.com/knocknote/pixi-after-effects",
   "author": "",
   "license": "MIT",
