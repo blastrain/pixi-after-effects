@@ -1129,14 +1129,14 @@ export default class ShapeContainerElement extends Element {
   }
 
   set frameRate(value: number) {
-    this.frameRate = value;
+    super.frameRate = value;
     this.children.forEach(child => {
-      (child as ShapeElement).frameRate = value;
+      (child as Element).frameRate = value;
     });
   }
 
   set opt(value: any) {
-    this.opt = value;
+    super.opt = value;
     this.children.forEach(child => {
       (child as ShapeElement).opt = value;
     });

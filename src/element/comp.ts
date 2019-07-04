@@ -61,12 +61,12 @@ export default class CompElement extends Element {
   }
 
   set frameRate(value: number) {
-    this.frameRate = value;
+    super.frameRate = value;
     this.allLayers().forEach(layer => (layer.frameRate = value));
   }
 
   set opt(value: any) {
-    this.opt = value;
+    super.opt = value;
     this.allLayers().forEach(layer => (layer.opt = value));
   }
 
