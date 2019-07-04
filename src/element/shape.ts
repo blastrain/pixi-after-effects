@@ -1,5 +1,5 @@
-import * as PIXI from "pixi.js";
-import BezierEasing from "bezier-easing";
+import * as PIXI from 'pixi.js';
+import BezierEasing from 'bezier-easing';
 import {
   Element,
   ElementData,
@@ -10,9 +10,9 @@ import {
   SeparatedPositionAnimation,
   TransformAnimationData,
   PositionData,
-  OpacityData
-} from "./element";
-import pixiVersionHelper from "../versionHelper";
+  OpacityData,
+} from './element';
+import pixiVersionHelper from '../versionHelper';
 
 export interface PathData {
   m: any;
@@ -240,23 +240,34 @@ export interface PathAnimation extends Animation {
 
 export class ShapeElement extends Element {
   shapePaths: ShapePath[];
+
   stroke: StrokePath;
+
   trim: TrimShape;
+
   rects: Rect[];
+
   ellipses: Ellipse[];
+
   fillRGBA: Fill;
+
   strokeColorHex: string | undefined;
+
   fillColorHex: string | undefined;
+
   isClosed: boolean;
+
   paths: PathAnimation[];
+
   beginProcess: Function;
+
   endProcess: Function;
 
   constructor(
     data: ElementData | null,
     inFrame: number,
     outFrame: number,
-    startTime: number
+    startTime: number,
   ) {
     super();
     if (!data) return;
@@ -269,7 +280,7 @@ export class ShapeElement extends Element {
       () => {} /* for v4 API */,
       () => {
         this.beginHole();
-      } /* for v5 API */
+      }, /* for v5 API */
     );
     this.endProcess = pixiVersionHelper.select(
       () => {
@@ -282,7 +293,7 @@ export class ShapeElement extends Element {
       () => {
         // for v5 API
         this.endHole();
-      }
+      },
     );
     if (!data.it) {
       this.setupShapeByType(data);
@@ -301,37 +312,37 @@ export class ShapeElement extends Element {
       | RectData
       | EllipseData
       | FillData
-      | TransformData
+      | TransformData,
   ) {
     switch (data.ty) {
-      case "sh":
-        this.setupPath(data as PathData);
-        break;
-      case "st":
-        this.setupStroke(data as StrokeData);
-        break;
-      case "tm":
-        this.setupTrim(data as TrimData);
-        break;
-      case "rc":
-        this.setupRect(data as RectData);
-        break;
-      case "el":
-        this.setupEllipse(data as EllipseData);
-        break;
-      case "fl":
-        this.setupFill(data as FillData);
-        break;
-      case "tr":
-        this.setupProperties(data as TransformData);
-        break;
-      default:
-        break;
+    case 'sh':
+      this.setupPath(data as PathData);
+      break;
+    case 'st':
+      this.setupStroke(data as StrokeData);
+      break;
+    case 'tm':
+      this.setupTrim(data as TrimData);
+      break;
+    case 'rc':
+      this.setupRect(data as RectData);
+      break;
+    case 'el':
+      this.setupEllipse(data as EllipseData);
+      break;
+    case 'fl':
+      this.setupFill(data as FillData);
+      break;
+    case 'tr':
+      this.setupProperties(data as TransformData);
+      break;
+    default:
+      break;
     }
   }
 
   setupShapeIteration(data: TransformData[]) {
-    data.forEach(def => {
+    data.forEach((def) => {
       this.setupShapeByType(def);
     });
     if (this.shapePaths) this.shapePaths.reverse();
@@ -342,7 +353,7 @@ export class ShapeElement extends Element {
     this.shapePaths.push({
       isClosed: data.closed,
       name: data.nm,
-      path: this.createPath(data.ks.k)
+      path: this.createPath(data.ks.k),
     });
   }
 
@@ -354,7 +365,7 @@ export class ShapeElement extends Element {
       opacity: data.o.k,
       width: data.w.k,
       color: ShapeElement.createColor(data.c),
-      enabledFill: data.fillEnabled
+      enabledFill: data.fillEnabled,
     };
   }
 
@@ -364,7 +375,7 @@ export class ShapeElement extends Element {
       o: data.o,
       name: data.nm,
       start: ShapeElement.createTrim(data.s.k),
-      end: ShapeElement.createTrim(data.e.k)
+      end: ShapeElement.createTrim(data.e.k),
     };
     if ((this.trim.start as TrimAnimation[]).length > 0) {
       this.trim.enabledAnimation = true;
@@ -372,7 +383,7 @@ export class ShapeElement extends Element {
   }
 
   static createTrim(data: number) {
-    if (typeof data === "number") {
+    if (typeof data === 'number') {
       return data;
     }
     return ShapeElement.createTrimAnimation(data);
@@ -384,7 +395,7 @@ export class ShapeElement extends Element {
         animData.o.x[0],
         animData.o.y[0],
         animData.i.x[0],
-        animData.i.y[0]
+        animData.i.y[0],
       );
     }
     return (x: number) => x;
@@ -399,7 +410,7 @@ export class ShapeElement extends Element {
         endFrame: lastIndex > index ? data[index + 1].t : animData.t,
         easing: ShapeElement.createTrimEasing(animData),
         fromRatio: animData.s ? animData.s[0] : null,
-        toRatio: animData.e ? animData.e[0] : null
+        toRatio: animData.e ? animData.e[0] : null,
       };
       return anim;
     });
@@ -411,7 +422,7 @@ export class ShapeElement extends Element {
       name: data.nm,
       direction: data.d,
       position: ShapeElement.createPosition(data.p),
-      size: ShapeElement.createSize(data.s)
+      size: ShapeElement.createSize(data.s),
     };
     const animPos = rect.position as PositionAnimation[];
     const animSize = rect.size as PositionAnimation[];
@@ -426,7 +437,7 @@ export class ShapeElement extends Element {
     const ellipse: Ellipse = {
       direction: data.d,
       position: ShapeElement.createPosition(data.p),
-      size: ShapeElement.createSize(data.s)
+      size: ShapeElement.createSize(data.s),
     };
     const animPos = ellipse.position as PositionAnimation[];
     const animSize = ellipse.size as PositionAnimation[];
@@ -441,7 +452,7 @@ export class ShapeElement extends Element {
   }
 
   static createColor(data: ColorData) {
-    if (typeof data.k[0] === "number") {
+    if (typeof data.k[0] === 'number') {
       return ShapeElement.rgbArrayToHex(data.k as number[]);
     }
     return ShapeElement.createAnimatedColor(data.k as ColorAnimationData[]);
@@ -453,7 +464,7 @@ export class ShapeElement extends Element {
         animData.o.x,
         animData.o.y,
         animData.i.x,
-        animData.i.y
+        animData.i.y,
       );
     }
     return (x: number) => x;
@@ -469,10 +480,10 @@ export class ShapeElement extends Element {
         easing: ShapeElement.createColorEasing(animData),
         fromColor: animData.s
           ? ShapeElement.rgbArrayToHex(animData.s)
-          : "0x000000",
+          : '0x000000',
         toColor: animData.e
           ? ShapeElement.rgbArrayToHex(animData.e)
-          : "0x000000"
+          : '0x000000',
       };
       return anim;
     });
@@ -484,7 +495,7 @@ export class ShapeElement extends Element {
         animData.o.x,
         animData.o.y,
         animData.i.x,
-        animData.i.y
+        animData.i.y,
       );
     }
     return (x: number) => x;
@@ -503,10 +514,10 @@ export class ShapeElement extends Element {
           endFrame: lastIndex > index ? data[index + 1].t : animData.t,
           easing: ShapeElement.createPathEasing(animData),
           fromPath: animData.s ? this.createPath(animData.s[0]) : null,
-          toPath: animData.e ? this.createPath(animData.e[0]) : null
+          toPath: animData.e ? this.createPath(animData.e[0]) : null,
         };
         return anim;
-      })
+      }),
     };
     return path;
   }
@@ -521,7 +532,7 @@ export class ShapeElement extends Element {
 
     const path: Path = {
       moveTo: new PIXI.Point(0, 0),
-      bezierCurveToPaths: []
+      bezierCurveToPaths: [],
     };
     data.v.forEach((_v, index) => {
       data.i[index][0] += data.v[index][0];
@@ -538,16 +549,16 @@ export class ShapeElement extends Element {
       path.bezierCurveToPaths.push({
         cp: new PIXI.Point(cp[0], cp[1]),
         cp2: new PIXI.Point(cp2[0], cp2[1]),
-        to: new PIXI.Point(to[0], to[1])
+        to: new PIXI.Point(to[0], to[1]),
       });
     });
     path.bezierCurveToPaths.push({
       cp: new PIXI.Point(
         data.o[data.v.length - 1][0],
-        data.o[data.v.length - 1][1]
+        data.o[data.v.length - 1][1],
       ),
       cp2: new PIXI.Point(data.i[0][0], data.i[0][1]),
-      to: new PIXI.Point(data.v[0][0], data.v[0][1])
+      to: new PIXI.Point(data.v[0][0], data.v[0][1]),
     });
     return path;
   }
@@ -557,7 +568,7 @@ export class ShapeElement extends Element {
       color: ShapeElement.createColor(data.c),
       enabled: true,
       name: data.nm,
-      opacity: ShapeElement.createOpacity(data.o)
+      opacity: ShapeElement.createOpacity(data.o),
     };
   }
 
@@ -582,29 +593,29 @@ export class ShapeElement extends Element {
   updateAnimationFrameByBaseFrame(animBaseFrame: number) {
     super.updateAnimationFrameByBaseFrame(animBaseFrame);
     if (!this.shapePaths) return;
-    this.shapePaths.forEach(shapePath => {
+    this.shapePaths.forEach((shapePath) => {
       if (!shapePath.path.hasAnimatedPath) return;
       if (!shapePath.path.paths) return;
 
-      shapePath.path.paths.forEach(animData => {
+      shapePath.path.paths.forEach((animData) => {
         animData.startFrame += animBaseFrame;
         animData.endFrame += animBaseFrame;
       });
     });
     if (this.ellipses) {
-      this.ellipses.forEach(ellipse => {
+      this.ellipses.forEach((ellipse) => {
         if (!ellipse.enabledAnimation) return;
 
         const sizeAnim = ellipse.size as PositionAnimation[];
         if (sizeAnim.length > 0) {
-          sizeAnim.forEach(animData => {
+          sizeAnim.forEach((animData) => {
             animData.startFrame += animBaseFrame;
             animData.endFrame += animBaseFrame;
           });
         }
         const posAnim = ellipse.position as PositionAnimation[];
         if (posAnim.length > 0) {
-          posAnim.forEach(animData => {
+          posAnim.forEach((animData) => {
             animData.startFrame += animBaseFrame;
             animData.endFrame += animBaseFrame;
           });
@@ -612,12 +623,12 @@ export class ShapeElement extends Element {
       });
     }
     if (this.rects) {
-      this.rects.forEach(rect => {
+      this.rects.forEach((rect) => {
         if (!rect.enabledAnimation) return;
 
         const sizeAnim = rect.size as PositionAnimation[];
         if (sizeAnim.length > 0) {
-          sizeAnim.forEach(animData => {
+          sizeAnim.forEach((animData) => {
             animData.startFrame += animBaseFrame;
             animData.endFrame += animBaseFrame;
           });
@@ -625,7 +636,7 @@ export class ShapeElement extends Element {
 
         const posAnim = rect.position as PositionAnimation[];
         if (posAnim.length > 0) {
-          posAnim.forEach(animData => {
+          posAnim.forEach((animData) => {
             animData.startFrame += animBaseFrame;
             animData.endFrame += animBaseFrame;
           });
@@ -637,14 +648,14 @@ export class ShapeElement extends Element {
   drawPathForMask(shapePath: Path) {
     const moveTo = shapePath.moveTo;
     this.moveTo(moveTo.x, moveTo.y);
-    shapePath.bezierCurveToPaths.forEach(path => {
+    shapePath.bezierCurveToPaths.forEach((path) => {
       this.bezierCurveTo(
         path.cp.x,
         path.cp.y,
         path.cp2.x,
         path.cp2.y,
         path.to.x,
-        path.to.y
+        path.to.y,
       );
     });
     this.closePath();
@@ -694,14 +705,14 @@ export class ShapeElement extends Element {
     this.beforeDraw();
 
     this.moveTo(shapePath.moveTo.x, shapePath.moveTo.y);
-    shapePath.bezierCurveToPaths.forEach(path => {
+    shapePath.bezierCurveToPaths.forEach((path) => {
       this.bezierCurveTo(
         path.cp.x,
         path.cp.y,
         path.cp2.x,
         path.cp2.y,
         path.to.x,
-        path.to.y
+        path.to.y,
       );
     });
 
@@ -712,7 +723,7 @@ export class ShapeElement extends Element {
     animData: Animation,
     frame: number,
     fromPos: PIXI.Point,
-    toPos: PIXI.Point
+    toPos: PIXI.Point,
   ) {
     const totalFrame = animData.endFrame - animData.startFrame;
     const playFrame = (frame - animData.startFrame) * 1.0;
@@ -733,7 +744,7 @@ export class ShapeElement extends Element {
         animData,
         frame,
         fromPath.moveTo,
-        toPath.moveTo
+        toPath.moveTo,
       ),
       bezierCurveToPaths: fromPath.bezierCurveToPaths.map((path, index) => {
         const fromBezierCurveToPath = fromPath.bezierCurveToPaths[index];
@@ -742,35 +753,35 @@ export class ShapeElement extends Element {
           animData,
           frame,
           fromBezierCurveToPath.cp,
-          toBezierCurveToPath.cp
+          toBezierCurveToPath.cp,
         );
         const cp2 = ShapeElement.createAnimatePos(
           animData,
           frame,
           fromBezierCurveToPath.cp2,
-          toBezierCurveToPath.cp2
+          toBezierCurveToPath.cp2,
         );
         const to = ShapeElement.createAnimatePos(
           animData,
           frame,
           fromBezierCurveToPath.to,
-          toBezierCurveToPath.to
+          toBezierCurveToPath.to,
         );
         return { cp, cp2, to };
-      })
+      }),
     };
   }
 
   setupStrokeColor(frame: number) {
     if (!this.stroke) return;
 
-    if (typeof this.stroke.color !== "string") {
+    if (typeof this.stroke.color !== 'string') {
       const firstColor = this.stroke.color[0];
       if (frame < firstColor.startFrame) {
         this.strokeColorHex = firstColor.fromColor;
         return;
       }
-      this.stroke.color.forEach(animData => {
+      this.stroke.color.forEach((animData) => {
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           this.strokeColorHex = animData.fromColor;
         }
@@ -787,14 +798,14 @@ export class ShapeElement extends Element {
   setupFillColor(frame: number) {
     if (!this.fillRGBA) return;
 
-    if (typeof this.fillRGBA.color !== "string") {
+    if (typeof this.fillRGBA.color !== 'string') {
       const color = this.fillRGBA.color as ColorAnimation[];
       const firstColor = color[0];
       if (frame < firstColor.startFrame) {
         this.fillColorHex = firstColor.fromColor;
         return;
       }
-      color.forEach(animData => {
+      color.forEach((animData) => {
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
           this.fillColorHex = animData.fromColor;
         }
@@ -812,7 +823,7 @@ export class ShapeElement extends Element {
     const posAnim = shape.position as PositionAnimation[];
     if (posAnim.length > 0) {
       let pos: PIXI.Point | null = null;
-      posAnim.forEach(animData => {
+      posAnim.forEach((animData) => {
         if (!animData.toPosition) return;
         if (!animData.fromPosition) return;
 
@@ -841,7 +852,7 @@ export class ShapeElement extends Element {
     const sizeAnim = shape.size as PositionAnimation[];
     if (sizeAnim.length > 0) {
       let size: PIXI.Point | null = null;
-      sizeAnim.forEach(animData => {
+      sizeAnim.forEach((animData) => {
         if (!animData.toPosition) return;
         if (!animData.fromPosition) return;
 
@@ -885,7 +896,7 @@ export class ShapeElement extends Element {
   drawTrim(frame: number) {
     if (!this.trim.enabledAnimation) {
       this.beforeDraw();
-      this.shapePaths.forEach(shapePath => {
+      this.shapePaths.forEach((shapePath) => {
         const path = shapePath.path;
 
         const fromPath = path.moveTo;
@@ -913,7 +924,7 @@ export class ShapeElement extends Element {
     }
 
     let trimStartRatio: number = 0;
-    startAnim.some(animData => {
+    startAnim.some((animData) => {
       if (animData.startFrame === animData.endFrame) {
         return false;
       }
@@ -936,7 +947,7 @@ export class ShapeElement extends Element {
     }
 
     let trimEndRatio = 0;
-    endAnim.some(animData => {
+    endAnim.some((animData) => {
       if (animData.startFrame === animData.endFrame) {
         return false;
       }
@@ -964,7 +975,7 @@ export class ShapeElement extends Element {
       trimEndRatio = tmp;
     }
     this.beforeDraw();
-    this.shapePaths.forEach(shapePath => {
+    this.shapePaths.forEach((shapePath) => {
       const path = shapePath.path;
 
       const fromPath = path.moveTo;
@@ -997,7 +1008,7 @@ export class ShapeElement extends Element {
           this.endProcess();
         }
       }
-      paths.some(animData => {
+      paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
           return false;
         }
@@ -1057,7 +1068,7 @@ export class ShapeElement extends Element {
 
     if (this.ellipses) {
       this.beforeDraw();
-      this.ellipses.forEach(ellipse => {
+      this.ellipses.forEach((ellipse) => {
         if (ellipse.enabledAnimation) {
           this.drawEllipseAnimation(frame, ellipse);
         } else {
@@ -1070,7 +1081,7 @@ export class ShapeElement extends Element {
     }
     if (this.rects) {
       this.beforeDraw();
-      this.rects.forEach(rect => {
+      this.rects.forEach((rect) => {
         if (rect.enabledAnimation) {
           this.drawRectAnimation(frame, rect);
         } else {
@@ -1092,7 +1103,9 @@ export class ShapeElement extends Element {
 
 export default class ShapeContainerElement extends Element {
   shapes: ShapeElement[];
+
   bounds: Bounds;
+
   noreplay: boolean;
 
   constructor(data: ElementData) {
@@ -1103,15 +1116,15 @@ export default class ShapeContainerElement extends Element {
       this.width = 0;
       this.height = 0;
     }
-    this.shapes = data.shapes.map(shape => {
+    this.shapes = data.shapes.map((shape) => {
       return new ShapeElement(
         shape,
         this.inFrame,
         this.outFrame,
-        this.startTime
+        this.startTime,
       );
     });
-    this.shapes.forEach(shape => {
+    this.shapes.forEach((shape) => {
       if (this.scaleX && this.scaleY) {
         shape.scaleX = this.scaleX;
         shape.scaleY = this.scaleY;
@@ -1123,7 +1136,7 @@ export default class ShapeContainerElement extends Element {
 
   destroy(opt: any) {
     const children = this.children.concat();
-    children.forEach(child => {
+    children.forEach((child) => {
       (child as ShapeElement).destroy(opt);
       this.removeChild(child);
     });
@@ -1131,21 +1144,21 @@ export default class ShapeContainerElement extends Element {
 
   set frameRate(value: number) {
     super.frameRate = value;
-    this.children.forEach(child => {
+    this.children.forEach((child) => {
       (child as Element).frameRate = value;
     });
   }
 
   set opt(value: any) {
     super.opt = value;
-    this.children.forEach(child => {
+    this.children.forEach((child) => {
       (child as ShapeElement).opt = value;
     });
   }
 
   updateAnimationFrameByBaseFrame(animBaseFrame: number) {
     super.updateAnimationFrameByBaseFrame(animBaseFrame);
-    this.shapes.forEach(shape => {
+    this.shapes.forEach((shape) => {
       shape.inFrame += animBaseFrame;
       shape.outFrame += animBaseFrame;
       shape.updateAnimationFrameByBaseFrame(animBaseFrame);
@@ -1159,7 +1172,7 @@ export default class ShapeContainerElement extends Element {
       top: data.t,
       bottom: data.b,
       left: data.l,
-      right: data.r
+      right: data.r,
     };
   }
 
@@ -1167,7 +1180,7 @@ export default class ShapeContainerElement extends Element {
     super.__updateWithFrame(frame);
     if (this.noreplay) {
       const children = this.children.concat();
-      children.forEach(child => {
+      children.forEach((child) => {
         const layer = child as ShapeElement;
         if (layer.outFrame < frame) {
           this.removeChild(layer);
@@ -1179,7 +1192,7 @@ export default class ShapeContainerElement extends Element {
         return true;
       });
     } else {
-      this.children.forEach(child => {
+      this.children.forEach((child) => {
         const layer = child as ShapeElement;
         layer.__updateWithFrame(frame);
       });

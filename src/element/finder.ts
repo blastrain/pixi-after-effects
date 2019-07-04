@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+
 export default class ElementFinder {
   findByName(name: string, node: PIXI.Container) {
     return this.__findByName(name, node);

@@ -1,9 +1,9 @@
-import * as PIXI from "pixi.js";
-import * as element from "./element";
-import { AEDataInterceptor } from "./interceptor";
-import { AssetData, Asset } from "./asset";
-import pixiVersionHelper from "./versionHelper";
-import { AEData } from "./AfterEffects";
+import * as PIXI from 'pixi.js';
+import * as element from './element';
+import { AEDataInterceptor } from './interceptor';
+import { AssetData, Asset } from './asset';
+import pixiVersionHelper from './versionHelper';
+import { AEData } from './AfterEffects';
 
 /**
  * Create assets and layers, also load all images includes AfterEffects animation.
@@ -15,6 +15,7 @@ import { AEData } from "./AfterEffects";
  */
 export class AEDataLoader {
   imagePathProxy: (path: string) => string;
+
   createImageLoader: Function;
 
   constructor() {
@@ -23,13 +24,13 @@ export class AEDataLoader {
       (imageAssets: Asset[]) => {
         const loader = new PIXI.loaders.Loader();
         return (loader as ((s: string, n: number) => any))(
-          "",
-          imageAssets.length
+          '',
+          imageAssets.length,
         ); /* for v4 API */
       },
       (imageAssets: Asset[]) => {
-        new PIXI.Loader("", imageAssets.length); /* for v5 API */
-      }
+        return new PIXI.Loader('', imageAssets.length); /* for v5 API */
+      },
     );
   }
 
@@ -74,7 +75,7 @@ export class AEDataLoader {
   loadJSONWithInterceptor(jsonPath: string, interceptor: AEDataInterceptor) {
     return new Promise((resolve: (value?: AEData | null) => void, reject) => {
       if (!interceptor) {
-        return reject(new Error("required interceptor parameter"));
+        return reject(new Error('required interceptor parameter'));
       }
       return fetch(jsonPath)
         .then((res: Response) => {
@@ -105,23 +106,21 @@ export class AEDataLoader {
   loadAssets(
     data: AEData,
     jsonPath: string,
-    interceptor: AEDataInterceptor | null
+    interceptor: AEDataInterceptor | null,
   ) {
     const baseName = jsonPath
-      .split("/")
+      .split('/')
       .slice(0, -1)
-      .join("/");
+      .join('/');
     const assets = data.assets.map((asset: AssetData) => {
       if (interceptor) interceptor.intercept(asset);
       return new Asset(this, asset, baseName);
     });
-    const imageAssets = assets.filter(asset => {
+    const imageAssets = assets.filter((asset) => {
       return !!asset.imagePath;
     });
     if (imageAssets.length === 0) {
-      return new Promise((resolve: (value?: Asset[]) => void) =>
-        resolve(assets)
-      );
+      return new Promise((resolve: (value?: Asset[]) => void) => resolve(assets));
     }
     return this.loadImages(imageAssets).then(() => assets);
   }
@@ -133,23 +132,23 @@ export class AEDataLoader {
       // if override createImageLoader and use shared PIXI.Loaders,
       // possibly loader.resources has already loaded resource
       const requiredLoadAssets = imageAssets.filter(
-        asset => !loader.resources[asset.imagePath]
+        asset => !loader.resources[asset.imagePath],
       );
       if (requiredLoadAssets.length === 0) {
-        imageAssets.forEach(asset => {
+        imageAssets.forEach((asset) => {
           asset.texture = loader.resources[asset.imagePath].texture;
         });
         return resolve();
       }
-      requiredLoadAssets.forEach(asset => {
+      requiredLoadAssets.forEach((asset) => {
         loader.add(asset.imagePath, asset.imagePath);
       });
-      loader.onError.add((error: Error, _: any, resource: any) => {
+      loader.onError.add((error: Error) => {
         reject(error);
       });
       return loader.load((_: any, resources: { [k: string]: any }) => {
         imageAssets.forEach(
-          asset => (asset.texture = resources[asset.imagePath].texture)
+          asset => (asset.texture = resources[asset.imagePath].texture),
         );
         resolve();
       });
@@ -158,7 +157,7 @@ export class AEDataLoader {
 
   static resolveReference(layers: any, assets: Asset[]) {
     const assetMap: { [key: string]: Asset } = {};
-    assets.forEach(asset => {
+    assets.forEach((asset) => {
       assetMap[asset.id] = asset;
     });
     layers.forEach((layer: any) => {
@@ -177,7 +176,7 @@ export class AEDataLoader {
         AEDataLoader.resolveReference(layers, assets);
         data.assets = assets;
         data.layers = layers;
-      }
+      },
     );
   }
 }

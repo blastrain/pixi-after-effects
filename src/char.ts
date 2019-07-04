@@ -7,14 +7,19 @@ export interface CharData {
   data: {
     shapes: any
   };
-};
+}
 
 export default class Char {
   ch: string;
+
   fontFamily: string;
+
   fontSize: number;
+
   fontStyle: string;
+
   width: number;
+
   shapes: any;
 
   constructor(data : CharData) {

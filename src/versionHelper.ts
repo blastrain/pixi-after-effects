@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import * as PIXI from 'pixi.js';
 
 const pixiVersionHelper = {
   version: PIXI.VERSION,
@@ -36,7 +36,7 @@ const pixiVersionHelper = {
       return v5func;
     }
     return () => {};
-  }
+  },
 };
 
 export default pixiVersionHelper;

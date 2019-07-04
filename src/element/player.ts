@@ -1,13 +1,22 @@
 export default class ElementPlayer {
   frameRate: number;
+
   inFrame: number;
+
   outFrame: number;
+
   isLoop: boolean;
+
   isCompleted: boolean;
+
   updater: (value: number) => void;
+
   completed: () => void;
+
   isPlaying: boolean;
+
   firstTime: number | null;
+
   nowTime: number;
 
   constructor(
@@ -15,7 +24,7 @@ export default class ElementPlayer {
     inFrame: number,
     outFrame: number,
     updater: (value: number) => void,
-    completed: () => void
+    completed: () => void,
   ) {
     this.frameRate = frameRate;
     this.inFrame = inFrame;

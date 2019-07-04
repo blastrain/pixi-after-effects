@@ -1,7 +1,7 @@
-import * as PIXI from "pixi.js";
-import { Asset } from "../asset";
-import { Element, ElementData } from "./element";
-import { MaskElement } from "./mask";
+import * as PIXI from 'pixi.js';
+import { Asset } from '../asset';
+import { Element, ElementData } from './element';
+import { MaskElement } from './mask';
 
 interface MaskContainer {
   mask: PIXI.Sprite | PIXI.Graphics | null;
@@ -9,18 +9,28 @@ interface MaskContainer {
 
 export default class CompElement extends Element {
   originWidth: number;
+
   originHeight: number;
+
   clonedLayers: Element[];
+
   autoOriented: number;
+
   masks: {
     maskLayer: Element;
     maskTargetLayer: Element;
   }[];
+
   layers: Element[];
+
   noreplay: boolean;
+
   scaleX: number;
+
   scaleY: number;
+
   startTime: number;
+
   referenceId: string;
 
   constructor(data: ElementData) {
@@ -46,7 +56,7 @@ export default class CompElement extends Element {
     }
     if (!this.layers) {
       const subLayers = this.children
-        .map(child => {
+        .map((child) => {
           if (child instanceof Element) {
             return child;
           }
@@ -81,7 +91,7 @@ export default class CompElement extends Element {
     layer.maskLayer = maskLayer;
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer
+      maskLayer,
     });
   }
 
@@ -93,7 +103,7 @@ export default class CompElement extends Element {
     if (!this.masks) this.masks = [];
     this.masks.push({
       maskTargetLayer: layer,
-      maskLayer: trackMatteLayer
+      maskLayer: trackMatteLayer,
     });
   }
 
@@ -111,7 +121,7 @@ export default class CompElement extends Element {
       layer.updateAnimationFrameByBaseFrame(this.startTime || 0);
     });
     if (this.blendMode !== PIXI.BLEND_MODES.NORMAL) {
-      this.layers.forEach(layer => {
+      this.layers.forEach((layer) => {
         layer.blendMode = this.blendMode;
       });
     }
@@ -129,7 +139,7 @@ export default class CompElement extends Element {
       if (layer.isTrackMatteData) return;
       this.addChild(layer);
     });
-    this.clonedLayers.forEach(layer => {
+    this.clonedLayers.forEach((layer) => {
       layer.inFrame += this.startTime;
       layer.outFrame += this.startTime;
       layer.startTime += this.startTime;
@@ -145,7 +155,7 @@ export default class CompElement extends Element {
     if (!parentLayer) return null;
 
     if (parentLayer.shapes) {
-      parentLayer.shapes.forEach(shape => {
+      parentLayer.shapes.forEach((shape) => {
         const parent = shape.parent;
         if (parent) parent.removeChild(shape);
       });
@@ -157,7 +167,7 @@ export default class CompElement extends Element {
     parentLayer.addChild(layer);
     const nextParentLayer = this.createParentLayer(
       parentLayer as Element,
-      asset
+      asset,
     );
     if (nextParentLayer) {
       nextParentLayer.addChild(parentLayer);
@@ -169,18 +179,18 @@ export default class CompElement extends Element {
   resolveLayerReference(
     layers: Element[],
     assetMap: { [key: string]: Asset },
-    asset: Asset
+    asset: Asset,
   ) {
     layers.sort((a, b) => {
       if (a.index < b.index) return -1;
       if (a.index > b.index) return 1;
       return 0;
     });
-    layers.reverse().forEach(layer => {
+    layers.reverse().forEach((layer) => {
       const parentLayer = this.createParentLayer(layer, asset);
       if (parentLayer) this.clonedLayers.push(parentLayer);
     });
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       if (layer.isCompType()) {
         layer.setupReference(assetMap);
       } else if (layer.isImageType()) {
@@ -190,7 +200,7 @@ export default class CompElement extends Element {
   }
 
   updateMask(frame: number) {
-    this.masks.forEach(maskData => {
+    this.masks.forEach((maskData) => {
       let maskLayer = maskData.maskLayer;
 
       if (maskLayer.isTrackMatteData && maskLayer.maskLayer) {
@@ -210,7 +220,7 @@ export default class CompElement extends Element {
     this.alpha = 1;
     if (this.noreplay) {
       const children = this.children.concat();
-      children.forEach(layer => {
+      children.forEach((layer) => {
         if (layer instanceof Element) {
           if (layer.outFrame < frame) {
             this.removeChild(layer);
@@ -222,7 +232,7 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.children.forEach(layer => {
+    this.children.forEach((layer) => {
       if (layer instanceof Element) {
         layer.__updateWithFrame(frame);
       }
@@ -231,7 +241,7 @@ export default class CompElement extends Element {
 
   updateLayers(frame: number) {
     if (this.noreplay) {
-      this.layers = this.layers.filter(layer => {
+      this.layers = this.layers.filter((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
           layer.destroy();
@@ -242,14 +252,14 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.layers.forEach(layer => {
+    this.layers.forEach((layer) => {
       layer.__updateWithFrame(frame);
     });
   }
 
   updateClonedLayers(frame: number) {
     if (this.noreplay) {
-      this.clonedLayers = this.clonedLayers.filter(layer => {
+      this.clonedLayers = this.clonedLayers.filter((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
           layer.destroy();
@@ -262,7 +272,7 @@ export default class CompElement extends Element {
       });
       return;
     }
-    this.clonedLayers.forEach(layer => {
+    this.clonedLayers.forEach((layer) => {
       layer.__updateWithFrame(frame);
       layer.visible = true;
     });

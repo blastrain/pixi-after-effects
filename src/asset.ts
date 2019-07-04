@@ -1,4 +1,4 @@
-import * as element from "./element";
+import * as element from './element';
 
 export interface AssetData {
   id: string;
@@ -16,9 +16,13 @@ export interface AssetData {
  */
 export class Asset {
   id: string;
+
   layers: element.ElementData[];
+
   texture: any;
+
   imagePath: string;
+
   blendMode: number;
 
   constructor(loader: any, data: AssetData, jsonPath: string) {
@@ -34,9 +38,9 @@ export class Asset {
       }
     } else if (data.p) {
       const contents = data.u
-        .split("/")
-        .filter((content: string) => content !== "");
-      let imagePath = [jsonPath, ...contents, data.p].join("/");
+        .split('/')
+        .filter((content: string) => content !== '');
+      let imagePath = [jsonPath, ...contents, data.p].join('/');
       if (loader.imagePathProxy) {
         imagePath = loader.imagePathProxy(imagePath);
       }

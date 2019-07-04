@@ -1,6 +1,6 @@
-import * as PIXI from "pixi.js";
-import { Element, ElementData, OpacityData } from "./element";
-import { ShapeElement, Path } from "./shape";
+import * as PIXI from 'pixi.js';
+import { Element, OpacityData } from './element';
+import { ShapeElement, Path } from './shape';
 
 const MASK_MODE = {
   NONE: 0,
@@ -8,20 +8,25 @@ const MASK_MODE = {
   SUBTRACT: 2,
   LIGHTEN: 3,
   DARKEN: 4,
-  DIFFERENCE: 5
+  DIFFERENCE: 5,
 };
 
 export class MaskElement extends ShapeElement {
   maskShapePaths: Path[];
+
   isMaskLayer: boolean;
+
   maskTargetLayer: Element;
+
   maskMode: number;
+
   screenWidth: number;
+
   screenHeight: number;
 
   constructor(maskTargetLayer: Element) {
     super(null, 0, 0, 0);
-    this.maskShapePaths = maskTargetLayer.masksProperties.map(maskProperty => {
+    this.maskShapePaths = maskTargetLayer.masksProperties.map((maskProperty) => {
       return this.createPath(maskProperty.pt.k);
     });
     const data = maskTargetLayer.masksProperties[0];
@@ -34,55 +39,55 @@ export class MaskElement extends ShapeElement {
     this.inFrame = maskTargetLayer.inFrame;
     this.outFrame = maskTargetLayer.outFrame;
     this.setupOpacity(data.o as OpacityData);
-    this.fillColorHex = "0x000000";
+    this.fillColorHex = '0x000000';
     this.fillRGBA = { enabled: true };
   }
 
   setBlendModeByMaskMode(mode: number) {
     switch (mode) {
-      case MASK_MODE.ADDITIVE:
-        this.blendMode = PIXI.BLEND_MODES.ADD;
-        break;
-      case MASK_MODE.SUBTRACT:
-        // no match into PIXI.BLEND_MODES
-        break;
-      case MASK_MODE.LIGHTEN:
-        this.blendMode = PIXI.BLEND_MODES.LIGHTEN;
-        break;
-      case MASK_MODE.DARKEN:
-        this.blendMode = PIXI.BLEND_MODES.DARKEN;
-        break;
-      case MASK_MODE.DIFFERENCE:
-        this.blendMode = PIXI.BLEND_MODES.DIFFERENCE;
-        break;
-      default:
-        break;
+    case MASK_MODE.ADDITIVE:
+      this.blendMode = PIXI.BLEND_MODES.ADD;
+      break;
+    case MASK_MODE.SUBTRACT:
+      // no match into PIXI.BLEND_MODES
+      break;
+    case MASK_MODE.LIGHTEN:
+      this.blendMode = PIXI.BLEND_MODES.LIGHTEN;
+      break;
+    case MASK_MODE.DARKEN:
+      this.blendMode = PIXI.BLEND_MODES.DARKEN;
+      break;
+    case MASK_MODE.DIFFERENCE:
+      this.blendMode = PIXI.BLEND_MODES.DIFFERENCE;
+      break;
+    default:
+      break;
     }
   }
 
   static toMaskMode(mode: string) {
     let maskMode = MASK_MODE.ADDITIVE;
     switch (mode) {
-      case "n":
-        maskMode = MASK_MODE.NONE;
-        break;
-      case "a":
-        maskMode = MASK_MODE.ADDITIVE;
-        break;
-      case "s":
-        maskMode = MASK_MODE.SUBTRACT;
-        break;
-      case "l":
-        maskMode = MASK_MODE.LIGHTEN;
-        break;
-      case "d":
-        maskMode = MASK_MODE.DARKEN;
-        break;
-      case "f":
-        maskMode = MASK_MODE.DIFFERENCE;
-        break;
-      default:
-        break;
+    case 'n':
+      maskMode = MASK_MODE.NONE;
+      break;
+    case 'a':
+      maskMode = MASK_MODE.ADDITIVE;
+      break;
+    case 's':
+      maskMode = MASK_MODE.SUBTRACT;
+      break;
+    case 'l':
+      maskMode = MASK_MODE.LIGHTEN;
+      break;
+    case 'd':
+      maskMode = MASK_MODE.DARKEN;
+      break;
+    case 'f':
+      maskMode = MASK_MODE.DIFFERENCE;
+      break;
+    default:
+      break;
     }
     return maskMode;
   }
@@ -90,11 +95,11 @@ export class MaskElement extends ShapeElement {
   updateAnimationFrameByBaseFrame(animBaseFrame: number) {
     super.updateAnimationFrameByBaseFrame(animBaseFrame);
     if (!this.maskShapePaths) return;
-    this.maskShapePaths.forEach(shapePath => {
+    this.maskShapePaths.forEach((shapePath) => {
       if (!shapePath.hasAnimatedPath) return;
       if (!shapePath.paths) return;
 
-      shapePath.paths.forEach(animData => {
+      shapePath.paths.forEach((animData) => {
         animData.startFrame += animBaseFrame;
         animData.endFrame += animBaseFrame;
       });
@@ -115,7 +120,7 @@ export class MaskElement extends ShapeElement {
         drawnMask = true;
       }
 
-      paths.some(animData => {
+      paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
           return false;
         }
@@ -160,9 +165,9 @@ export class MaskElement extends ShapeElement {
   drawAllMask(frame: number) {
     let drawnMask = false;
     if (
-      this.inFrame <= frame &&
-      frame <= this.outFrame &&
-      this.isInvertedMask
+      this.inFrame <= frame
+      && frame <= this.outFrame
+      && this.isInvertedMask
     ) {
       if (!this.screenWidth || !this.screenHeight) {
         this.setupScreenSize();
@@ -179,7 +184,7 @@ export class MaskElement extends ShapeElement {
       this.afterDraw();
       drawnMask = true;
     }
-    this.maskShapePaths.forEach(shapePath => {
+    this.maskShapePaths.forEach((shapePath) => {
       if (this.drawMask(frame, shapePath)) {
         drawnMask = true;
       }

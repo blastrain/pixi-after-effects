@@ -1,8 +1,8 @@
-import * as PIXI from "pixi.js";
-import * as element from "./element";
-import { Element } from "./element/element";
-import { MaskElement } from "./element/mask";
-import { AEDataLoader } from "./loader";
+import * as PIXI from 'pixi.js';
+import * as element from './element';
+import { Element } from './element/element';
+import { MaskElement } from './element/mask';
+import { AEDataLoader } from './loader';
 
 export interface AEData {
   h: number;
@@ -37,20 +37,32 @@ export interface AEOption {
  */
 export class AfterEffects extends PIXI.Container {
   finder: element.ElementFinder;
+
   inFrame: number;
+
   outFrame: number;
+
   frameRate: number;
+
   version: string;
+
   layers: Element[];
+
   textures: any[];
+
   textureCacheIds: any;
+
   player: element.ElementPlayer;
+
   deltaPlayer: element.ElementDeltaPlayer;
+
   masks: {
     maskLayer: Element;
     maskTargetLayer: Element;
   }[];
+
   noreplay: boolean;
+
   [key: string]: any;
 
   constructor() {
@@ -111,41 +123,41 @@ export class AfterEffects extends PIXI.Container {
       .map(asset => asset.texture);
     this.textureCacheIds = this.textures
       .filter(
-        texture => texture.textureCacheIds && texture.textureCacheIds.length > 0
+        texture => texture.textureCacheIds && texture.textureCacheIds.length > 0,
       )
       .map(texture => texture.textureCacheIds[0]);
     this.player = new element.ElementPlayer(
       this.frameRate,
       this.inFrame,
       this.outFrame,
-      frame => {
+      (frame) => {
         this.updateWithFrame(frame);
       },
       () => {
-        this.emit("completed", this);
-      }
+        this.emit('completed', this);
+      },
     );
     this.deltaPlayer = new element.ElementDeltaPlayer(
       this.frameRate,
       this.inFrame,
       this.outFrame,
-      frame => {
+      (frame) => {
         this.updateWithFrame(frame);
       },
       () => {
-        this.emit("completed", this);
-      }
+        this.emit('completed', this);
+      },
     );
-    Object.keys(opt).forEach(key => {
+    Object.keys(opt).forEach((key) => {
       this[key] = opt[key];
     });
 
     const layerIndexMap: any = {};
-    this.layers.forEach(layer => {
+    this.layers.forEach((layer) => {
       layerIndexMap[layer.index] = layer;
     });
 
-    this.layers.reverse().forEach(layer => {
+    this.layers.reverse().forEach((layer) => {
       layer.frameRate = this.frameRate;
       layer.opt = opt;
       if (layer.hasMask) {
@@ -156,7 +168,7 @@ export class AfterEffects extends PIXI.Container {
         layer.addChild(maskLayer);
         this.masks.push({
           maskTargetLayer: layer,
-          maskLayer
+          maskLayer,
         });
       } else if (layer.hasParent) {
         const parentLayer = layerIndexMap[layer.parentIndex];
@@ -188,7 +200,7 @@ export class AfterEffects extends PIXI.Container {
    * @param {number} - The current frame number
    */
   updateMask(frame: number) {
-    this.masks.forEach(maskData => {
+    this.masks.forEach((maskData) => {
       const drawnMask = maskData.maskLayer.__updateWithFrame(frame);
       if (drawnMask) {
         maskData.maskTargetLayer.mask = maskData.maskLayer;
@@ -209,7 +221,7 @@ export class AfterEffects extends PIXI.Container {
   update(nowTime: number) {
     if (!this.layers) return;
     this.player.update(nowTime);
-    this.layers.forEach(layer => {
+    this.layers.forEach((layer) => {
       layer.update(nowTime);
     });
   }
@@ -223,7 +235,7 @@ export class AfterEffects extends PIXI.Container {
   updateByDelta(deltaTime: number) {
     if (!this.layers) return;
     this.deltaPlayer.update(deltaTime);
-    this.layers.forEach(layer => {
+    this.layers.forEach((layer) => {
       layer.updateByDelta(deltaTime);
     });
   }
@@ -239,7 +251,7 @@ export class AfterEffects extends PIXI.Container {
       this.updateMask(frame);
     }
     if (this.noreplay) {
-      this.layers = this.layers.filter(layer => {
+      this.layers = this.layers.filter((layer) => {
         if (layer.outFrame < frame) {
           this.removeChild(layer);
           layer.destroy();
@@ -249,7 +261,7 @@ export class AfterEffects extends PIXI.Container {
         return true;
       });
     } else {
-      this.layers.forEach(layer => {
+      this.layers.forEach((layer) => {
         layer.updateWithFrame(frame);
       });
     }

@@ -1,26 +1,34 @@
-import * as PIXI from "pixi.js";
-import { Element, ElementData, TextData } from "./element";
+import * as PIXI from 'pixi.js';
+import { Element, ElementData, TextData } from './element';
 
 const JUSTIFICATION_TYPE = {
   LEFT: 0,
   RIGHT: 1,
-  CENTER: 2
+  CENTER: 2,
 };
 
 const ALIGN_OF_JUSTIFICATION: { [key: number]: string } = {};
-ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.LEFT] = "left";
-ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.RIGHT] = "right";
-ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.CENTER] = "center";
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.LEFT] = 'left';
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.RIGHT] = 'right';
+ALIGN_OF_JUSTIFICATION[JUSTIFICATION_TYPE.CENTER] = 'center';
 
 export default class TextElement extends Element {
   text: PIXI.Text;
+
   rawText: string;
+
   fontFamily: string;
+
   fontColor: number;
+
   fontSize: number;
+
   justification: number;
+
   baseLineHeight: number;
+
   baseLineShift: any;
+
   tracking: any;
 
   constructor(data: ElementData) {
@@ -56,7 +64,7 @@ export default class TextElement extends Element {
     if (data.length > 0) {
       return parseInt(
         `0x${this.toHex(data[0])}${this.toHex(data[1])}${this.toHex(data[2])}`,
-        16
+        16,
       );
     }
     return 0xffffff;
@@ -77,7 +85,7 @@ export default class TextElement extends Element {
       fontFamily: this.fontFamily,
       fontSize: this.fontSize,
       fill: this.fontColor,
-      align: ALIGN_OF_JUSTIFICATION[this.justification]
+      align: ALIGN_OF_JUSTIFICATION[this.justification],
     });
 
     if (this.justification === JUSTIFICATION_TYPE.LEFT) {

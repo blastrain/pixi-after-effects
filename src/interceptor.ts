@@ -59,8 +59,7 @@ export class AEDataInterceptor {
         this.intercept(layer);
       });
     }
-    const cfg =
-      this.config[data.nm] || this.config[data.p] || this.config[data.id];
+    const cfg =      this.config[data.nm] || this.config[data.p] || this.config[data.id];
     if (cfg) {
       if (cfg.text) data.text = cfg.text;
       if (cfg.rawText) data.rawText = cfg.rawText;
