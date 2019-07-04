@@ -33,14 +33,13 @@
     "pixi.js": "^5.0.4"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.4.5",
     "@pixi/jsdoc-template": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
     "copy-webpack-plugin": "^5.0.3",
     "dat.gui": "^0.7.6",
     "eslint": "^6.0.1",
-    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-airbnb": "^17.1.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-jsx-a11y": "^6.2.2",
