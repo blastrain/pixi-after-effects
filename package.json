@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "server": "webpack-dev-server --host 0.0.0.0 --progress --port 5000 --mode development",
-    "lint": "eslint src/** --ext .ts",
+    "lint": "eslint . --ext .ts",
     "lint:fix": "yarn lint --fix",
     "doc": "jsdoc -c .jsdoc.json -R README.md"
   },

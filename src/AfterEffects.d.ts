@@ -1,6 +1,6 @@
-import * as PIXI from "pixi.js";
-import * as element from "./element";
-import { Element } from "./element/element";
+import * as PIXI from 'pixi.js';
+import * as element from './element';
+import { Element } from './element/element';
 export interface AEData {
     h: number;
     w: number;

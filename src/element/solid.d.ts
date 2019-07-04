@@ -1,4 +1,4 @@
-import { Element, ElementData } from "./element";
+import { Element, ElementData } from './element';
 export default class SolidElement extends Element {
     color: string;
     colorNumber: number;

@@ -1,10 +1,10 @@
-import * as PIXI from "pixi.js";
-import BezierEasing from "bezier-easing";
-import ElementFinder from "./finder";
-import ElementPlayer from "./player";
-import ElementDeltaPlayer from "./delta_player";
-import { ShapeElement, PathParamData } from "./shape";
-import { MaskElement } from "./mask";
+import * as PIXI from 'pixi.js';
+import BezierEasing from 'bezier-easing';
+import ElementFinder from './finder';
+import ElementPlayer from './player';
+import ElementDeltaPlayer from './delta_player';
+import { ShapeElement, PathParamData } from './shape';
+import { MaskElement } from './mask';
 export interface Container extends PIXI.Graphics {
     parent: Container;
     isInvertedMask: boolean;
@@ -285,7 +285,7 @@ export declare class Element extends PIXI.Graphics {
     static createOpacityEasing(animData: OpacityAnimationData): BezierEasing.EasingFunction;
     static createAnimatedOpacity(data: OpacityAnimationData[]): OpacityAnimation[];
     setupPosition(data: PositionData): void;
-    static createPosition(data: PositionData | SeparatedPositionData): PositionAnimation[] | SeparatedPositionAnimation | PIXI.Point;
+    static createPosition(data: PositionData | SeparatedPositionData): PIXI.Point | PositionAnimation[] | SeparatedPositionAnimation;
     static createSeparatedPositionEasing(animData: SeparatedPositionAnimationData): BezierEasing.EasingFunction;
     static createAnimatedSeparatedPosition(data: SeparatedPositionAnimationData[]): EachPositionAnimation[];
     static createPositionEasing(animData: PositionAnimationData | SeparatedPositionAnimationData): BezierEasing.EasingFunction;

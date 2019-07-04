@@ -1,6 +1,6 @@
-import { AEDataInterceptor } from "./interceptor";
-import { Asset } from "./asset";
-import { AEData } from "./AfterEffects";
+import { AEDataInterceptor } from './interceptor';
+import { Asset } from './asset';
+import { AEData } from './AfterEffects';
 /**
  * Create assets and layers, also load all images includes AfterEffects animation.
  *

@@ -1,5 +1,5 @@
-import { Element } from "./element";
-import { ShapeElement, Path } from "./shape";
+import { Element } from './element';
+import { ShapeElement, Path } from './shape';
 export declare class MaskElement extends ShapeElement {
     maskShapePaths: Path[];
     isMaskLayer: boolean;

@@ -1,6 +1,6 @@
-import * as PIXI from "pixi.js";
-import BezierEasing from "bezier-easing";
-import { Element, ElementData, TransformData, Animation, OpacityAnimation, PositionAnimation, SeparatedPositionAnimation, TransformAnimationData, PositionData, OpacityData } from "./element";
+import * as PIXI from 'pixi.js';
+import BezierEasing from 'bezier-easing';
+import { Element, ElementData, TransformData, Animation, OpacityAnimation, PositionAnimation, SeparatedPositionAnimation, TransformAnimationData, PositionData, OpacityData } from './element';
 export interface PathData {
     m: any;
     e: any;
@@ -223,7 +223,7 @@ export declare class ShapeElement extends Element {
     static createTrimAnimation(data: TrimAnimationData[]): TrimAnimation[];
     setupRect(data: RectData): void;
     setupEllipse(data: EllipseData): void;
-    static createSize(data: PositionData): PositionAnimation[] | SeparatedPositionAnimation | PIXI.Point;
+    static createSize(data: PositionData): PIXI.Point | PositionAnimation[] | SeparatedPositionAnimation;
     static createColor(data: ColorData): string | ColorAnimation[];
     static createColorEasing(animData: ColorAnimationData): BezierEasing.EasingFunction;
     static createAnimatedColor(data: ColorAnimationData[]): ColorAnimation[];

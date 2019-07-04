@@ -1,4 +1,4 @@
-import * as element from "./element";
+import * as element from './element';
 export interface AssetData {
     id: string;
     layers: any;

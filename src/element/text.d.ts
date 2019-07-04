@@ -1,5 +1,5 @@
-import * as PIXI from "pixi.js";
-import { Element, ElementData, TextData } from "./element";
+import * as PIXI from 'pixi.js';
+import { Element, ElementData, TextData } from './element';
 export default class TextElement extends Element {
     text: PIXI.Text;
     rawText: string;

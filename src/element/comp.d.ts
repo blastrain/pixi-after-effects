@@ -1,6 +1,6 @@
-import { Asset } from "../asset";
-import { Element, ElementData } from "./element";
-import { MaskElement } from "./mask";
+import { Asset } from '../asset';
+import { Element, ElementData } from './element';
+import { MaskElement } from './mask';
 export default class CompElement extends Element {
     originWidth: number;
     originHeight: number;
