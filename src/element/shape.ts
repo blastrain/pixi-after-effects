@@ -908,8 +908,9 @@ export class ShapeElement extends Element {
 
     const startAnim = this.trim.start as TrimAnimation[];
     const endAnim = this.trim.end as TrimAnimation[];
-    if (frame < startAnim[0].startFrame && frame < endAnim[0].startFrame)
+    if (frame < startAnim[0].startFrame && frame < endAnim[0].startFrame) {
       return;
+    }
 
     let trimStartRatio: number = 0;
     startAnim.some(animData => {
@@ -917,8 +918,8 @@ export class ShapeElement extends Element {
         return false;
       }
       if (animData.startFrame <= frame && frame <= animData.endFrame) {
-        if (!animData.toRatio) return false;
-        if (!animData.fromRatio) return false;
+        if (animData.toRatio === null) return false;
+        if (animData.fromRatio === null) return false;
 
         const ratioDiff = animData.toRatio - animData.fromRatio;
         const totalFrame = animData.endFrame - animData.startFrame;
@@ -940,8 +941,8 @@ export class ShapeElement extends Element {
         return false;
       }
       if (animData.startFrame <= frame && frame <= animData.endFrame) {
-        if (!animData.toRatio) return false;
-        if (!animData.fromRatio) return false;
+        if (animData.toRatio === null) return false;
+        if (animData.fromRatio === null) return false;
 
         const ratioDiff = animData.toRatio - animData.fromRatio;
         const totalFrame = animData.endFrame - animData.startFrame;
@@ -1001,7 +1002,7 @@ export class ShapeElement extends Element {
           return false;
         }
         if (animData.startFrame <= frame && frame <= animData.endFrame) {
-          if (!animData.fromPath) return false;
+          if (animData.fromPath === null) return false;
           if (index !== 0) {
             this.beginProcess();
           }
