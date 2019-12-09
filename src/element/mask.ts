@@ -1,36 +1,49 @@
 import * as PIXI from 'pixi.js';
-import { ShapeElement } from './shape';
+import { Element, OpacityData } from './element';
+import { ShapeElement, Path } from './shape';
 
 const MASK_MODE = {
-  NONE:       0,
-  ADDITIVE:   1,
-  SUBTRACT:   2,
-  LIGHTEN:    3,
-  DARKEN:     4,
+  NONE: 0,
+  ADDITIVE: 1,
+  SUBTRACT: 2,
+  LIGHTEN: 3,
+  DARKEN: 4,
   DIFFERENCE: 5,
 };
 
-export default class MaskElement extends ShapeElement {
-  constructor(maskTargetLayer) {
-    super();
+export class MaskElement extends ShapeElement {
+  maskShapePaths: Path[];
+
+  isMaskLayer: boolean;
+
+  maskTargetLayer: Element;
+
+  maskMode: number;
+
+  screenWidth: number;
+
+  screenHeight: number;
+
+  constructor(maskTargetLayer: Element) {
+    super(null, 0, 0, 0);
     this.maskShapePaths = maskTargetLayer.masksProperties.map((maskProperty) => {
       return this.createPath(maskProperty.pt.k);
     });
     const data = maskTargetLayer.masksProperties[0];
     this.isMaskLayer = true;
     this.maskTargetLayer = maskTargetLayer;
-    this.isClosed   = data.cl;
+    this.isClosed = data.cl;
     this.isInvertedMask = data.inv;
-    this.maskMode   = MaskElement.toMaskMode(data.mode);
+    this.maskMode = MaskElement.toMaskMode(data.mode);
     this.setBlendModeByMaskMode(this.maskMode);
-    this.inFrame    = maskTargetLayer.inFrame;
-    this.outFrame   = maskTargetLayer.outFrame;
-    this.setupOpacity(data.o);
+    this.inFrame = maskTargetLayer.inFrame;
+    this.outFrame = maskTargetLayer.outFrame;
+    this.setupOpacity(data.o as OpacityData);
     this.fillColorHex = '0x000000';
     this.fillRGBA = { enabled: true };
   }
 
-  setBlendModeByMaskMode(mode) {
+  setBlendModeByMaskMode(mode: number) {
     switch (mode) {
     case MASK_MODE.ADDITIVE:
       this.blendMode = PIXI.BLEND_MODES.ADD;
@@ -44,15 +57,15 @@ export default class MaskElement extends ShapeElement {
     case MASK_MODE.DARKEN:
       this.blendMode = PIXI.BLEND_MODES.DARKEN;
       break;
-    case MASK_MODE.DEFFERENCE:
-      this.blendMode = PIXI.BLEND_MODES.DEFFERENCE;
+    case MASK_MODE.DIFFERENCE:
+      this.blendMode = PIXI.BLEND_MODES.DIFFERENCE;
       break;
     default:
       break;
     }
   }
 
-  static toMaskMode(mode) {
+  static toMaskMode(mode: string) {
     let maskMode = MASK_MODE.ADDITIVE;
     switch (mode) {
     case 'n':
@@ -79,30 +92,35 @@ export default class MaskElement extends ShapeElement {
     return maskMode;
   }
 
-  updateAnimationFrameByBaseFrame(animBaseFrame) {
+  updateAnimationFrameByBaseFrame(animBaseFrame: number) {
     super.updateAnimationFrameByBaseFrame(animBaseFrame);
     if (!this.maskShapePaths) return;
     this.maskShapePaths.forEach((shapePath) => {
       if (!shapePath.hasAnimatedPath) return;
+      if (!shapePath.paths) return;
+
       shapePath.paths.forEach((animData) => {
         animData.startFrame += animBaseFrame;
-        animData.endFrame   += animBaseFrame;
+        animData.endFrame += animBaseFrame;
       });
     });
   }
   // TODO: Check addhole() with new paradigma v5 beginHole() and endhole()
 
-  drawMask(frame, shapePath) {
-    let drawnMask   = false;
+  drawMask(frame: number, shapePath: Path) {
+    let drawnMask = false;
     if (shapePath.hasAnimatedPath) {
-      this.isClosed = shapePath.isClosed;
-      const paths     = shapePath.paths;
-      if (frame < shapePath.paths[0].startFrame) {
-        this.drawPath(shapePath.paths[0].fromPath);
+      this.isClosed = shapePath.isClosed || false;
+      const paths = shapePath.paths;
+      if (!paths) return drawnMask;
+
+      if (frame < paths[0].startFrame) {
+        this.drawPath(paths[0].fromPath as Path);
         if (this.isInvertedMask) this.addHole();
         drawnMask = true;
       }
-      shapePath.paths.some((animData) => {
+
+      paths.some((animData) => {
         if (animData.startFrame === animData.endFrame) {
           return false;
         }
@@ -120,12 +138,12 @@ export default class MaskElement extends ShapeElement {
       });
       const lastPath = paths[paths.length - 2];
       if (lastPath.endFrame <= frame) {
-        this.drawPath(lastPath.toPath);
+        this.drawPath(lastPath.toPath as Path);
         if (this.isInvertedMask) this.addHole();
         drawnMask = true;
       }
     } else if (this.inFrame <= frame && frame <= this.outFrame) {
-      this.isClosed = shapePath.isClosed;
+      this.isClosed = shapePath.isClosed || false;
 
       this.drawPath(shapePath);
       if (this.isInvertedMask) {
@@ -138,20 +156,26 @@ export default class MaskElement extends ShapeElement {
 
   setupScreenSize() {
     const ae = this.root();
-    this.screenWidth  = ae.width;
+    if (!ae) return;
+
+    this.screenWidth = ae.width;
     this.screenHeight = ae.height;
   }
 
-  drawAllMask(frame) {
-    let drawnMask   = false;
-    if (this.inFrame <= frame && frame <= this.outFrame && this.isInvertedMask) {
+  drawAllMask(frame: number) {
+    let drawnMask = false;
+    if (
+      this.inFrame <= frame
+      && frame <= this.outFrame
+      && this.isInvertedMask
+    ) {
       if (!this.screenWidth || !this.screenHeight) {
         this.setupScreenSize();
       }
       this.beforeDraw();
-      const x = -this.screenWidth  / 2;
+      const x = -this.screenWidth / 2;
       const y = -this.screenHeight / 2;
-      const w = this.screenWidth  * 2;
+      const w = this.screenWidth * 2;
       const h = this.screenHeight * 2;
       this.moveTo(x, y);
       this.lineTo(x + w, y);
@@ -168,7 +192,7 @@ export default class MaskElement extends ShapeElement {
     return drawnMask;
   }
 
-  __updateWithFrame(frame) {
+  __updateWithFrame(frame: number) {
     if (this.maskMode === MASK_MODE.NONE) return false;
     this.clear();
     return this.drawAllMask(frame);

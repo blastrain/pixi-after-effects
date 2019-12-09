@@ -1,9 +1,27 @@
+export interface AEDataInterceptorConfig {
+  text?: PIXI.Text;
+  rawText?: string;
+  image?: PIXI.Sprite;
+  imagePath?: string;
+  texture?: any;
+  isDisused?: boolean;
+  events?: {
+    [x: string]: Function;
+  };
+  inPoint?: number;
+  outPoint?: number;
+  blendMode?: number;
+  [name: string]: any;
+}
+
 /**
  * @class AEDataInterceptor
  * @memberof PIXI
  */
-export default class AEDataInterceptor {
-  constructor(config) {
+export class AEDataInterceptor {
+  config: AEDataInterceptorConfig;
+
+  constructor(config: AEDataInterceptorConfig) {
     this.config = config;
   }
 
@@ -24,7 +42,7 @@ export default class AEDataInterceptor {
    * @param {string} [name.blendMode] - The name for overrindg blend mode
    * @param {any} [param] - The value
    */
-  add(name, param) {
+  add(name: string, param: any) {
     if (!this.config) this.config = {};
     this.config[name] = param;
   }
@@ -35,24 +53,24 @@ export default class AEDataInterceptor {
    * @memberof PIXI.AEDataInterceptor#
    * @param {object} - The Object loaded by AEDataLoader
    */
-  intercept(data) {
+  intercept(data: any) {
     if (data.layers) {
-      data.layers.forEach((layer) => {
+      data.layers.forEach((layer: any) => {
         this.intercept(layer);
       });
     }
-    const cfg = this.config[data.nm] || this.config[data.p] || this.config[data.id];
+    const cfg =      this.config[data.nm] || this.config[data.p] || this.config[data.id];
     if (cfg) {
-      if (cfg.text)      data.text      = cfg.text;
-      if (cfg.rawText)   data.rawText   = cfg.rawText;
-      if (cfg.image)     data.image     = cfg.image;
+      if (cfg.text) data.text = cfg.text;
+      if (cfg.rawText) data.rawText = cfg.rawText;
+      if (cfg.image) data.image = cfg.image;
       if (cfg.imagePath) data.imagePath = cfg.imagePath;
-      if (cfg.texture)   data.texture   = cfg.texture;
+      if (cfg.texture) data.texture = cfg.texture;
       if (cfg.isDisused) data.isDisused = cfg.isDisused;
-      if (cfg.events)    data.events    = cfg.events;
-      if (cfg.inPoint)   data.ip        = cfg.inPoint;
-      if (cfg.outPoint)  data.op        = cfg.outPoint;
-      if (cfg.blendMode) data.bmPIXI    = cfg.blendMode;
+      if (cfg.events) data.events = cfg.events;
+      if (cfg.inPoint) data.ip = cfg.inPoint;
+      if (cfg.outPoint) data.op = cfg.outPoint;
+      if (cfg.blendMode) data.bmPIXI = cfg.blendMode;
     }
     return data;
   }

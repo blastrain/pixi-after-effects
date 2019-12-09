@@ -1,4 +1,4 @@
-import Element from './element';
+import { Element, ElementData } from './element';
 import CompElement  from './comp';
 import ImageElement from './image';
 import SolidElement from './solid';
@@ -17,7 +17,7 @@ const ELEMENT_TYPE = {
 };
 
 export default class ElementFactory {
-  static create(data) {
+  static create(data : ElementData) {
     let elem = null;
     switch (data.ty) {
     case ELEMENT_TYPE.COMP:
