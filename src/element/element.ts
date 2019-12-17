@@ -781,13 +781,22 @@ export class Element extends PIXI.Graphics {
   static createAnimatedPosition(data: PositionAnimationData[]) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
+      let toPosition;
+      if (animData.e) {
+        toPosition = animData.e;
+      } else if (data[index + 1] && data[index + 1].s) {
+        toPosition = data[index + 1].s;
+      } else {
+        toPosition = animData.s;
+      }
+
       const d: PositionAnimation = {
         name: animData.n,
         startFrame: animData.t,
         endFrame: lastIndex > index ? data[index + 1].t : animData.t,
         easing: Element.createPositionEasing(animData),
         fromPosition: animData.s,
-        toPosition: animData.e ? animData.e : animData.s,
+        toPosition,
       };
       return d;
     });
@@ -829,6 +838,15 @@ export class Element extends PIXI.Graphics {
   static createAnimatedRotation(data: RotationAnimationData[]) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
+      let toRotation: number | undefined;
+      if (animData.e) {
+        toRotation = Math.PI * animData.e[0] / 180.0;
+      } else if (data[index + 1] && data[index + 1].s) {
+        toRotation = data[index + 1].s[0] / 180.0;
+      } else {
+        toRotation = undefined;
+      }
+
       const d: RotationAnimation = {
         name: animData.n,
         startFrame: animData.t,
@@ -837,7 +855,7 @@ export class Element extends PIXI.Graphics {
         fromRotation: animData.s
           ? (Math.PI * animData.s[0]) / 180.0
           : undefined,
-        toRotation: animData.e ? (Math.PI * animData.e[0]) / 180.0 : undefined,
+        toRotation,
       };
       return d;
     });
@@ -883,13 +901,22 @@ export class Element extends PIXI.Graphics {
   static createAnimatedScale(data: ScaleAnimationData[]) {
     const lastIndex = data.length - 1;
     return data.map((animData, index) => {
+      let toScale = null;
+      if (animData.e) {
+        toScale = animData.e;
+      } else if (data[index + 1] && data[index + 1].s) {
+        toScale = data[index + 1].s;
+      } else {
+        toScale = animData.s;
+      }
+
       const d: ScaleAnimation = {
         name: animData.n,
         startFrame: animData.t,
         endFrame: lastIndex > index ? data[index + 1].t : animData.t,
         easing: Element.createScaleEasing(animData),
         fromScale: animData.s,
-        toScale: animData.e ? animData.e : animData.s,
+        toScale,
       };
       return d;
     });
