@@ -9,7 +9,6 @@ export default class ElementFinder {
     const foundNodes: PIXI.DisplayObject[] = [];
     if (node.name === name) foundNodes.push(node);
     node.children.forEach((child) => {
-      if (child.name === name) foundNodes.push(child);
       this.__findByName(name, child as PIXI.Container).forEach((subnode) => {
         foundNodes.push(subnode);
       });
