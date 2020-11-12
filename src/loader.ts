@@ -22,11 +22,8 @@ export class AEDataLoader {
     this.imagePathProxy = path => path;
     this.createImageLoader = pixiVersionHelper.select(
       (imageAssets: Asset[]) => {
-        const loader = new PIXI.loaders.Loader();
-        return (loader as ((s: string, n: number) => any))(
-          '',
-          imageAssets.length,
-        ); /* for v4 API */
+        // @ts-ignore
+        return new PIXI.loaders.Loader('', imageAssets.length);
       },
       (imageAssets: Asset[]) => {
         return new PIXI.Loader('', imageAssets.length); /* for v5 API */
