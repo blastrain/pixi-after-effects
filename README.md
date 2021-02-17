@@ -1,7 +1,7 @@
 # pixi-after-effects
 play AfterEffects animation by pixi.js
 
-[![CircleCI](https://circleci.com/gh/knocknote/pixi-after-effects.svg?style=svg)](https://circleci.com/gh/knocknote/pixi-after-effects)
+[![CircleCI](https://circleci.com/gh/blastrain/pixi-after-effects.svg?style=svg)](https://circleci.com/gh/blastrain/pixi-after-effects)
 
 # FEATURES
 
@@ -12,7 +12,7 @@ play AfterEffects animation by pixi.js
 
 # DOCUMENTATION
 
-see https://knocknote.github.io/pixi-after-effects/docs
+see https://blastrain.github.io/pixi-after-effects/docs
 
 # INSTALL
 
@@ -24,7 +24,7 @@ install minified file to `node_modules/pixi-after-effects/dist/pixi-ae.js`
 
 # DEMO
 
-see https://knocknote.github.io/pixi-after-effects/dist  
+see https://blastrain.github.io/pixi-after-effects/dist  
 
 or run your machine the following step
 
