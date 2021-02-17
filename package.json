@@ -19,13 +19,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/knocknote/pixi-after-effects"
+    "url": "https://github.com/blastrain/pixi-after-effects"
   },
   "bugs": {
-    "url": "https://github.com/knocknote/pixi-after-effects/issues"
+    "url": "https://github.com/blastrain/pixi-after-effects/issues"
   },
   "types": "src",
-  "homepage": "https://github.com/knocknote/pixi-after-effects",
+  "homepage": "https://github.com/blastrain/pixi-after-effects",
   "author": "",
   "license": "MIT",
   "dependencies": {
